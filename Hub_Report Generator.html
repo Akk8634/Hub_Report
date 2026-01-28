@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central Hub Report – Clean Telegram Format</title>
+
+<style>
+body{
+  font-family:Segoe UI,Tahoma,Verdana,sans-serif;
+  background:#eef2ff;
+  padding:20px;
+}
+.container{
+  max-width:1200px;
+  margin:auto;
+  background:#ffffff;
+  padding:25px;
+  border-radius:12px;
+}
+.section{margin-bottom:14px}
+textarea{
+  width:100%;
+  min-height:70px;
+  padding:10px;
+  font-family:Courier New,monospace;
+}
+button{
+  padding:14px 36px;
+  background:#4f46e5;
+  color:#fff;
+  border:none;
+  border-radius:28px;
+  cursor:pointer;
+}
+.copy{
+  background:#16a34a;
+  margin-left:10px;
+}
+#output{
+  margin-top:30px;
+  background:#f9fafb;
+  padding:20px;
+  border-radius:10px;
+  white-space:pre-wrap;
+  font-family:Courier New,monospace;
+}
+h2,h3{margin-bottom:6px}
+hr{margin:22px 0}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h2> Central Hub Report Builder (Clean Telegram)</h2>
+
+<!-- ROUTES -->
+<div class="section"><h3>① T-LP</h3><textarea id="T-LP"></textarea></div>
+<div class="section"><h3>② Chembur-BKC</h3><textarea id="Chembur-BKC"></textarea></div>
+<div class="section"><h3>③ T-BKC</h3><textarea id="T-BKC"></textarea></div>
+<div class="section"><h3>④ T-Sobo</h3><textarea id="T-Sobo"></textarea></div>
+<div class="section"><h3>⑤ Chembur-Worli</h3><textarea id="Chembur-Worli"></textarea></div>
+<div class="section"><h3>⑥ Mulund-LP</h3><textarea id="Mulund-LP"></textarea></div>
+<div class="section"><h3>⑦ T-NM</h3><textarea id="T-NM"></textarea></div>
+<div class="section"><h3>⑧ MULUND - BKC</h3><textarea id="MULUND - BKC"></textarea></div>
+<div class="section"><h3>⑨ T-Santacruze</h3><textarea id="T-Santacruze"></textarea></div>
+<div class="section"><h3>⑩ BKC-Metro</h3><textarea id="BKC-Metro"></textarea></div>
+<div class="section"><h3>⑪ Worli Metro-LP</h3><textarea id="Worli Metro-LP"></textarea></div>
+<div class="section"><h3>⑫ Worli-BKC</h3><textarea id="Worli-BKC"></textarea></div>
+<div class="section"><h3>⑬ Chembur-SOBO</h3><textarea id="Chembur-SOBO"></textarea></div>
+
+<div class="section"><h3>▪️ Mulund-SOBO</h3><textarea id="Mulund-SOBO"></textarea></div>
+<div class="section"><h3>▪️ MJW-LP</h3><textarea id="MJW-LP"></textarea></div>
+<div class="section"><h3>▪️ MJW-BKC</h3><textarea id="MJW-BKC"></textarea></div>
+
+<hr>
+
+<div class="section"><h3>Rest / General Notes</h3><textarea id="notes"></textarea></div>
+<div class="section"><h3>Route Training Requirements</h3><textarea id="training"></textarea></div>
+
+<div class="section">
+<h3>Backup Buses</h3>
+<textarea id="backup" placeholder="C18, C117, C503, C229, C203, C30 Avl
+C60 Used for B2B
+C203 Will Run Instead of C554"></textarea>
+</div>
+
+<button onclick="generate()">Generate Telegram Report</button>
+<button class="copy" onclick="copyReport()">Copy</button>
+
+<div id="output"></div>
+
+</div>
+
+<script>
+const ROUTES = [
+ ['①','T-LP'],['②','Chembur-BKC'],['③','T-BKC'],['④','T-Sobo'],
+ ['⑤','Chembur-Worli'],['⑥','Mulund-LP'],['⑦','T-NM'],
+ ['⑧','MULUND - BKC'],['⑨','T-Santacruze'],['⑩','BKC-Metro'],
+ ['⑪','Worli Metro-LP'],['⑫','Worli-BKC'],['⑬','Chembur-SOBO'],
+ ['▪️','Mulund-SOBO'],['▪️','MJW-LP'],['▪️','MJW-BKC']
+];
+
+function generate(){
+  let out = '**✪ Central Hub Update**\n\n';
+
+  ROUTES.forEach(([sym,id])=>{
+    const val = document.getElementById(id).value.trim();
+    out += `**${sym} ${id}**\n`;
+
+    if(val){
+      val.split('\n')
+         .map(l=>l.trim())
+         .filter(Boolean)
+         .forEach(l=>{
+           out += '   – ' + l.replace(/^[-•–]\s*/,'') + '\n';
+         });
+    }
+    out += '\n';
+  });
+
+  const notes = document.getElementById('notes').value.trim();
+  if(notes){
+    out += '— — — — — —\n';
+    out += '• ' + notes + '\n\n';
+  }
+
+  const training = document.getElementById('training').value.trim();
+  if(training){
+    out += '**Route Training Requirements**\n\n';
+    out += training + '\n\n';
+  }
+
+  const backupRaw = document.getElementById('backup').value.trim();
+  if(backupRaw){
+    const lines = backupRaw.split('\n').map(l=>l.trim()).filter(Boolean);
+    const available = [];
+    const issues = [];
+
+    lines.forEach(l=>{
+      if(/avl|available/i.test(l)){
+        available.push(l.replace(/avl|available/i,'').trim());
+      }else{
+        issues.push(l);
+      }
+    });
+
+    out += '**Backup Bus**\n';
+    if(available.length){
+      out += 'Available:\n';
+      out += available.join(', ') + '\n\n';
+    }
+
+    if(issues.length){
+      out += 'Issues:\n';
+      issues.forEach(i=>{
+        out += '– ' + i + '\n';
+      });
+    }
+  }
+
+  // SHOW OUTPUT
+  document.getElementById('output').textContent = out.trim();
+
+  // GOOGLE SHEET LEVEL-1 SYNC
+  fetch('https://script.google.com/macros/s/AKfycbxnNNlZF7POPncqe0liLljFVB3lT5bDYru5tfUqIH8XQh6KHkO-mNMRVXPpMYY_ptpz/exec', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ report: out.trim() })
+  }).catch(err => console.error('Sheet sync failed', err));
+}
+
+function copyReport(){
+  const text = document.getElementById('output').textContent;
+  if(!text){
+    alert('Generate report first');
+    return;
+  }
+
+  const temp = document.createElement('textarea');
+  temp.value = text;
+  document.body.appendChild(temp);
+  temp.select();
+  temp.setSelectionRange(0, 999999);
+
+  try{
+    document.execCommand('copy');
+    alert('Report copied. Paste in Telegram.');
+  }catch(e){
+    alert('Copy failed. Please copy manually.');
+  }
+
+  document.body.removeChild(temp);
+}
+</script>
+
+</body>
+</html>
