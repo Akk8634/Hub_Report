@@ -164,7 +164,7 @@ function generate(){
   document.getElementById('output').textContent = out.trim();
 
   // GOOGLE SHEET LEVEL-1 SYNC
-  fetch('https://script.google.com/macros/s/AKfycbxnNNlZF7POPncqe0liLljFVB3lT5bDYru5tfUqIH8XQh6KHkO-mNMRVXPpMYY_ptpz/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbwPif2lFXpDuC4Qo_2WEeuKPL6z2QHBM6QY-bP1WGWn-yGWrHqCtjb9CU8yRCq-ZKIa/exec', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ report: out.trim() })
