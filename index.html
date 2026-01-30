@@ -8,12 +8,13 @@
 <style>
 body{font-family:Segoe UI;background:#eef2ff;padding:20px}
 .container{max-width:1200px;margin:auto;background:#fff;padding:25px;border-radius:12px}
+.section{margin-bottom:14px}
 textarea{width:100%;min-height:60px;padding:8px;font-family:Courier New,monospace}
-button{padding:12px 28px;background:#4f46e5;color:#fff;border:none;border-radius:25px;cursor:pointer;margin:6px}
+button{padding:12px 28px;background:#4f46e5;color:#fff;border:none;border-radius:25px;cursor:pointer;margin:5px}
 .copy{background:#16a34a}
 #output{margin-top:25px;background:#f9fafb;padding:20px;border-radius:10px;white-space:pre-wrap;font-family:Courier New,monospace}
-h3{margin:8px 0}
-.mode{font-weight:bold;margin-bottom:10px}
+h3{margin:6px 0}
+.mode{margin-bottom:12px;font-weight:bold}
 </style>
 </head>
 
@@ -30,18 +31,26 @@ Mode:
 
 <div id="routes"></div>
 
-<div id="extras">
+<div id="morningExtras">
+
+<div class="section">
 <h3>Rest / Notes</h3>
 <textarea id="notes"></textarea>
+</div>
 
-<h3>Route Training</h3>
+<div class="section">
+<h3>Route Training Requirements</h3>
 <textarea id="training"></textarea>
+</div>
 
+<div class="section">
 <h3>Backup Buses</h3>
 <textarea id="backup"></textarea>
 </div>
 
-<button onclick="generate()">Generate</button>
+</div>
+
+<button onclick="generate()">Generate Telegram Report</button>
 <button class="copy" onclick="copyReport()">Copy</button>
 
 <div id="output"></div>
@@ -50,9 +59,9 @@ Mode:
 
 <script>
 
-let mode='morning';
+let mode = "morning";
 
-const MORNING=[
+const MORNING = [
 ['①','T-LP'],['②','Chembur-BKC'],['③','T-BKC'],['④','T-Sobo'],
 ['⑤','Chembur-Worli'],['⑥','Mulund-LP'],['⑦','T-NM'],
 ['⑧','MULUND - BKC'],['⑨','T-Santacruze'],['⑩','BKC-Metro'],
@@ -60,80 +69,114 @@ const MORNING=[
 ['▪️','Mulund-SOBO'],['▪️','MJW-LP'],['▪️','MJW-BKC']
 ];
 
-const EVENING=[
-['❶','LP - Thane'],
-['❷','Sobo - Thane'],
-['❸','BKC - Thane'],
-['❹','LP - Mulund'],
-['❺','Worli - Chembur'],
-['❻','Worli-BKC'],
-['❼','Santacruz - Thane'],
-['❽','Worli Metro-LP'],
-['➒','BKC-Metro'],
-['➓','BKC - Chembur'],
-['⓫','NM - Thane'],
-['⓬','SOBO - Chembur'],
-['▪️','SOBO - Mulund'],
-['▪️','BKC - Mulund'],
-['▪️','LP - MJW'],
-['▪️','BKC - MJW'],
-['▪️','BKC - Mulund'],
+const EVENING = [
+['❶','LP - Thane'],['❷','Sobo - Thane'],['❸','BKC - Thane'],
+['❹','LP - Mulund'],['❺','Worli - Chembur'],
+['❻','Worli-BKC'],['❼','Santacruz - Thane'],
+['❽','Worli Metro-LP'],['➒','BKC-Metro'],
+['➓','BKC - Chembur'],['⓫','NM - Thane'],['⓬','SOBO - Chembur'],
+['▪️','SOBO - Mulund'],['▪️','BKC - Mulund'],
+['▪️','LP - MJW'],['▪️','BKC - MJW'],['▪️','BKC - Mulund'],
 ];
 
 function setMode(m){
-mode=m;
+mode = m;
 renderRoutes();
-document.getElementById('extras').style.display=m==='morning'?'block':'none';
+document.getElementById("morningExtras").style.display =
+  (mode==="morning") ? "block" : "none";
 }
 
 function renderRoutes(){
-const list=mode==='morning'?MORNING:EVENING;
-let html='';
+const list = mode==="morning" ? MORNING : EVENING;
+let html = "";
 list.forEach(([s,id])=>{
-html+=`<h3>${s} ${id}</h3><textarea id="${id}"></textarea>`;
+html += `<div class="section"><h3>${s} ${id}</h3><textarea id="${id}"></textarea></div>`;
 });
-document.getElementById('routes').innerHTML=html;
+document.getElementById("routes").innerHTML = html;
 }
 
 function generate(){
-const list=mode==='morning'?MORNING:EVENING;
-let out=`✪ Central hub update - ${mode.toUpperCase()}\n\n`;
 
-list.forEach(([s,id])=>{
-const val=document.getElementById(id).value.trim();
-out+=`${s} ${id}\n`;
+const list = mode==="morning" ? MORNING : EVENING;
+
+let out = '**✪ Central Hub Update**\n\n';
+
+list.forEach(([sym,id])=>{
+const val = document.getElementById(id).value.trim();
+
+out += `**${sym} ${id}**\n`;
 
 if(val){
-val.split('\n').forEach(l=>{
-if(l.trim()) out+=`- ${l.trim()}\n`;
+val.split('\n')
+.map(l=>l.trim())
+.filter(Boolean)
+.forEach(l=>{
+out += '   – ' + l.replace(/^[-•–]\s*/,'') + '\n';
 });
 }
 
-out+='\n';
+out += '\n';
 });
 
-if(mode==='morning'){
-const notes=document.getElementById('notes').value.trim();
-if(notes) out+=`- ${notes}\n\n`;
+if(mode==="morning"){
 
-const training=document.getElementById('training').value.trim();
-if(training) out+=`Route training requirements -\n${training}\n\n`;
-
-const backup=document.getElementById('backup').value.trim();
-if(backup) out+=`Backup Bus -\n${backup}\n`;
+const notes = document.getElementById('notes').value.trim();
+if(notes){
+out += '— — — — — —\n';
+out += '• ' + notes + '\n\n';
 }
 
-document.getElementById('output').textContent=out.trim();
+const training = document.getElementById('training').value.trim();
+if(training){
+out += '**Route Training Requirements**\n\n';
+out += training + '\n\n';
+}
+
+const backupRaw = document.getElementById('backup').value.trim();
+
+if(backupRaw){
+const lines = backupRaw.split('\n').map(l=>l.trim()).filter(Boolean);
+const available = [];
+const issues = [];
+
+lines.forEach(l=>{
+if(/avl|available/i.test(l)){
+available.push(l.replace(/avl|available/i,'').trim());
+}else{
+issues.push(l);
+}
+});
+
+out += '**Backup Bus**\n';
+
+if(available.length){
+out += 'Available:\n';
+out += available.join(', ') + '\n\n';
+}
+
+if(issues.length){
+out += 'Issues:\n';
+issues.forEach(i=>{
+out += '– ' + i + '\n';
+});
+}
+}
+}
+
+document.getElementById('output').textContent = out.trim();
 }
 
 function copyReport(){
-const t=document.getElementById('output').textContent;
-if(!t)return alert('Generate first');
-navigator.clipboard.writeText(t);
-alert('Copied');
+const text = document.getElementById('output').textContent;
+if(!text){
+alert('Generate report first');
+return;
+}
+navigator.clipboard.writeText(text);
+alert('Report copied. Paste in Telegram.');
 }
 
-setMode('morning');
+setMode("morning");
 
 </script>
 </body>
