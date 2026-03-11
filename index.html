@@ -696,7 +696,7 @@ function generate() {
 
     if (val) {
       hasContent = true;
-      out += `${prefix} *${displayName}*\n`;
+      out += `${prefix} **${displayName}**\n`;
       val.split('\n').forEach(v => {
         v = formatText(v);
         if (!v) return;
@@ -707,7 +707,7 @@ function generate() {
       out += '\n';
     } else {
       // Empty route — show name only, no issues
-      out += `${prefix} *${displayName}*\n\n`;
+      out += `${prefix} **${displayName}**\n\n`;
     }
   });
 
@@ -718,7 +718,7 @@ function generate() {
     const backup = document.getElementById('backup').value.trim();
     if (backup) {
       const { available, issues } = parseBackup(backup);
-      out += `*🚌 Backup Buses*\n`;
+      out += `**🚌 Backup Buses**\n`;
       if (available.length) { out += `✅ Available:\n`; available.forEach(b => { out += `– ${b}\n`; }); }
       if (issues.length)    { out += `⚠️ Issues:\n`;   issues.forEach(b => { out += `– ${b}\n`; }); }
       out += '\n';
@@ -726,13 +726,13 @@ function generate() {
 
     const training = document.getElementById('training').value.trim();
     if (training) {
-      out += `*📋 Training Requirements*\n`;
+      out += `**📋 Training Requirements**\n`;
       training.split('\n').forEach(t => { t = formatText(t); if (t) out += `– ${t}\n`; });
       out += '\n';
     }
 
     const notes = document.getElementById('notes').value.trim() || 'Rest All Ready For Tomorrow';
-    out += `— — — — — —\n• *${notes}*\n`;
+    out += `— — — — — —\n• **${notes}**\n`;
   }
 
   document.getElementById('telegramPreview').innerText = out;
