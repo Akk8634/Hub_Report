@@ -475,7 +475,7 @@ body.evening-mode .mode-btn.active-evening {
       <div class="extras-card">
         <div>
           <div class="field-label">Rest / Notes</div>
-          <textarea id="notes" placeholder="*Rest All Ready For Tomorrow*" rows="2"></textarea>
+          <textarea id="notes" placeholder="Rest All Ready For Tomorrow" rows="2"></textarea>
         </div>
         <div>
           <div class="field-label">Route Training Requirements</div>
@@ -712,13 +712,7 @@ function generate() {
   });
 
   if (!hasContent) { showToast('No route data entered', true); return; }
-  /* PREVIEW */
-  document.getElementById("telegramPreview").innerText = out.trim();
 
-  /* DATABASE SAVE */
-  saveToDatabase(records);
-
-}
   /* MORNING EXTRAS */
   if (mode === 'morning') {
     const backup = document.getElementById('backup').value.trim();
@@ -783,45 +777,54 @@ function toggleCustomDays() {
 }
 
 /* ── JSONBIN SAVE ── */
-async function saveToDatabase(records){
-
-if(!records.length) return;
-
-try{
-
-const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
-headers:{
-"X-Master-Key": API_KEY
-}
-});
-
-const data = await res.json();
-
-let db = data.record.reports || [];
-
-db = db.concat(records);
-
-await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
-method:"PUT",
-headers:{
-"Content-Type":"application/json",
-"X-Master-Key":API_KEY,
-"X-Bin-Versioning":"false"
-},
-body:JSON.stringify({
-reports: db
-})
-});
-
-console.log("Report saved to JSONBin");
-
-}catch(e){
-
-console.error("JSON save error",e);
-
+async function autoSave(records) {
+  await saveToDatabase(records);
 }
 
+async function saveToDatabase(records) {
+  if (!records.length) return;
+
+  try {
+    // Step 1: Fetch existing data
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+
+    const data = await res.json();
+
+    // Safe fallback agar reports undefined ho
+    let db = [];
+    if (data && data.record && Array.isArray(data.record.reports)) {
+      db = data.record.reports;
+    }
+
+    // Step 2: Append new records
+    db = db.concat(records);
+
+    // Step 3: Save back
+    const putRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': API_KEY,
+        'X-Bin-Versioning': 'false'
+      },
+      body: JSON.stringify({ reports: db })
+    });
+
+    if (!putRes.ok) throw new Error(`Save failed: ${putRes.status}`);
+
+    console.log(`Saved ${records.length} record(s) to JSONBin`);
+    showToast(`Saved ${records.length} record(s) to DB`);
+
+  } catch(e) {
+    console.error('JSONBin save error:', e);
+    showToast('Save failed: ' + e.message, true);
+  }
 }
+
 /* ── FETCH DATA ── */
 async function fetchData() {
   const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { headers: { 'X-Master-Key': API_KEY } });
