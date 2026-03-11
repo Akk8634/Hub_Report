@@ -90,7 +90,7 @@ Mode:
 
 <div class="section">
 <h3>Rest / Notes</h3>
-<textarea id="notes"></textarea>
+<textarea id="notes" placeholder="Rest All Ready for Tomorrow"></textarea>
 </div>
 
 <div class="section">
@@ -118,8 +118,6 @@ Mode:
 
 let mode="morning";
 
-/* TEXT FORMAT */
-
 function formatText(line){
 
 line=line.replace(/\bc(\d+)/gi,'C$1');
@@ -129,8 +127,6 @@ line=line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
 return line.trim();
 
 }
-
-/* MORNING ROUTES */
 
 const MORNING_MAIN=[
 'T-LP',
@@ -154,8 +150,6 @@ const MORNING_SECONDARY=[
 'MJW-LP',
 'MJW-BKC'
 ];
-
-/* EVENING ROUTES */
 
 const EVENING_MAIN=[
 'LP - Thane',
@@ -186,8 +180,6 @@ const nums=[
 "⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"
 ];
 
-/* MODE SWITCH */
-
 function setMode(m){
 
 mode=m;
@@ -199,16 +191,12 @@ document.getElementById("morningExtras").style.display=
 
 }
 
-/* RENDER ROUTES */
-
 function renderRoutes(){
 
 let html="";
 
 let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
 let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
-
-/* MAIN */
 
 mainRoutes.forEach(route=>{
 
@@ -220,8 +208,6 @@ html+=`
 `;
 
 });
-
-/* SECONDARY */
 
 secRoutes.forEach(route=>{
 
@@ -238,8 +224,6 @@ document.getElementById("routes").innerHTML=html;
 
 }
 
-/* GENERATE REPORT */
-
 function generate(){
 
 let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
@@ -249,8 +233,6 @@ let filledMain=[];
 let emptyMain=[];
 let filledSec=[];
 let emptySec=[];
-
-/* MAIN */
 
 mainRoutes.forEach(route=>{
 
@@ -276,8 +258,6 @@ emptyMain.push(obj);
 }
 
 });
-
-/* SECONDARY */
 
 secRoutes.forEach(route=>{
 
@@ -306,8 +286,6 @@ emptySec.push(obj);
 
 let out="✪ Central Hub Update\n\n";
 
-/* MAIN OUTPUT */
-
 let main=[...filledMain,...emptyMain];
 
 main.forEach((r,i)=>{
@@ -326,13 +304,11 @@ out+="\n";
 
 });
 
-/* SECONDARY OUTPUT */
-
 let sec=[...filledSec,...emptySec];
 
 sec.forEach(r=>{
 
-out+="◾ "+r.name+"\n";
+out+="▪️ "+r.name+"\n";
 
 if(r.data.length){
 r.data.forEach(d=>{
@@ -344,8 +320,6 @@ out+="\n";
 
 });
 
-/* MORNING EXTRA */
-
 if(mode==="morning"){
 
 let notes=document.getElementById("notes").value.trim();
@@ -354,10 +328,7 @@ if(!notes){
 notes="Rest All Ready For Tomorrow";
 }
 
-out+="— — — — — —\n";
-out+=formatText(notes)+"\n\n";
-
-/* TRAINING */
+out+="**"+formatText(notes)+"**\n\n";
 
 const training=document.getElementById("training").value.trim();
 
@@ -375,8 +346,6 @@ out+="– "+formatText(t)+"\n";
 out+="\n";
 
 }
-
-/* BACKUP */
 
 const backupRaw=document.getElementById("backup").value.trim();
 
@@ -424,8 +393,6 @@ out+="- "+i+"\n";
 document.getElementById("telegramPreview").innerText=out.trim();
 
 }
-
-/* COPY */
 
 function copyReport(){
 
