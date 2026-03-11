@@ -116,8 +116,6 @@ Mode:
 
 <script>
 
-/* MODE */
-
 let mode="morning";
 
 /* TEXT FORMAT */
@@ -132,9 +130,9 @@ return line.trim();
 
 }
 
-/* ROUTES */
+/* MAIN ROUTES */
 
-const MORNING=[
+const MAIN_ROUTES=[
 'T-LP',
 'Chembur-BKC',
 'T-BKC',
@@ -147,31 +145,16 @@ const MORNING=[
 'BKC-Metro',
 'Worli Metro-LP',
 'Worli-BKC',
-'Chembur-SOBO',
+'Chembur-SOBO'
+];
+
+/* SECONDARY ROUTES */
+
+const SECONDARY_ROUTES=[
 'BKC - Ghatkopar',
 'Mulund-SOBO',
 'MJW-LP',
 'MJW-BKC'
-];
-
-const EVENING=[
-'LP - Thane',
-'Sobo - Thane',
-'BKC - Thane',
-'LP - Mulund',
-'Worli - Chembur',
-'Worli-BKC',
-'Santacruz - Thane',
-'Worli Metro-LP',
-'BKC-Metro',
-'BKC - Chembur',
-'NM - Thane',
-'SOBO - Chembur',
-'Ghatkopar - BKC',
-'SOBO - Mulund',
-'BKC - Mulund',
-'LP - MJW',
-'BKC - MJW'
 ];
 
 /* NUMBER ICONS */
@@ -181,7 +164,7 @@ const nums=[
 "⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"
 ];
 
-/* MODE SWITCH */
+/* MODE */
 
 function setMode(m){
 
@@ -194,19 +177,32 @@ document.getElementById("morningExtras").style.display=
 
 }
 
-/* RENDER ROUTES INPUT */
+/* RENDER ROUTES */
 
 function renderRoutes(){
 
-const list=(mode==="morning")?MORNING:EVENING;
-
 let html="";
 
-list.forEach(route=>{
+/* MAIN ROUTES */
+
+MAIN_ROUTES.forEach(route=>{
 
 html+=`
 <div class="section">
 <h3>${route}</h3>
+<textarea id="${route}"></textarea>
+</div>
+`;
+
+});
+
+/* SECONDARY ROUTES */
+
+SECONDARY_ROUTES.forEach(route=>{
+
+html+=`
+<div class="section">
+<h3>▪️ ${route}</h3>
 <textarea id="${route}"></textarea>
 </div>
 `;
@@ -221,19 +217,18 @@ document.getElementById("routes").innerHTML=html;
 
 function generate(){
 
-const list=(mode==="morning")?MORNING:EVENING;
+let filledMain=[];
+let emptyMain=[];
+let filledSec=[];
+let emptySec=[];
 
-let filled=[];
-let empty=[];
+/* MAIN ROUTES */
 
-list.forEach(route=>{
+MAIN_ROUTES.forEach(route=>{
 
 const val=document.getElementById(route).value.trim();
 
-let obj={
-name:route,
-data:[]
-};
+let obj={name:route,data:[]};
 
 if(val){
 
@@ -249,25 +244,79 @@ obj.data.push(clean);
 
 });
 
-filled.push(obj);
+filledMain.push(obj);
 
 }else{
 
-empty.push(obj);
+emptyMain.push(obj);
 
 }
 
 });
 
-let all=[...filled,...empty];
+/* SECONDARY ROUTES */
+
+SECONDARY_ROUTES.forEach(route=>{
+
+const val=document.getElementById(route).value.trim();
+
+let obj={name:route,data:[]};
+
+if(val){
+
+val.split('\n')
+.map(v=>v.trim())
+.filter(Boolean)
+.forEach(v=>{
+
+let clean=v.replace(/^[-•–]\s*/,'');
+clean=formatText(clean);
+
+obj.data.push(clean);
+
+});
+
+filledSec.push(obj);
+
+}else{
+
+emptySec.push(obj);
+
+}
+
+});
+
+/* COMBINE */
 
 let out="✪ Central Hub Update\n\n";
 
-all.forEach((r,i)=>{
+let mainRoutes=[...filledMain,...emptyMain];
+
+mainRoutes.forEach((r,i)=>{
 
 let num=nums[i] || (i+1)+".";
 
 out+=num+" "+r.name+"\n";
+
+if(r.data.length){
+
+r.data.forEach(d=>{
+out+="– "+d+"\n";
+});
+
+}
+
+out+="\n";
+
+});
+
+/* SECONDARY */
+
+let secRoutes=[...filledSec,...emptySec];
+
+secRoutes.forEach(r=>{
+
+out+="▪️ "+r.name+"\n";
 
 if(r.data.length){
 
@@ -361,6 +410,8 @@ out+="- "+i+"\n";
 }
 
 }
+
+/* PREVIEW */
 
 document.getElementById("telegramPreview").innerText=out.trim();
 
