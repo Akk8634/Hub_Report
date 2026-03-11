@@ -475,7 +475,7 @@ body.evening-mode .mode-btn.active-evening {
       <div class="extras-card">
         <div>
           <div class="field-label">Rest / Notes</div>
-          <textarea id="notes" placeholder="Rest All Ready For Tomorrow" rows="2"></textarea>
+          <textarea id="notes" placeholder="*Rest All Ready For Tomorrow*" rows="2"></textarea>
         </div>
         <div>
           <div class="field-label">Route Training Requirements</div>
@@ -540,7 +540,7 @@ body.evening-mode .mode-btn.active-evening {
 <script>
 
 const BIN_ID  = "69b1458ab7ec241ddc5c77b5";
-const API_KEY = "$2a$10$y93q84bYdEx8IjFFWvI2.ejAYbrdjWjC8Jd76a/02A2KFJ/52dyza";
+const API_KEY = "$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
 
 const ISSUE_KEYWORDS = ['issue','tyre','driver','mechanical','ac','pending','rental','na','n/a','breakdown','flat'];
 
@@ -676,31 +676,39 @@ function generate() {
 
   let out = `✪ Central Hub Update\n\n`;
 
-  let numIdx = 0;
   let hasContent = false;
+
+  // First pass: assign numbers to ALL main routes in sorted order
+  // (filled first, then empty — numbering follows position)
+  let numIdx = 0;
+  const routeNums = {};
+  sorted.forEach(({ r, secondary }) => {
+    if (!secondary) routeNums[r.id] = NUMS[numIdx++];
+  });
 
   sorted.forEach(({ r, secondary }) => {
     const el  = document.getElementById(rid(r));
     if (!el) return;
     const val = el.value.trim();
-    if (!val) return;
-
-    hasContent = true;
 
     const displayName = mode === 'evening' ? r.evening : r.morning;
-    const prefix      = secondary ? '▪️' : NUMS[numIdx++];
+    const prefix      = secondary ? '▪️' : routeNums[r.id];
 
-    out += `${prefix} *${displayName}*\n`;
-
-    val.split('\n').forEach(v => {
-      v = formatText(v);
-      if (!v) return;
-      out += `– ${v}\n`;
-      const parts = v.split(' ');
-      records.push({ date, mode, route: displayName, bus: parts[0], issue: parts.slice(1).join(' ').trim() });
-    });
-
-    out += '\n';
+    if (val) {
+      hasContent = true;
+      out += `${prefix} *${displayName}*\n`;
+      val.split('\n').forEach(v => {
+        v = formatText(v);
+        if (!v) return;
+        out += `– ${v}\n`;
+        const parts = v.split(' ');
+        records.push({ date, mode, route: displayName, bus: parts[0], issue: parts.slice(1).join(' ').trim() });
+      });
+      out += '\n';
+    } else {
+      // Empty route — show name only, no issues
+      out += `${prefix} *${displayName}*\n\n`;
+    }
   });
 
   if (!hasContent) { showToast('No route data entered', true); return; }
@@ -724,7 +732,7 @@ function generate() {
     }
 
     const notes = document.getElementById('notes').value.trim() || 'Rest All Ready For Tomorrow';
-    out += `*📝 Note:* ${notes}\n`;
+    out += `— — — — — —\n• *${notes}*\n`;
   }
 
   document.getElementById('telegramPreview').innerText = out;
