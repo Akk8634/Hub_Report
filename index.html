@@ -1,30 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Central Hub Report Builder</title>
 
 <style>
+
 body{
 font-family:Segoe UI;
 background:#eef2ff;
 padding:20px;
 }
+
 .container{
-max-width:1200px;
+max-width:1100px;
 margin:auto;
 background:#fff;
 padding:25px;
 border-radius:12px;
 }
-.section{margin-bottom:10px}
+
+.section{
+margin-bottom:10px;
+}
+
 textarea{
 width:100%;
 min-height:60px;
 padding:8px;
 font-family:Courier New;
 }
+
 button{
 padding:10px 24px;
 background:#4f46e5;
@@ -34,8 +43,14 @@ border-radius:20px;
 cursor:pointer;
 margin:5px;
 }
-.copy{background:#16a34a}
-.mode{margin-bottom:12px}
+
+.copy{
+background:#16a34a;
+}
+
+.mode{
+margin-bottom:12px;
+}
 
 #previewBox{
 margin-top:25px;
@@ -52,7 +67,25 @@ white-space:pre-wrap;
 font-family:Segoe UI;
 box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
+
+/* EXPORT UI */
+
+.exportBox{
+margin-top:20px;
+padding:15px;
+border-radius:10px;
+background:#f6f7ff;
+}
+
+select,input{
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+margin-top:5px;
+}
+
 </style>
+
 </head>
 
 <body>
@@ -91,16 +124,27 @@ Mode:
 <button onclick="generate()">Generate Report</button>
 <button class="copy" onclick="copyReport()">Copy</button>
 
-<br><br>
 
-<button onclick="exportDays(1)">1 Day CSV</button>
-<button onclick="exportDays(3)">3 Day CSV</button>
-<button onclick="exportDays(7)">7 Day CSV</button>
-<button onclick="exportMonth()">Monthly CSV</button>
-<button onclick="exportYear()">Yearly CSV</button>
+<div class="exportBox">
 
-<input id="daysInput" placeholder="Custom days">
-<button onclick="customDays()">Export</button>
+<h3>Export Report</h3>
+
+<select id="reportType">
+<option value="1">Last 1 Day</option>
+<option value="3">Last 3 Days</option>
+<option value="7">Last 7 Days</option>
+<option value="30">Last 30 Days</option>
+<option value="month">This Month</option>
+<option value="year">This Year</option>
+<option value="custom">Custom Days</option>
+</select>
+
+<input id="customDays" placeholder="Enter days">
+
+<button onclick="exportReport()">Export CSV</button>
+
+</div>
+
 
 <div id="previewBox">
 <div id="telegramPreview"></div>
@@ -115,38 +159,20 @@ let mode="morning";
 /* TEXT FORMAT */
 
 function formatText(line){
+
 line=line.replace(/\bc(\d+)/gi,'C$1');
 line=line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
+
 return line.trim();
+
 }
 
 /* ROUTES */
 
-const MORNING_MAIN=[
+const ROUTES=[
 'T-LP','Chembur-BKC','T-BKC','T-Sobo','Chembur-Worli',
 'Mulund-LP','T-NM','MULUND - BKC','T-Santacruze',
 'BKC-Metro','Worli Metro-LP','Worli-BKC','Chembur-SOBO'
-];
-
-const MORNING_SECONDARY=[
-'BKC - Ghatkopar','Mulund-SOBO','MJW-LP','MJW-BKC'
-];
-
-const EVENING_MAIN=[
-'LP - Thane','Sobo - Thane','BKC - Thane','LP - Mulund',
-'Worli - Chembur','Worli-BKC','Santacruz - Thane',
-'Worli Metro-LP','BKC-Metro','BKC - Chembur',
-'NM - Thane','SOBO - Chembur'
-];
-
-const EVENING_SECONDARY=[
-'Ghatkopar - BKC','SOBO - Mulund','BKC - Mulund',
-'LP - MJW','BKC - MJW','BKC - Mulund'
-];
-
-const nums=[
-"①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩",
-"⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"
 ];
 
 /* MODE */
@@ -164,21 +190,15 @@ function renderRoutes(){
 
 let html="";
 
-let mainRoutes=(mode==="morning")?MORNING_MAIN:EVENING_MAIN;
-let secRoutes=(mode==="morning")?MORNING_SECONDARY:EVENING_SECONDARY;
+ROUTES.forEach(route=>{
 
-mainRoutes.forEach(route=>{
-html+=`<div class="section">
+html+=`
+<div class="section">
 <h3><b>${route}</b></h3>
 <textarea id="${route}"></textarea>
-</div>`;
-});
+</div>
+`;
 
-secRoutes.forEach(route=>{
-html+=`<div class="section">
-<h3><b>▪️ ${route}</b></h3>
-<textarea id="${route}"></textarea>
-</div>`;
 });
 
 document.getElementById("routes").innerHTML=html;
@@ -189,28 +209,28 @@ document.getElementById("routes").innerHTML=html;
 
 function generate(){
 
-let mainRoutes=(mode==="morning")?MORNING_MAIN:EVENING_MAIN;
-let secRoutes=(mode==="morning")?MORNING_SECONDARY:EVENING_SECONDARY;
-
-let routes=[...mainRoutes,...secRoutes];
-
 let out="✪ Central Hub Update\n\n";
+
 let records=[];
+
 const date=new Date().toISOString().slice(0,10);
 
-routes.forEach(r=>{
+ROUTES.forEach(r=>{
 
-const val=document.getElementById(r)?.value?.trim();
+const val=document.getElementById(r).value.trim();
 
 if(!val) return;
 
 out+=`**${r}**\n`;
 
 val.split("\n").forEach(v=>{
+
 v=formatText(v);
+
 out+="– "+v+"\n";
 
 let bus=v.split(" ")[0];
+
 let issue=v.replace(bus,"").trim();
 
 records.push({
@@ -229,7 +249,7 @@ out+="\n";
 
 document.getElementById("telegramPreview").innerText=out;
 
-/* AUTO SAVE */
+/* SAVE */
 
 autoSave(records);
 
@@ -239,15 +259,16 @@ autoSave(records);
 
 async function autoSave(records){
 
-const BIN_ID="YOUR_BIN_ID";
-const API_KEY="YOUR_API_KEY";
+const BIN_ID="69b1458ab7ec241ddc5c77b5";
+const API_KEY="$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
 
 const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
 headers:{ "X-Master-Key":API_KEY }
 });
 
 const data=await res.json();
-let db=data.record.reports||[];
+
+let db=data.record.reports || [];
 
 db=db.concat(records);
 
@@ -266,15 +287,16 @@ body:JSON.stringify({reports:db})
 
 async function fetchData(){
 
-const BIN_ID="69b1458ab7ec241ddc5c77b5";
-const API_KEY="$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
+const BIN_ID="YOUR_BIN_ID";
+const API_KEY="YOUR_API_KEY";
 
 const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
 headers:{ "X-Master-Key":API_KEY }
 });
 
 const data=await res.json();
-return data.record.reports||[];
+
+return data.record.reports || [];
 
 }
 
@@ -289,40 +311,71 @@ csv+=`${r.date},${r.mode},${r.route},${r.bus},${r.issue}\n`;
 });
 
 const blob=new Blob([csv],{type:"text/csv"});
+
 const url=URL.createObjectURL(blob);
 
 const a=document.createElement("a");
+
 a.href=url;
 a.download=name;
 a.click();
 
 }
 
-/* DAYS REPORT */
+/* EXPORT LOGIC */
+
+async function exportReport(){
+
+const type=document.getElementById("reportType").value;
+
+if(type==="month"){
+exportMonth();
+return;
+}
+
+if(type==="year"){
+exportYear();
+return;
+}
+
+let days;
+
+if(type==="custom"){
+days=parseInt(document.getElementById("customDays").value);
+}else{
+days=parseInt(type);
+}
+
+exportDays(days);
+
+}
+
+/* DAYS */
 
 async function exportDays(days){
 
 const data=await fetchData();
 
 const now=new Date();
+
 const start=new Date();
+
 start.setDate(now.getDate()-days);
 
-const filtered=data.filter(r=>{
-return new Date(r.date)>=start;
-});
+const filtered=data.filter(r=>new Date(r.date)>=start);
 
 downloadCSV(filtered,days+"_days_report.csv");
 
 }
 
-/* MONTH REPORT */
+/* MONTH */
 
 async function exportMonth(){
 
 const data=await fetchData();
 
 const now=new Date();
+
 const m=now.getMonth();
 const y=now.getFullYear();
 
@@ -335,7 +388,7 @@ downloadCSV(filtered,"monthly_report.csv");
 
 }
 
-/* YEAR REPORT */
+/* YEAR */
 
 async function exportYear(){
 
@@ -351,15 +404,6 @@ downloadCSV(filtered,"yearly_report.csv");
 
 }
 
-/* CUSTOM DAYS */
-
-function customDays(){
-
-const d=parseInt(document.getElementById("daysInput").value);
-exportDays(d);
-
-}
-
 /* COPY */
 
 function copyReport(){
@@ -372,6 +416,7 @@ return;
 }
 
 navigator.clipboard.writeText(txt);
+
 alert("Report copied");
 
 }
