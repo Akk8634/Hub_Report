@@ -90,7 +90,7 @@ Mode:
 
 <div class="section">
 <h3>Rest / Notes</h3>
-<textarea id="notes" placeholder="Rest All Ready for Tomorrow"></textarea>
+<textarea id="notes" placeholder="Rest All Ready For Tomorrow"></textarea>
 </div>
 
 <div class="section">
@@ -113,198 +113,6 @@ Mode:
 </div>
 
 </div>
-
-<script>
-
-let mode="morning";
-
-function formatText(line){
-
-line=line.replace(/\bc(\d+)/gi,'C$1');
-
-line=line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
-
-return line.trim();
-
-}
-
-const MORNING_MAIN=[
-'T-LP',
-'Chembur-BKC',
-'T-BKC',
-'T-Sobo',
-'Chembur-Worli',
-'Mulund-LP',
-'T-NM',
-'MULUND - BKC',
-'T-Santacruze',
-'BKC-Metro',
-'Worli Metro-LP',
-'Worli-BKC',
-'Chembur-SOBO'
-];
-
-const MORNING_SECONDARY=[
-'BKC - Ghatkopar',
-'Mulund-SOBO',
-'MJW-LP',
-'MJW-BKC'
-];
-
-const EVENING_MAIN=[
-'LP - Thane',
-'Sobo - Thane',
-'BKC - Thane',
-'LP - Mulund',
-'Worli - Chembur',
-'Worli-BKC',
-'Santacruz - Thane',
-'Worli Metro-LP',
-'BKC-Metro',
-'BKC - Chembur',
-'NM - Thane',
-'SOBO - Chembur'
-];
-
-const EVENING_SECONDARY=[
-'Ghatkopar - BKC',
-'SOBO - Mulund',
-'BKC - Mulund',
-'LP - MJW',
-'BKC - MJW',
-'BKC - Mulund'
-];
-
-const nums=[
-"①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩",
-"⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"
-];
-
-function setMode(m){
-
-mode=m;
-
-renderRoutes();
-
-document.getElementById("morningExtras").style.display=
-(mode==="morning")?"block":"none";
-
-}
-
-function renderRoutes(){
-
-let html="";
-
-let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
-let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
-
-mainRoutes.forEach(route=>{
-
-html+=`
-<div class="section">
-<h3>${route}</h3>
-<textarea id="${route}"></textarea>
-</div>
-`;
-
-});
-
-secRoutes.forEach(route=>{
-
-html+=`
-<div class="section">
-<h3>▪️ ${route}</h3>
-<textarea id="${route}"></textarea>
-</div>
-`;
-
-});
-
-document.getElementById("routes").innerHTML=html;
-
-}
-
-function generate(){
-
-let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
-let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
-
-let filledMain=[];
-let emptyMain=[];
-let filledSec=[];
-let emptySec=[];
-
-mainRoutes.forEach(route=>{
-
-const val=document.getElementById(route).value.trim();
-
-let obj={name:route,data:[]};
-
-if(val){
-
-val.split('\n')
-.map(v=>v.trim())
-.filter(Boolean)
-.forEach(v=>{
-let clean=v.replace(/^[-•–]\s*/,'');
-clean=formatText(clean);
-obj.data.push(clean);
-});
-
-filledMain.push(obj);
-
-}else{
-emptyMain.push(obj);
-}
-
-});
-
-secRoutes.forEach(route=>{
-
-const val=document.getElementById(route).value.trim();
-
-let obj={name:route,data:[]};
-
-if(val){
-
-val.split('\n')
-.map(v=>v.trim())
-.filter(Boolean)
-.forEach(v=>{
-let clean=v.replace(/^[-•–]\s*/,'');
-clean=formatText(clean);
-obj.data.push(clean);
-});
-
-filledSec.push(obj);
-
-}else{
-emptySec.push(obj);
-}
-
-});
-
-let out="✪ Central Hub Update\n\n";
-
-let main=[...filledMain,...emptyMain];
-
-main.forEach((r,i)=>{
-
-let num=nums[i] || (i+1)+".";
-
-out+=num+" "+r.name+"\n";
-
-if(r.data.length){
-r.data.forEach(d=>{
-out+="– "+d+"\n";
-});
-}
-
-out+="\n";
-
-});
-
-let sec=[...filledSec,...emptySec];
 
 <script>
 
@@ -355,6 +163,7 @@ const nums=[
 function setMode(m){
 
 mode=m;
+
 renderRoutes();
 
 document.getElementById("morningExtras").style.display=
@@ -409,7 +218,7 @@ let emptyMain=[];
 let filledSec=[];
 let emptySec=[];
 
-/* MAIN ROUTES */
+/* MAIN */
 
 mainRoutes.forEach(route=>{
 
@@ -434,14 +243,12 @@ obj.data.push(clean);
 filledMain.push(obj);
 
 }else{
-
 emptyMain.push(obj);
-
 }
 
 });
 
-/* SECONDARY ROUTES */
+/* SECONDARY */
 
 secRoutes.forEach(route=>{
 
@@ -466,9 +273,7 @@ obj.data.push(clean);
 filledSec.push(obj);
 
 }else{
-
 emptySec.push(obj);
-
 }
 
 });
@@ -609,6 +414,7 @@ return;
 }
 
 navigator.clipboard.writeText(txt);
+
 alert("Report copied");
 
 }
