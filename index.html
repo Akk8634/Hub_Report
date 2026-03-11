@@ -21,7 +21,6 @@ margin:auto;
 background:#fff;
 padding:25px;
 border-radius:12px;
-position:relative;
 }
 
 .section{
@@ -49,11 +48,13 @@ margin:5px;
 background:#16a34a;
 }
 
+.analyticsBtn{
+background:#0ea5e9;
+}
+
 .mode{
 margin-bottom:12px;
 }
-
-/* PREVIEW */
 
 #previewBox{
 margin-top:25px;
@@ -71,8 +72,6 @@ font-family:Segoe UI;
 box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
 
-/* EXPORT UI */
-
 .exportBox{
 margin-top:20px;
 padding:15px;
@@ -85,11 +84,7 @@ padding:10px;
 border-radius:8px;
 border:1px solid #ccc;
 margin-top:5px;
-} 
-  
-.analyticsBtn{
-background:#0ea5e9;
-  }
+}
 
 </style>
 
@@ -132,6 +127,7 @@ Mode:
 <button class="copy" onclick="copyReport()">Copy</button>
 <button class="analyticsBtn" onclick="location.href='analytics.html'">📊 Analytics</button>
 
+
 <div class="exportBox">
 
 <h3>Export Report</h3>
@@ -166,20 +162,24 @@ let mode="morning";
 /* TEXT FORMAT */
 
 function formatText(line){
-
 line=line.replace(/\bc(\d+)/gi,'C$1');
 line=line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
-
 return line.trim();
-
 }
 
 /* ROUTES */
 
-const ROUTES=[
+const MORNING_ROUTES=[
 'T-LP','Chembur-BKC','T-BKC','T-Sobo','Chembur-Worli',
 'Mulund-LP','T-NM','MULUND - BKC','T-Santacruze',
 'BKC-Metro','Worli Metro-LP','Worli-BKC','Chembur-SOBO'
+];
+
+const EVENING_ROUTES=[
+'LP - Thane','Sobo - Thane','BKC - Thane','LP - Mulund',
+'Worli - Chembur','Worli-BKC','Santacruz - Thane',
+'Worli Metro-LP','BKC-Metro','BKC - Chembur',
+'NM - Thane','SOBO - Chembur'
 ];
 
 /* MODE */
@@ -197,7 +197,9 @@ function renderRoutes(){
 
 let html="";
 
-ROUTES.forEach(route=>{
+const routes = mode==="morning" ? MORNING_ROUTES : EVENING_ROUTES;
+
+routes.forEach(route=>{
 
 html+=`
 <div class="section">
@@ -222,9 +224,11 @@ let records=[];
 
 const date=new Date().toISOString().slice(0,10);
 
-ROUTES.forEach(r=>{
+const routes = mode==="morning" ? MORNING_ROUTES : EVENING_ROUTES;
 
-const val=document.getElementById(r).value.trim();
+routes.forEach(r=>{
+
+const val=document.getElementById(r)?.value.trim();
 
 if(!val) return;
 
@@ -255,8 +259,6 @@ out+="\n";
 });
 
 document.getElementById("telegramPreview").innerText=out;
-
-/* SAVE */
 
 autoSave(records);
 
@@ -304,6 +306,105 @@ return;
 navigator.clipboard.writeText(txt);
 
 alert("Report copied");
+
+}
+
+/* EXPORT FUNCTIONS */
+
+async function fetchData(){
+
+const BIN_ID="69b1458ab7ec241ddc5c77b5";
+const API_KEY="$2a$10$y93q84bYdEx8IjFFWvI2.ejAYbrdjWjC8Jd76a/02A2KFJ/52dyza";
+
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+headers:{ "X-Master-Key":API_KEY }
+});
+
+const data=await res.json();
+return data.record.reports || [];
+
+}
+
+function downloadCSV(records,name){
+
+let csv="date,mode,route,bus,issue\n";
+
+records.forEach(r=>{
+csv+=`${r.date},${r.mode},${r.route},${r.bus},${r.issue}\n`;
+});
+
+const blob=new Blob([csv],{type:"text/csv"});
+const url=URL.createObjectURL(blob);
+
+const a=document.createElement("a");
+a.href=url;
+a.download=name;
+a.click();
+
+}
+
+async function exportDays(days){
+
+const data=await fetchData();
+
+const now=new Date();
+const start=new Date();
+
+start.setDate(now.getDate()-days);
+
+const filtered=data.filter(r=>new Date(r.date)>=start);
+
+downloadCSV(filtered,days+"_days_report.csv");
+
+}
+
+async function exportMonth(){
+
+const data=await fetchData();
+
+const now=new Date();
+const m=now.getMonth();
+const y=now.getFullYear();
+
+const filtered=data.filter(r=>{
+let d=new Date(r.date);
+return d.getMonth()==m && d.getFullYear()==y;
+});
+
+downloadCSV(filtered,"monthly_report.csv");
+
+}
+
+async function exportYear(){
+
+const data=await fetchData();
+
+const y=new Date().getFullYear();
+
+const filtered=data.filter(r=>{
+return new Date(r.date).getFullYear()==y;
+});
+
+downloadCSV(filtered,"yearly_report.csv");
+
+}
+
+async function exportReport(){
+
+const type=document.getElementById("reportType").value;
+
+if(type==="month"){exportMonth();return;}
+if(type==="year"){exportYear();return;}
+
+let days;
+
+if(type==="custom"){
+days=parseInt(document.getElementById("customDays").value);
+}else{
+days=parseInt(type);
+}
+
+exportDays(days);
 
 }
 
