@@ -306,19 +306,216 @@ out+="\n";
 
 let sec=[...filledSec,...emptySec];
 
-sec.forEach(r=>{
+<script>
 
-out+="▪️ "+r.name+"\n";
+let mode="morning";
 
-if(r.data.length){
-r.data.forEach(d=>{
-out+="– "+d+"\n";
-});
+/* TEXT FORMAT */
+
+function formatText(line){
+
+line=line.replace(/\bc(\d+)/gi,'C$1');
+line=line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
+
+return line.trim();
+
 }
 
-out+="\n";
+/* ROUTES */
+
+const MORNING_MAIN=[
+'T-LP','Chembur-BKC','T-BKC','T-Sobo','Chembur-Worli',
+'Mulund-LP','T-NM','MULUND - BKC','T-Santacruze',
+'BKC-Metro','Worli Metro-LP','Worli-BKC','Chembur-SOBO'
+];
+
+const MORNING_SECONDARY=[
+'BKC - Ghatkopar','Mulund-SOBO','MJW-LP','MJW-BKC'
+];
+
+const EVENING_MAIN=[
+'LP - Thane','Sobo - Thane','BKC - Thane','LP - Mulund',
+'Worli - Chembur','Worli-BKC','Santacruz - Thane',
+'Worli Metro-LP','BKC-Metro','BKC - Chembur',
+'NM - Thane','SOBO - Chembur'
+];
+
+const EVENING_SECONDARY=[
+'Ghatkopar - BKC','SOBO - Mulund','BKC - Mulund',
+'LP - MJW','BKC - MJW','BKC - Mulund'
+];
+
+const nums=[
+"①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩",
+"⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"
+];
+
+/* MODE */
+
+function setMode(m){
+
+mode=m;
+renderRoutes();
+
+document.getElementById("morningExtras").style.display=
+(mode==="morning")?"block":"none";
+
+}
+
+/* RENDER ROUTES */
+
+function renderRoutes(){
+
+let html="";
+
+let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
+let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
+
+mainRoutes.forEach(route=>{
+
+html+=`
+<div class="section">
+<h3><b>${route}</b></h3>
+<textarea id="${route}"></textarea>
+</div>
+`;
 
 });
+
+secRoutes.forEach(route=>{
+
+html+=`
+<div class="section">
+<h3><b>▪️ ${route}</b></h3>
+<textarea id="${route}"></textarea>
+</div>
+`;
+
+});
+
+document.getElementById("routes").innerHTML=html;
+
+}
+
+/* GENERATE REPORT */
+
+function generate(){
+
+let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
+let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
+
+let filledMain=[];
+let emptyMain=[];
+let filledSec=[];
+let emptySec=[];
+
+/* MAIN ROUTES */
+
+mainRoutes.forEach(route=>{
+
+const val=document.getElementById(route).value.trim();
+
+let obj={name:route,data:[]};
+
+if(val){
+
+val.split('\n')
+.map(v=>v.trim())
+.filter(Boolean)
+.forEach(v=>{
+
+let clean=v.replace(/^[-•–]\s*/,'');
+clean=formatText(clean);
+
+obj.data.push(clean);
+
+});
+
+filledMain.push(obj);
+
+}else{
+
+emptyMain.push(obj);
+
+}
+
+});
+
+/* SECONDARY ROUTES */
+
+secRoutes.forEach(route=>{
+
+const val=document.getElementById(route).value.trim();
+
+let obj={name:route,data:[]};
+
+if(val){
+
+val.split('\n')
+.map(v=>v.trim())
+.filter(Boolean)
+.forEach(v=>{
+
+let clean=v.replace(/^[-•–]\s*/,'');
+clean=formatText(clean);
+
+obj.data.push(clean);
+
+});
+
+filledSec.push(obj);
+
+}else{
+
+emptySec.push(obj);
+
+}
+
+});
+
+/* HEADER */
+
+let out="✪ Central Hub Update\n\n";
+
+/* MAIN ROUTES */
+
+let main=[...filledMain,...emptyMain];
+
+main.forEach((r,i)=>{
+
+let num=nums[i] || (i+1)+".";
+
+out+=num+" **"+r.name+"**\n";
+
+if(r.data.length){
+
+r.data.forEach(d=>{
+out+="   – "+d+"\n";
+});
+
+}
+
+});
+
+/* SECONDARY ROUTES */
+
+let sec=[...filledSec,...emptySec];
+
+sec.forEach(r=>{
+
+out+="▪️ **"+r.name+"**\n";
+
+if(r.data.length){
+
+r.data.forEach(d=>{
+out+="   – "+d+"\n";
+});
+
+}
+
+});
+
+/* MORNING EXTRA */
 
 if(mode==="morning"){
 
@@ -328,24 +525,28 @@ if(!notes){
 notes="Rest All Ready For Tomorrow";
 }
 
-out+="**"+formatText(notes)+"**\n\n";
+out+="\n**"+formatText(notes)+"**\n\n";
+
+/* TRAINING */
 
 const training=document.getElementById("training").value.trim();
 
 if(training){
 
-out+="Route Training Requirements\n";
+out+="**Route Training Requirements**\n";
 
 training.split('\n')
 .map(t=>t.trim())
 .filter(Boolean)
 .forEach(t=>{
-out+="– "+formatText(t)+"\n";
+out+="   – "+formatText(t)+"\n";
 });
 
 out+="\n";
 
 }
+
+/* BACKUP */
 
 const backupRaw=document.getElementById("backup").value.trim();
 
@@ -362,7 +563,7 @@ lines.forEach(l=>{
 
 l=l.replace(/^[-•]\s*/,'');
 
-const issue=/issue|tyre|driver|mechanical|ac|pending/i.test(l);
+const issue=/issue|tyre|driver|mechanical|ac|pending|rental/i.test(l);
 
 if(issue){
 issues.push(formatText(l));
@@ -372,18 +573,20 @@ available.push(formatText(l));
 
 });
 
-out+="Backup Bus\n";
+out+="**Backup Bus**\n";
 
 if(available.length){
-out+="Available:\n";
-out+="- "+available.join(", ")+"\n\n";
+out+="Available: "+available.join(", ")+"\n";
 }
 
 if(issues.length){
+
 out+="Issues:\n";
+
 issues.forEach(i=>{
-out+="- "+i+"\n";
+out+="   – "+i+"\n";
 });
+
 }
 
 }
@@ -393,6 +596,8 @@ out+="- "+i+"\n";
 document.getElementById("telegramPreview").innerText=out.trim();
 
 }
+
+/* COPY */
 
 function copyReport(){
 
@@ -404,7 +609,6 @@ return;
 }
 
 navigator.clipboard.writeText(txt);
-
 alert("Report copied");
 
 }
