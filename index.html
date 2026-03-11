@@ -24,40 +24,35 @@ border-radius:12px;
 }
 
 .section{
-margin-bottom:10px;
+margin-bottom:8px;
 }
 
 textarea{
 width:100%;
-min-height:60px;
+min-height:55px;
 padding:8px;
 font-family:Courier New;
 }
 
 button{
-padding:10px 24px;
+padding:10px 22px;
 background:#4f46e5;
 color:#fff;
 border:none;
-border-radius:20px;
+border-radius:18px;
 cursor:pointer;
-margin:5px;
+margin:4px;
 }
 
-.copy{
-background:#16a34a;
-}
-
-.analyticsBtn{
-background:#0ea5e9;
-}
+.copy{background:#16a34a;}
+.analyticsBtn{background:#0ea5e9;}
 
 .mode{
 margin-bottom:12px;
 }
 
 #previewBox{
-margin-top:25px;
+margin-top:20px;
 display:flex;
 justify-content:center;
 }
@@ -73,21 +68,19 @@ box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
 
 .exportBox{
-margin-top:20px;
-padding:15px;
+margin-top:15px;
+padding:12px;
 border-radius:10px;
 background:#f6f7ff;
 }
 
 select,input{
-padding:10px;
-border-radius:8px;
+padding:8px;
+border-radius:6px;
 border:1px solid #ccc;
-margin-top:5px;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -127,27 +120,18 @@ Mode:
 <button class="copy" onclick="copyReport()">Copy</button>
 <button class="analyticsBtn" onclick="location.href='analytics.html'">📊 Analytics</button>
 
-
 <div class="exportBox">
-
-<h3>Export Report</h3>
 
 <select id="reportType">
 <option value="1">Last 1 Day</option>
 <option value="3">Last 3 Days</option>
 <option value="7">Last 7 Days</option>
 <option value="30">Last 30 Days</option>
-<option value="month">This Month</option>
-<option value="year">This Year</option>
-<option value="custom">Custom Days</option>
 </select>
-
-<input id="customDays" placeholder="Enter days">
 
 <button onclick="exportReport()">Export CSV</button>
 
 </div>
-
 
 <div id="previewBox">
 <div id="telegramPreview"></div>
@@ -159,36 +143,50 @@ Mode:
 
 let mode="morning";
 
+/* JSONBIN API */
+
+const BIN_ID="69b1458ab7ec241ddc5c77b5";
+const API_KEY="$2a$10$y93q84bYdEx8IjFFWvI2.ejAYbrdjWjC8Jd76a/02A2KFJ/52dyza";
+
 /* TEXT FORMAT */
 
 function formatText(line){
+
 line=line.replace(/\bc(\d+)/gi,'C$1');
 line=line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
+
 return line.trim();
+
 }
 
 /* ROUTES */
 
-const MORNING_ROUTES=[
+const MAIN_ROUTES=[
 'T-LP','Chembur-BKC','T-BKC','T-Sobo','Chembur-Worli',
 'Mulund-LP','T-NM','MULUND - BKC','T-Santacruze',
 'BKC-Metro','Worli Metro-LP','Worli-BKC','Chembur-SOBO'
 ];
 
-const EVENING_ROUTES=[
-'LP - Thane','Sobo - Thane','BKC - Thane','LP - Mulund',
-'Worli - Chembur','Worli-BKC','Santacruz - Thane',
-'Worli Metro-LP','BKC-Metro','BKC - Chembur',
-'NM - Thane','SOBO - Chembur'
+const SECONDARY_ROUTES=[
+'BKC - Ghatkopar','Mulund-SOBO','MJW-LP','MJW-BKC'
+];
+
+const nums=[
+"①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩",
+"⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"
 ];
 
 /* MODE */
 
 function setMode(m){
+
 mode=m;
+
 renderRoutes();
+
 document.getElementById("morningExtras").style.display=
 (mode==="morning")?"block":"none";
+
 }
 
 /* RENDER ROUTES */
@@ -197,13 +195,13 @@ function renderRoutes(){
 
 let html="";
 
-const routes = mode==="morning" ? MORNING_ROUTES : EVENING_ROUTES;
+[...MAIN_ROUTES,...SECONDARY_ROUTES].forEach(route=>{
 
-routes.forEach(route=>{
+let symbol=SECONDARY_ROUTES.includes(route)?"▪️ ":"";
 
 html+=`
 <div class="section">
-<h3><b>${route}</b></h3>
+<h3><b>${symbol}${route}</b></h3>
 <textarea id="${route}"></textarea>
 </div>
 `;
@@ -218,58 +216,183 @@ document.getElementById("routes").innerHTML=html;
 
 function generate(){
 
-let out="✪ Central Hub Update\n\n";
+let filledMain=[];
+let filledSec=[];
+let emptyMain=[];
+let emptySec=[];
 
 let records=[];
 
 const date=new Date().toISOString().slice(0,10);
 
-const routes = mode==="morning" ? MORNING_ROUTES : EVENING_ROUTES;
+[...MAIN_ROUTES,...SECONDARY_ROUTES].forEach(route=>{
 
-routes.forEach(r=>{
+const val=document.getElementById(route).value.trim();
 
-const val=document.getElementById(r)?.value.trim();
+let obj={name:route,data:[]};
 
-if(!val) return;
+if(val){
 
-out+=`**${r}**\n`;
+val.split('\n')
+.map(v=>v.trim())
+.filter(Boolean)
+.forEach(v=>{
 
-val.split("\n").forEach(v=>{
+let clean=v.replace(/^[-•–]\s*/,'');
+clean=formatText(clean);
 
-v=formatText(v);
-
-out+="– "+v+"\n";
-
-let bus=v.split(" ")[0];
-
-let issue=v.replace(bus,"").trim();
+obj.data.push(clean);
 
 records.push({
 date:date,
 mode:mode,
-route:r,
-bus:bus,
-issue:issue
+route:route,
+bus:clean.split(" ")[0],
+issue:clean.replace(clean.split(" ")[0],"").trim()
 });
 
 });
 
-out+="\n";
+if(SECONDARY_ROUTES.includes(route)){
+filledSec.push(obj);
+}else{
+filledMain.push(obj);
+}
+
+}else{
+
+if(SECONDARY_ROUTES.includes(route)){
+emptySec.push(obj);
+}else{
+emptyMain.push(obj);
+}
+
+}
 
 });
 
-document.getElementById("telegramPreview").innerText=out;
+/* ROUTE SORT */
 
-autoSave(records);
+let routes=[
+...filledMain,
+...filledSec,
+...emptySec,
+...emptyMain
+];
+
+let out="✪ Central Hub Update\n\n";
+
+let numIndex=0;
+
+routes.forEach(r=>{
+
+if(!SECONDARY_ROUTES.includes(r.name)){
+
+let num=nums[numIndex] || (numIndex+1);
+
+out+=num+" **"+r.name+"**\n";
+
+numIndex++;
+
+}else{
+
+out+="▪️ **"+r.name+"**\n";
+
+}
+
+r.data.forEach(d=>{
+out+="– "+d+"\n";
+});
+
+});
+
+/* MORNING EXTRA */
+
+if(mode==="morning"){
+
+let notes=document.getElementById("notes").value.trim();
+
+if(!notes){
+notes="Rest All Ready For Tomorrow";
+}
+
+out+="\n**"+formatText(notes)+"**\n\n";
+
+const training=document.getElementById("training").value.trim();
+
+if(training){
+
+out+="**Route Training Requirements**\n";
+
+training.split('\n')
+.map(t=>t.trim())
+.filter(Boolean)
+.forEach(t=>{
+out+="– "+formatText(t)+"\n";
+});
+
+}
+
+/* BACKUP BUS */
+
+const backupRaw=document.getElementById("backup").value.trim();
+
+if(backupRaw){
+
+const lines=backupRaw.split('\n')
+.map(l=>l.trim())
+.filter(Boolean);
+
+let available=[];
+let issues=[];
+
+lines.forEach(l=>{
+
+l=l.replace(/^[-•]\s*/,'');
+
+const issue=/issue|tyre|driver|mechanical|ac|pending|rental|\bna\b|\bn\/a\b/i.test(l);
+
+if(issue){
+issues.push(formatText(l));
+}else{
+available.push(formatText(l));
+}
+
+});
+
+out+="\n**Backup Bus**\n";
+
+if(available.length){
+out+="Available: "+available.join(", ")+"\n";
+}
+
+if(issues.length){
+
+out+="Issues:\n";
+
+issues.forEach(i=>{
+out+="– "+i+"\n";
+});
+
+}
+
+}
+
+}
+
+document.getElementById("telegramPreview").innerText=out.trim();
+
+/* SAVE TO API */
+
+saveToDatabase(records);
 
 }
 
 /* JSONBIN SAVE */
 
-async function autoSave(records){
+async function saveToDatabase(records){
 
-const BIN_ID="69b1458ab7ec241ddc5c77b5";
-const API_KEY="$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
+if(!records.length) return;
 
 const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
 headers:{ "X-Master-Key":API_KEY }
@@ -292,6 +415,61 @@ body:JSON.stringify({reports:db})
 
 }
 
+/* FETCH DATA */
+
+async function fetchDatabase(){
+
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+headers:{ "X-Master-Key":API_KEY }
+});
+
+const data=await res.json();
+
+return data.record.reports || [];
+
+}
+
+/* CSV EXPORT */
+
+function downloadCSV(records,name){
+
+let csv="date,mode,route,bus,issue\n";
+
+records.forEach(r=>{
+csv+=`${r.date},${r.mode},${r.route},${r.bus},${r.issue}\n`;
+});
+
+const blob=new Blob([csv],{type:"text/csv"});
+
+const url=URL.createObjectURL(blob);
+
+const a=document.createElement("a");
+
+a.href=url;
+a.download=name;
+a.click();
+
+}
+
+/* EXPORT */
+
+async function exportReport(){
+
+const days=parseInt(document.getElementById("reportType").value);
+
+const data=await fetchDatabase();
+
+const now=new Date();
+const start=new Date();
+
+start.setDate(now.getDate()-days);
+
+const filtered=data.filter(r=>new Date(r.date)>=start);
+
+downloadCSV(filtered,"hub_report.csv");
+
+}
+
 /* COPY */
 
 function copyReport(){
@@ -306,105 +484,6 @@ return;
 navigator.clipboard.writeText(txt);
 
 alert("Report copied");
-
-}
-
-/* EXPORT FUNCTIONS */
-
-async function fetchData(){
-
-const BIN_ID="69b1458ab7ec241ddc5c77b5";
-const API_KEY="$2a$10$y93q84bYdEx8IjFFWvI2.ejAYbrdjWjC8Jd76a/02A2KFJ/52dyza";
-
-const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
-headers:{ "X-Master-Key":API_KEY }
-});
-
-const data=await res.json();
-return data.record.reports || [];
-
-}
-
-function downloadCSV(records,name){
-
-let csv="date,mode,route,bus,issue\n";
-
-records.forEach(r=>{
-csv+=`${r.date},${r.mode},${r.route},${r.bus},${r.issue}\n`;
-});
-
-const blob=new Blob([csv],{type:"text/csv"});
-const url=URL.createObjectURL(blob);
-
-const a=document.createElement("a");
-a.href=url;
-a.download=name;
-a.click();
-
-}
-
-async function exportDays(days){
-
-const data=await fetchData();
-
-const now=new Date();
-const start=new Date();
-
-start.setDate(now.getDate()-days);
-
-const filtered=data.filter(r=>new Date(r.date)>=start);
-
-downloadCSV(filtered,days+"_days_report.csv");
-
-}
-
-async function exportMonth(){
-
-const data=await fetchData();
-
-const now=new Date();
-const m=now.getMonth();
-const y=now.getFullYear();
-
-const filtered=data.filter(r=>{
-let d=new Date(r.date);
-return d.getMonth()==m && d.getFullYear()==y;
-});
-
-downloadCSV(filtered,"monthly_report.csv");
-
-}
-
-async function exportYear(){
-
-const data=await fetchData();
-
-const y=new Date().getFullYear();
-
-const filtered=data.filter(r=>{
-return new Date(r.date).getFullYear()==y;
-});
-
-downloadCSV(filtered,"yearly_report.csv");
-
-}
-
-async function exportReport(){
-
-const type=document.getElementById("reportType").value;
-
-if(type==="month"){exportMonth();return;}
-if(type==="year"){exportYear();return;}
-
-let days;
-
-if(type==="custom"){
-days=parseInt(document.getElementById("customDays").value);
-}else{
-days=parseInt(type);
-}
-
-exportDays(days);
 
 }
 
