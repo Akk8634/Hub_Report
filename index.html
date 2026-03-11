@@ -212,10 +212,12 @@ function generate(){
 let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
 let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
 
-let filled=[];
-let empty=[];
+let filledMain=[];
+let filledSec=[];
+let emptyMain=[];
+let emptySec=[];
 
-/* PROCESS ALL ROUTES */
+/* PROCESS ROUTES */
 
 [...mainRoutes,...secRoutes].forEach(route=>{
 
@@ -241,17 +243,32 @@ obj.data.push(clean);
 
 });
 
-filled.push(obj);
+if(obj.secondary){
+filledSec.push(obj);
+}else{
+filledMain.push(obj);
+}
 
 }else{
 
-empty.push(obj);
+if(obj.secondary){
+emptySec.push(obj);
+}else{
+emptyMain.push(obj);
+}
 
 }
 
 });
 
-let routes=[...filled,...empty];
+/* ORDER */
+
+let routes=[
+...filledMain,
+...filledSec,
+...emptySec,
+...emptyMain
+];
 
 let out="✪ Central Hub Update\n\n";
 
@@ -332,8 +349,6 @@ let issues=[];
 lines.forEach(l=>{
 
 l=l.replace(/^[-•]\s*/,'');
-
-/* ISSUE DETECTION */
 
 const issue=/issue|tyre|driver|mechanical|ac|pending|rental|\bna\b|\bn\/a\b/i.test(l);
 
