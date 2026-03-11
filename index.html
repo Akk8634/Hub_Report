@@ -53,20 +53,6 @@ background:#16a34a;
 margin-bottom:12px;
 }
 
-/* ANALYTICS BUTTON */
-
-.analyticsBtn{
-position:absolute;
-top:25px;
-right:30px;
-background:#4f46e5;
-color:white;
-border:none;
-padding:10px 20px;
-border-radius:20px;
-cursor:pointer;
-}
-
 /* PREVIEW */
 
 #previewBox{
@@ -99,7 +85,11 @@ padding:10px;
 border-radius:8px;
 border:1px solid #ccc;
 margin-top:5px;
-}
+} 
+  
+.analyticsBtn{
+background:#0ea5e9;
+  }
 
 </style>
 
@@ -110,10 +100,6 @@ margin-top:5px;
 <div class="container">
 
 <h2>Central Hub Report Builder</h2>
-
-<button class="analyticsBtn" onclick="location.href='analytics.html'">
-📊 Analytics
-</button>
 
 <div class="mode">
 Mode:
@@ -144,7 +130,7 @@ Mode:
 
 <button onclick="generate()">Generate Report</button>
 <button class="copy" onclick="copyReport()">Copy</button>
-
+<button class="analyticsBtn" onclick="location.href='analytics.html'">📊 Analytics</button>
 
 <div class="exportBox">
 
