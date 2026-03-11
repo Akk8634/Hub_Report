@@ -483,7 +483,7 @@ body.evening-mode .mode-btn.active-evening {
         </div>
         <div>
           <div class="field-label">Backup Buses</div>
-          <textarea id="backup" placeholder="Enter Backup Buses" rows="3"></textarea>
+          <textarea id="backup" placeholder="C101 available&#10;C202 tyre issue&#10;C303 driver pending" rows="3"></textarea>
         </div>
       </div>
     </div>
@@ -539,78 +539,53 @@ body.evening-mode .mode-btn.active-evening {
 
 <script>
 
-/* ─── CONFIG ─── */
 const BIN_ID  = "69b1458ab7ec241ddc5c77b5";
-const API_KEY = "$2a$10$y93q84bYdEx8IjFFWvI2.ejAYbrdjWjC8Jd76a/02A2KFJ/52dyza";
+const API_KEY = "$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
 
 const ISSUE_KEYWORDS = ['issue','tyre','driver','mechanical','ac','pending','rental','na','n/a','breakdown','flat'];
 
-/* ─── ROUTES ─── */
-// Morning routes (as-is), Evening routes are reversed versions
+// Circled numbers for main routes
+const NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
+
+/* ── MORNING ROUTES (display name : id key) ── */
 const MAIN_ROUTES = [
-  'T-Sobo','T-LP','T-BKC','T-Santacruze','Chembur-Worli',
-  'Chembur-SOBO','Chembur-BKC','Worli Metro-LP','Worli-BKC',
-  'Mulund-LP','BKC-Metro','T-NM'
+  { id: 'T-LP',          morning: 'T-LP',          evening: 'LP - Thane' },
+  { id: 'Chembur-BKC',   morning: 'Chembur-BKC',   evening: 'BKC - Chembur' },
+  { id: 'T-BKC',         morning: 'T-BKC',          evening: 'BKC - Thane' },
+  { id: 'T-Sobo',        morning: 'T-Sobo',         evening: 'Sobo - Thane' },
+  { id: 'Chembur-Worli', morning: 'Chembur-Worli',  evening: 'Worli - Chembur' },
+  { id: 'Mulund-LP',     morning: 'Mulund-LP',      evening: 'LP - Mulund' },
+  { id: 'T-NM',          morning: 'T-NM',           evening: 'NM - Thane' },
+  { id: 'MULUND-BKC',    morning: 'MULUND - BKC',   evening: 'BKC - MULUND' },
+  { id: 'T-Santacruze',  morning: 'T-Santacruze',   evening: 'Santacruz - Thane' },
+  { id: 'BKC-Metro',     morning: 'BKC-Metro',      evening: 'Metro - BKC' },
+  { id: 'Worli-Metro-LP',morning: 'Worli Metro-LP', evening: 'LP - Worli Metro' },
+  { id: 'Worli-BKC',     morning: 'Worli-BKC',      evening: 'BKC - Worli' },
+  { id: 'Chembur-SOBO',  morning: 'Chembur-SOBO',   evening: 'SOBO - Chembur' },
 ];
 
 const SECONDARY_ROUTES = [
-  'SOBO-Mulund','LP-MJW','BKC-Mulund','BKC-MJW','BKC-Ghatkopar'
+  { id: 'BKC-Ghatkopar', morning: 'BKC - Ghatkopar', evening: 'BKC - Ghatkopar' },
+  { id: 'Mulund-SOBO',   morning: 'Mulund-SOBO',     evening: 'SOBO - Mulund' },
+  { id: 'MJW-LP',        morning: 'MJW-LP',           evening: 'LP - MJW' },
+  { id: 'MJW-BKC',       morning: 'MJW-BKC',          evening: 'BKC - MJW' },
 ];
 
-// Morning display names
-const MORNING_ROUTES = {
-'T-LP':         'T - LP',
-'Chembur-BKC':  'Chembur - BKC',
-'T-BKC':        'T - BKC',
-'T-SOBO':       'T - SOBO',
-'Chembur-Worli':'Chembur - Worli',
-'Mulund-LP':    'Mulund - LP',
-'T-NM':         'T - NM',
-'MULUND-BKC':   'MULUND - BKC',
-'T-Santacruze': 'T - Santacruze',
-'BKC-Metro':    'BKC - Metro',
-'Worli Metro-LP':'Worli Metro - LP',
-'Worli-BKC':    'Worli - BKC',
-'Chembur-SOBO': 'Chembur - SOBO',
-'BKC-Ghatkopar': 'BKC - Ghatkopar',
-'Mulund-SOBO':   'Mulund - SOBO',
-'MJW-LP':        'MJW - LP',
-'MJW-BKC':       'MJW - BKC'
-};
-
-// Evening display names (manually defined to match exact format)
-const EVENING_ROUTES = {
-  'T-SOBO':       'SOBO - Thane',
-  'T-LP':         'LP - Thane',
-  'T-BKC':        'BKC - Thane',
-  'T-Santacruze': 'Santacruz - Thane',
-  'Chembur-Worli':'Worli - Chembur',
-  'Chembur-SOBO': 'SOBO - Chembur',
-  'Chembur-BKC':  'BKC - Chembur',
-  'Worli Metro-LP':'Worli Metro-LP',
-  'Worli-BKC':    'Worli-BKC',
-  'Mulund-LP':    'LP - Mulund',
-  'BKC-Metro':    'BKC-Metro',
-  'T-NM':         'NM - Thane',
-  'LP-MJW':       'LP - MJW',
-  'BKC-Mulund':   'BKC - Mulund',
-  'SOBO-Mulund':  'SOBO - Mulund',
-  'BKC-MJW':      'BKC - MJW',
-  'BKC-Ghatkopar':'BKC - Ghatkopar'
-};
-
-/* ─── STATE ─── */
 let mode = 'morning';
 
-/* ─── INIT ─── */
+/* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('currentDate').textContent =
     new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
-  renderRoutes();
   setMode('morning');
 });
 
-/* ─── SET MODE ─── */
+/* ── ROUTE ID ── */
+function rid(r) {
+  return 'r_' + r.id.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+/* ── SET MODE ── */
 function setMode(m) {
   mode = m;
   document.body.className = m === 'evening' ? 'evening-mode' : '';
@@ -620,23 +595,22 @@ function setMode(m) {
   renderRoutes();
 }
 
-/* ─── RENDER ROUTES ─── */
+/* ── RENDER ROUTES ── */
 function renderRoutes() {
-
-  // Save existing values before re-render
+  // Save textarea values before re-render
   const saved = {};
   [...MAIN_ROUTES, ...SECONDARY_ROUTES].forEach(r => {
-    const el = document.getElementById(routeId(r));
-    if (el) saved[r] = el.value;
+    const el = document.getElementById(rid(r));
+    if (el) saved[r.id] = el.value;
   });
 
-  function makeCard(route, isSecondary) {
-    const id = routeId(route);
-    const displayName = mode === 'evening' ? eveningRoute(route) : (MORNING_ROUTES[route] || route);
+  function makeCard(r, isSecondary) {
+    const id = rid(r);
+    const label = mode === 'evening' ? r.evening : r.morning;
     return `
       <div class="card">
         <div class="card-header">
-          <span class="route-label">${isSecondary ? '▪️ ' : ''}<b>${displayName}</b></span>
+          <span class="route-label">${isSecondary ? '▪️ ' : ''}<b>${label}</b></span>
           ${isSecondary ? '<span class="secondary-tag">secondary</span>' : ''}
         </div>
         <textarea id="${id}" placeholder="Enter bus issues..."></textarea>
@@ -648,139 +622,104 @@ function renderRoutes() {
   document.getElementById('secondaryRoutes').innerHTML =
     SECONDARY_ROUTES.map(r => makeCard(r, true)).join('');
 
-  // Restore values after re-render
+  // Restore values
   [...MAIN_ROUTES, ...SECONDARY_ROUTES].forEach(r => {
-    const el = document.getElementById(routeId(r));
-    if (el && saved[r]) el.value = saved[r];
+    const el = document.getElementById(rid(r));
+    if (el && saved[r.id]) el.value = saved[r.id];
   });
 }
 
-function routeId(r) {
-  return 'route_' + r.replace(/[^a-zA-Z0-9]/g, '_');
-}
-
-/* ─── REVERSE ROUTE FOR EVENING ─── */
-function eveningRoute(route) {
-  return EVENING_ROUTES[route] || route;
-}
-
-/* ─── FORMAT TEXT ─── */
+/* ── FORMAT TEXT ── */
 function formatText(line) {
   line = line.replace(/\bc(\d+)/gi, 'C$1');
   line = line.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
   return line.trim();
 }
 
-/* ─── SORT ROUTES ─── */
+/* ── SORT ROUTES ── */
 // Order: Filled main → Filled secondary → Empty secondary → Empty main
-function getSortedRoutes() {
-  const allRoutes = [
-    ...MAIN_ROUTES.map(r => ({ route: r, secondary: false })),
-    ...SECONDARY_ROUTES.map(r => ({ route: r, secondary: true }))
-  ];
+function getSorted() {
+  const filledMain = [], filledSec = [], emptySec = [], emptyMain = [];
 
-  const filled = [], filledSec = [], emptySec = [], emptyMain = [];
-
-  allRoutes.forEach(({ route, secondary }) => {
-    const val = (document.getElementById(routeId(route)) || {}).value || '';
-    const hasFill = val.trim().length > 0;
-    if (hasFill && !secondary) filled.push({ route, secondary });
-    else if (hasFill && secondary) filledSec.push({ route, secondary });
-    else if (!hasFill && secondary) emptySec.push({ route, secondary });
-    else emptyMain.push({ route, secondary });
+  MAIN_ROUTES.forEach(r => {
+    const val = (document.getElementById(rid(r)) || {}).value || '';
+    (val.trim() ? filledMain : emptyMain).push({ r, secondary: false });
   });
 
-  return [...filled, ...filledSec, ...emptySec, ...emptyMain];
+  SECONDARY_ROUTES.forEach(r => {
+    const val = (document.getElementById(rid(r)) || {}).value || '';
+    (val.trim() ? filledSec : emptySec).push({ r, secondary: true });
+  });
+
+  return [...filledMain, ...filledSec, ...emptySec, ...emptyMain];
 }
 
-/* ─── PARSE BACKUP BUSES (MORNING) ─── */
+/* ── PARSE BACKUP ── */
 function parseBackup(raw) {
   const available = [], issues = [];
   raw.split('\n').forEach(line => {
     line = formatText(line.trim());
     if (!line) return;
     const low = line.toLowerCase();
-    const hasIssue = ISSUE_KEYWORDS.some(k => low.includes(k));
-    if (hasIssue) issues.push(line);
-    else available.push(line);
+    ISSUE_KEYWORDS.some(k => low.includes(k)) ? issues.push(line) : available.push(line);
   });
   return { available, issues };
 }
 
-/* ─── GENERATE ─── */
+/* ── GENERATE ── */
 function generate() {
-
-  const sorted = getSortedRoutes();
-  const date   = new Date().toISOString().slice(0, 10);
+  const sorted  = getSorted();
+  const date    = new Date().toISOString().slice(0, 10);
   const records = [];
+  const emoji   = mode === 'morning' ? '🌅' : '🌙';
+  const label   = mode === 'morning' ? 'Morning' : 'Evening';
 
-  const emoji  = mode === 'morning' ? '🌅' : '🌙';
-  const label  = mode === 'morning' ? 'Morning' : 'Evening';
+  let out = `✪ Central Hub Update\n\n`;
 
-  let out = `${emoji} *Central Hub ${label} Update*\n`;
-  out    += `📅 ${new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })}\n\n`;
-
-  let counter = 1;
+  let numIdx = 0;
   let hasContent = false;
 
-  sorted.forEach(({ route, secondary }) => {
-    const el = document.getElementById(routeId(route));
+  sorted.forEach(({ r, secondary }) => {
+    const el  = document.getElementById(rid(r));
     if (!el) return;
     const val = el.value.trim();
     if (!val) return;
 
     hasContent = true;
 
-    const prefix = secondary ? '▪️' : `${counter}.`;
-    if (!secondary) counter++;
+    const displayName = mode === 'evening' ? r.evening : r.morning;
+    const prefix      = secondary ? '▪️' : NUMS[numIdx++];
 
-    const displayRoute = mode === 'evening' ? eveningRoute(route) : (MORNING_ROUTES[route] || route);
-    out += `${prefix} *${displayRoute}*\n`;
+    out += `${prefix} *${displayName}*\n`;
 
     val.split('\n').forEach(v => {
       v = formatText(v);
       if (!v) return;
-      out += `   – ${v}\n`;
-
+      out += `– ${v}\n`;
       const parts = v.split(' ');
-      const bus   = parts[0];
-      const issue = parts.slice(1).join(' ').trim();
-      records.push({ date, mode, route, bus, issue });
+      records.push({ date, mode, route: displayName, bus: parts[0], issue: parts.slice(1).join(' ').trim() });
     });
 
     out += '\n';
   });
 
-  if (!hasContent) {
-    showToast('No route data entered', true);
-    return;
-  }
+  if (!hasContent) { showToast('No route data entered', true); return; }
 
   /* MORNING EXTRAS */
   if (mode === 'morning') {
-
     const backup = document.getElementById('backup').value.trim();
     if (backup) {
       const { available, issues } = parseBackup(backup);
       out += `*🚌 Backup Buses*\n`;
-      if (available.length) {
-        out += `✅ Available:\n`;
-        available.forEach(b => { out += `   – ${b}\n`; });
-      }
-      if (issues.length) {
-        out += `⚠️ Issues:\n`;
-        issues.forEach(b => { out += `   – ${b}\n`; });
-      }
+      if (available.length) { out += `✅ Available:\n`; available.forEach(b => { out += `– ${b}\n`; }); }
+      if (issues.length)    { out += `⚠️ Issues:\n`;   issues.forEach(b => { out += `– ${b}\n`; }); }
       out += '\n';
     }
 
     const training = document.getElementById('training').value.trim();
     if (training) {
       out += `*📋 Training Requirements*\n`;
-      training.split('\n').forEach(t => {
-        t = formatText(t);
-        if (t) out += `   – ${t}\n`;
-      });
+      training.split('\n').forEach(t => { t = formatText(t); if (t) out += `– ${t}\n`; });
       out += '\n';
     }
 
@@ -788,130 +727,103 @@ function generate() {
     out += `*📝 Note:* ${notes}\n`;
   }
 
-  /* DISPLAY */
   document.getElementById('telegramPreview').innerText = out;
   document.getElementById('previewDot').className = 'preview-dot live';
 
-  /* SAVE */
   if (records.length) autoSave(records);
-
   showToast('Report generated ✓');
 }
 
-/* ─── COPY ─── */
+/* ── COPY ── */
 function copyReport() {
   const txt = document.getElementById('telegramPreview').innerText;
-  if (!txt || txt.includes('Generate a report')) {
-    showToast('Generate report first', true);
-    return;
-  }
+  if (!txt || txt.includes('Generate a report')) { showToast('Generate report first', true); return; }
   navigator.clipboard.writeText(txt).then(() => showToast('Copied to clipboard ✓'));
 }
 
-/* ─── CLEAR ─── */
+/* ── CLEAR ── */
 function clearAll() {
   [...MAIN_ROUTES, ...SECONDARY_ROUTES].forEach(r => {
-    const el = document.getElementById(routeId(r));
+    const el = document.getElementById(rid(r));
     if (el) el.value = '';
   });
-  ['notes','training','backup'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
+  ['notes','training','backup'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('telegramPreview').innerHTML = '<div class="empty-preview">Generate a report to see preview</div>';
   document.getElementById('previewDot').className = 'preview-dot';
   showToast('Cleared');
 }
 
-/* ─── TOAST ─── */
+/* ── TOAST ── */
 function showToast(msg, error = false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast show' + (error ? ' error' : '');
-  setTimeout(() => { t.className = 'toast'; }, 2500);
+  t.className   = 'toast show' + (error ? ' error' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.className = 'toast'; }, 2500);
 }
 
-/* ─── CUSTOM DAYS ─── */
+/* ── CUSTOM DAYS ── */
 function toggleCustomDays() {
-  const type = document.getElementById('reportType').value;
-  document.getElementById('customDays').style.display = type === 'custom' ? 'block' : 'none';
+  document.getElementById('customDays').style.display =
+    document.getElementById('reportType').value === 'custom' ? 'block' : 'none';
 }
 
-/* ─── JSONBIN SAVE ─── */
+/* ── JSONBIN SAVE ── */
 async function autoSave(records) {
   try {
-    const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-      headers: { 'X-Master-Key': API_KEY }
-    });
+    const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { headers: { 'X-Master-Key': API_KEY } });
     const data = await res.json();
     let db     = (data.record && data.record.reports) ? data.record.reports : [];
     db         = db.concat(records);
     await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-      method:  'PUT',
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-      body:    JSON.stringify({ reports: db })
+      body: JSON.stringify({ reports: db })
     });
-  } catch (e) {
-    console.warn('Save failed:', e);
-  }
+  } catch(e) { console.warn('Save failed:', e); }
 }
 
-/* ─── FETCH DATA ─── */
+/* ── FETCH DATA ── */
 async function fetchData() {
-  const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-    headers: { 'X-Master-Key': API_KEY }
-  });
+  const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { headers: { 'X-Master-Key': API_KEY } });
   const data = await res.json();
   return (data.record && data.record.reports) ? data.record.reports : [];
 }
 
-/* ─── CSV DOWNLOAD ─── */
+/* ── CSV ── */
 function downloadCSV(records, name) {
   let csv = 'date,mode,route,bus,issue\n';
-  records.forEach(r => {
-    csv += `${r.date},${r.mode},"${r.route}","${r.bus}","${r.issue}"\n`;
-  });
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
+  records.forEach(r => { csv += `${r.date},${r.mode},"${r.route}","${r.bus}","${r.issue}"\n`; });
+  const a  = document.createElement('a');
+  a.href   = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
   a.download = name;
   a.click();
   showToast('CSV downloaded ✓');
 }
 
-/* ─── EXPORT ─── */
+/* ── EXPORT ── */
 async function exportReport() {
   const type = document.getElementById('reportType').value;
   let data;
-  try {
-    data = await fetchData();
-  } catch (e) {
-    showToast('Failed to fetch data', true);
-    return;
-  }
+  try { data = await fetchData(); } catch(e) { showToast('Failed to fetch data', true); return; }
 
   const now = new Date();
   let filtered, filename;
 
   if (type === 'month') {
-    const m = now.getMonth(), y = now.getFullYear();
-    filtered = data.filter(r => { const d = new Date(r.date); return d.getMonth() === m && d.getFullYear() === y; });
+    filtered = data.filter(r => { const d = new Date(r.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
     filename = `monthly_${now.toISOString().slice(0,7)}.csv`;
   } else if (type === 'year') {
-    const y = now.getFullYear();
-    filtered = data.filter(r => new Date(r.date).getFullYear() === y);
-    filename = `yearly_${y}.csv`;
+    filtered = data.filter(r => new Date(r.date).getFullYear() === now.getFullYear());
+    filename = `yearly_${now.getFullYear()}.csv`;
   } else {
-    let days = type === 'custom'
-      ? parseInt(document.getElementById('customDays').value) || 1
-      : parseInt(type);
+    const days  = type === 'custom' ? parseInt(document.getElementById('customDays').value) || 1 : parseInt(type);
     const start = new Date(); start.setDate(now.getDate() - days);
     filtered = data.filter(r => new Date(r.date) >= start);
     filename = `report_${days}days.csv`;
   }
 
-  if (!filtered.length) { showToast('No data found for selected range', true); return; }
+  if (!filtered.length) { showToast('No data for selected range', true); return; }
   downloadCSV(filtered, filename);
 }
 
