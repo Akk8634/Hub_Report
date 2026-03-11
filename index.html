@@ -120,47 +120,72 @@ out += '\n';
 
 if(mode==="morning"){
 
-const notes = document.getElementById('notes').value.trim();
-if(notes){
-out += '— — — — — —\n';
-out += '• ' + notes + '\n\n';
+let notes = document.getElementById('notes').value.trim();
+
+/* DEFAULT TEXT */
+if(!notes){
+notes = "Rest All Ready for Tomorrow";
 }
 
+out += '— — — — — —\n';
+out += `**${notes}**\n\n`;
+
+
+/* TRAINING */
 const training = document.getElementById('training').value.trim();
 if(training){
 out += '**Route Training Requirements**\n\n';
 out += training + '\n\n';
 }
 
+
+/* BACKUP BUS */
 const backupRaw = document.getElementById('backup').value.trim();
 
 if(backupRaw){
-const lines = backupRaw.split('\n').map(l=>l.trim()).filter(Boolean);
+
+const lines = backupRaw.split('\n')
+.map(l=>l.trim())
+.filter(Boolean);
+
 const available = [];
 const issues = [];
 
 lines.forEach(l=>{
+
 if(/avl|available/i.test(l)){
-available.push(l.replace(/avl|available/i,'').trim());
+
+let bus = l.replace(/avl|available/i,'').trim();
+bus = bus.replace(/[-•]/g,'').trim();
+
+available.push(bus);
+
 }else{
+
 issues.push(l);
+
 }
+
 });
 
 out += '**Backup Bus**\n';
 
 if(available.length){
 out += 'Available:\n';
-out += available.join(', ') + '\n\n';
+out += '- ' + available.join(', ') + '\n\n';
 }
 
 if(issues.length){
 out += 'Issues:\n';
+
 issues.forEach(i=>{
-out += '– ' + i + '\n';
+out += '- ' + i + '\n';
 });
+
 }
+
 }
+
 }
 
 document.getElementById('output').textContent = out.trim();
