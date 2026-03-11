@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Central Hub Report Builder</title>
 
 <style>
@@ -16,28 +17,28 @@ padding:20px;
 .container{
 max-width:1200px;
 margin:auto;
-background:#ffffff;
+background:#fff;
 padding:25px;
 border-radius:12px;
 }
 
 .section{
-margin-bottom:12px;
+margin-bottom:10px;
 }
 
 textarea{
 width:100%;
 min-height:60px;
 padding:8px;
-font-family:Courier New,monospace;
+font-family:Courier New;
 }
 
 button{
-padding:12px 28px;
+padding:10px 24px;
 background:#4f46e5;
 color:#fff;
 border:none;
-border-radius:25px;
+border-radius:20px;
 cursor:pointer;
 margin:5px;
 }
@@ -47,8 +48,7 @@ background:#16a34a;
 }
 
 .mode{
-margin-bottom:10px;
-font-weight:bold;
+margin-bottom:12px;
 }
 
 #previewBox{
@@ -60,14 +60,15 @@ justify-content:center;
 #telegramPreview{
 background:#e9f5ff;
 border-radius:10px;
-padding:15px 18px;
+padding:15px;
 max-width:520px;
 white-space:pre-wrap;
 font-family:Segoe UI;
-box-shadow:0 2px 6px rgba(0,0,0,0.15);
+box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
 
 </style>
+
 </head>
 
 <body>
@@ -103,7 +104,7 @@ Mode:
 
 </div>
 
-<button onclick="generate()">Generate Telegram Report</button>
+<button onclick="generate()">Generate Report</button>
 <button class="copy" onclick="copyReport()">Copy</button>
 
 <div id="previewBox">
@@ -114,15 +115,15 @@ Mode:
 
 <script>
 
-let mode = "morning";
+let mode="morning";
 
 /* TEXT FORMAT */
 
 function formatText(line){
 
-line = line.replace(/\bc(\d+)/gi,'C$1');
+line=line.replace(/\bc(\d+)/gi,'C$1');
 
-line = line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
+line=line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
 
 return line.trim();
 
@@ -130,7 +131,7 @@ return line.trim();
 
 /* ROUTE STRUCTURE */
 
-const MORNING = [
+const MORNING=[
 ['①','T-LP'],['②','Chembur-BKC'],['③','T-BKC'],['④','T-Sobo'],
 ['⑤','Chembur-Worli'],['⑥','Mulund-LP'],['⑦','T-NM'],
 ['⑧','MULUND - BKC'],['⑨','T-Santacruze'],['⑩','BKC-Metro'],
@@ -138,139 +139,7 @@ const MORNING = [
 ['▪️','BKC - Ghatkopar'],['▪️','Mulund-SOBO'],['▪️','MJW-LP'],['▪️','MJW-BKC']
 ];
 
-const EVENING = [
-['❶','LP - Thane'],['❷','Sobo - Thane'],['❸','BKC - Thane'],
-['❹','LP - Mulund'],['❺','Worli - Chembur'],
-['❻','Worli-BKC'],['❼','Santacruz - Thane'],
-['❽','Worli Metro-LP'],['➒','BKC-Metro'],
-['➓','BKC - Chembur'],['⓫','NM - Thane'],['⓬','SOBO - Chembur'],
-['▪️','Ghatkopar - BKC'],['▪️','SOBO - Mulund'],['▪️','BKC - Mulund'],
-['▪️','LP - MJW'],['▪️','BKC - MJW'],['▪️','BKC - Mulund']
-];
-
-/* MODE SWITCH */
-
-function setMode(m){
-
-mode = m;
-
-renderRoutes();
-
-document.getElementById("morningExtras").style.display =
-(mode==="morning") ? "block" : "none";
-
-}
-
-/* ROUTE INPUT UI */
-
-function renderRoutes(){
-
-const list = mode==="morning" ? MORNING : EVENING;
-
-let html = "";
-
-list.forEach(([s,id])=>{
-
-html += `<div class="section">
-<h3>${s} ${id}</h3>
-<textarea id="${id}"></textarea>
-</div>`;
-
-});
-
-document.getElementById("routes").innerHTML = html;
-
-}
-
-/* REPORT GENERATOR */
-
-function generate(){
-
-const list = mode==="morning" ? MORNING : EVENING;
-
-let out = '✪ Central Hub Update\n\n';
-
-list.forEach(([sym,id])=>{
-
-const val = document.getElementById(id).value.trim();
-
-out += `${sym} ${id}\n`;
-
-if(val){
-
-val.split('\n')
-.map(v=>v.trim())
-.filter(Boolean)
-.forEach(v=>{
-
-let clean = v.replace(/^[-•–]\s*/,'');
-clean = formatText(clean);
-
-out += '– ' + clean + '\n';
-
-});
-
-}
-
-});
-
-/* MORNING EXTRA */
-
-if(mode==="morning"){
-
-let notes = document.getElementById('notes').value.trim();
-
-if(!notes){
-notes = "Rest All Ready For Tomorrow";
-}
-
-out += '\n— — — — — —\n';
-out += formatText(notes) + '\n\n';
-
-/* TRAINING */
-
-const training = document.getElementById('training').value.trim();
-
-if(training){
-
-out += 'Route Training Requirements\n';
-
-training.split('\n')
-.map(t=>t.trim())
-.filter(Boolean)
-.forEach(t=>{
-out += '– ' + formatText(t) + '\n';
-});
-
-out += '\n';
-
-<script>
-
-let mode = "morning";
-
-/* TEXT FORMATTER */
-
-function formatText(line){
-
-line = line.replace(/\bc(\d+)/gi,'C$1');
-
-line = line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
-
-return line.trim();
-
-}
-
-/* ROUTES */
-
-const MORNING = [
-['①','T-LP'],['②','Chembur-BKC'],['③','T-BKC'],['④','T-Sobo'],
-['⑤','Chembur-Worli'],['⑥','Mulund-LP'],['⑦','T-NM'],
-['⑧','MULUND - BKC'],['⑨','T-Santacruze'],['⑩','BKC-Metro'],
-['⑪','Worli Metro-LP'],['⑫','Worli-BKC'],['⑬','Chembur-SOBO'],
-['▪️','BKC - Ghatkopar'],['▪️','Mulund-SOBO'],['▪️','MJW-LP'],['▪️','MJW-BKC']
-];
-
-const EVENING = [
+const EVENING=[
 ['❶','LP - Thane'],['❷','Sobo - Thane'],['❸','BKC - Thane'],
 ['❹','LP - Mulund'],['❺','Worli - Chembur'],
 ['❻','Worli-BKC'],['❼','Santacruz - Thane'],
@@ -284,33 +153,35 @@ const EVENING = [
 
 function setMode(m){
 
-mode = m;
+mode=m;
 
 renderRoutes();
 
-document.getElementById("morningExtras").style.display =
-(mode==="morning") ? "block" : "none";
+document.getElementById("morningExtras").style.display=
+(mode==="morning")?"block":"none";
 
 }
 
-/* RENDER INPUT ROUTES */
+/* RENDER ROUTE INPUT */
 
 function renderRoutes(){
 
-const list = mode==="morning" ? MORNING : EVENING;
+const list=(mode==="morning")?MORNING:EVENING;
 
 let html="";
 
 list.forEach(([sym,id])=>{
 
-html += `<div class="section">
+html+=`
+<div class="section">
 <h3>${sym} ${id}</h3>
 <textarea id="${id}"></textarea>
-</div>`;
+</div>
+`;
 
 });
 
-document.getElementById("routes").innerHTML = html;
+document.getElementById("routes").innerHTML=html;
 
 }
 
@@ -318,16 +189,16 @@ document.getElementById("routes").innerHTML = html;
 
 function generate(){
 
-const list = mode==="morning" ? MORNING : EVENING;
+const list=(mode==="morning")?MORNING:EVENING;
 
-let filledRoutes=[];
-let emptyRoutes=[];
+let filled=[];
+let empty=[];
 
 list.forEach(([sym,id])=>{
 
-const val = document.getElementById(id).value.trim();
+const val=document.getElementById(id).value.trim();
 
-let block = `${sym} ${id}\n`;
+let block=`${sym} ${id}\n`;
 
 if(val){
 
@@ -336,77 +207,76 @@ val.split('\n')
 .filter(Boolean)
 .forEach(v=>{
 
-let clean = v.replace(/^[-•–]\s*/,'');
-clean = formatText(clean);
+let clean=v.replace(/^[-•–]\s*/,'');
+clean=formatText(clean);
 
-block += '– ' + clean + '\n';
+block+='– '+clean+'\n';
 
 });
 
-filledRoutes.push(block);
+filled.push(block);
 
 }else{
 
-emptyRoutes.push(block);
+empty.push(block);
 
 }
 
 });
 
-/* HEADER */
+let out="✪ Central Hub Update\n\n";
 
-let out = '✪ Central Hub Update\n\n';
+out+=filled.join("\n");
 
-/* ROUTES */
+out+="\n";
 
-out += filledRoutes.join('\n');
-out += '\n';
-out += emptyRoutes.join('\n');
+out+=empty.join("\n");
 
 /* MORNING EXTRA */
 
 if(mode==="morning"){
 
-let notes = document.getElementById('notes').value.trim();
+let notes=document.getElementById("notes").value.trim();
 
 if(!notes){
-notes = "Rest All Ready For Tomorrow";
+
+notes="Rest All Ready For Tomorrow";
+
 }
 
-out += '\n— — — — — —\n';
-out += formatText(notes) + '\n\n';
+out+="\n— — — — — —\n";
 
-/* TRAINING */
+out+=formatText(notes)+"\n\n";
 
-const training = document.getElementById('training').value.trim();
+const training=document.getElementById("training").value.trim();
 
 if(training){
 
-out += 'Route Training Requirements\n';
+out+="Route Training Requirements\n";
 
 training.split('\n')
 .map(t=>t.trim())
 .filter(Boolean)
 .forEach(t=>{
-out += '– ' + formatText(t) + '\n';
+
+out+="– "+formatText(t)+"\n";
+
 });
 
-out += '\n';
+out+="\n";
 
 }
 
-/* BACKUP */
-
-const backupRaw = document.getElementById('backup').value.trim();
+const backupRaw=document.getElementById("backup").value.trim();
 
 if(backupRaw){
 
-const lines = backupRaw.split('\n')
+const lines=backupRaw.split('\n')
 .map(l=>l.trim())
 .filter(Boolean);
 
-const available=[];
-const issues=[];
+let available=[];
+let issues=[];
 
 lines.forEach(l=>{
 
@@ -415,34 +285,44 @@ l=l.replace(/^[-•]\s*/,'');
 const issue=/issue|tyre|driver|mechanical|ac|pending/i.test(l);
 
 if(issue){
+
 issues.push(formatText(l));
+
 }else{
+
 available.push(formatText(l));
+
 }
 
 });
 
-out += 'Backup Bus\n';
+out+="Backup Bus\n";
 
 if(available.length){
-out += 'Available:\n';
-out += '- ' + available.join(', ') + '\n\n';
+
+out+="Available:\n";
+
+out+="- "+available.join(", ")+"\n\n";
+
 }
 
 if(issues.length){
-out += 'Issues:\n';
+
+out+="Issues:\n";
+
 issues.forEach(i=>{
-out += '- ' + i + '\n';
+
+out+="- "+i+"\n";
+
 });
-}
 
 }
 
 }
 
-/* PREVIEW */
+}
 
-document.getElementById("telegramPreview").innerText = out.trim();
+document.getElementById("telegramPreview").innerText=out.trim();
 
 }
 
@@ -450,16 +330,19 @@ document.getElementById("telegramPreview").innerText = out.trim();
 
 function copyReport(){
 
-const txt = document.getElementById("telegramPreview").innerText;
+const txt=document.getElementById("telegramPreview").innerText;
 
 if(!txt){
+
 alert("Generate report first");
+
 return;
+
 }
 
 navigator.clipboard.writeText(txt);
 
-alert("Report copied. Paste in Telegram.");
+alert("Report copied");
 
 }
 
