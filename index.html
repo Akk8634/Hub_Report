@@ -84,10 +84,16 @@ border:1px solid #ccc;
 margin-top:5px;
 }
   
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
 .navBar{
 display:flex;
 gap:10px;
-margin-bottom:20px;
 }
   
 </style>
@@ -96,6 +102,10 @@ margin-bottom:20px;
 
 <body>
   
+<div class="header">
+
+<h2>Central Hub Report Builder</h2>
+
 <div class="navBar">
 
 <button onclick="location.href='hub-report.html'">
@@ -105,6 +115,8 @@ Hub Report
 <button onclick="location.href='analytics.html'">
 📊 Analytics Dashboard
 </button>
+
+</div>
 
 </div>
   
