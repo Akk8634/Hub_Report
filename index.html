@@ -84,14 +84,20 @@ border:1px solid #ccc;
 margin-top:5px;
 }
   
-.header{
+.modeRow{
 display:flex;
 justify-content:space-between;
 align-items:center;
 margin-bottom:20px;
 }
 
-.navBar{
+.modeLeft{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.modeRight{
 display:flex;
 gap:10px;
 }
@@ -101,22 +107,6 @@ gap:10px;
 </head>
 
 <body>
-  
-<div class="header">
-
-<h2>Central Hub Report Builder</h2>
-
-<div class="navBar">
-
-<button onclick="location.href='hub-report.html'">
-Hub Report
-</button>
-
-<button onclick="location.href='analytics.html'">
-📊 Analytics Dashboard
-</button>
-
-</div>
 
 </div>
   
@@ -128,6 +118,11 @@ Hub Report
 Mode:
 <button onclick="setMode('morning')">Morning</button>
 <button onclick="setMode('evening')">Evening</button>
+</div>
+  <div class="modeRight">
+<button onclick="location.href='analytics.html'">📊 Analytics</button>
+</div>
+
 </div>
 
 <div id="routes"></div>
