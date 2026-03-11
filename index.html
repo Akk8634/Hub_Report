@@ -83,7 +83,7 @@ function setMode(m){
 mode = m;
 renderRoutes();
 document.getElementById("morningExtras").style.display =
-  (mode==="morning") ? "block" : "none";
+(mode==="morning") ? "block" : "none";
 }
 
 function renderRoutes(){
@@ -122,14 +122,12 @@ if(mode==="morning"){
 
 let notes = document.getElementById('notes').value.trim();
 
-/* DEFAULT TEXT */
 if(!notes){
 notes = "Rest All Ready for Tomorrow";
 }
 
 out += '— — — — — —\n';
 out += `**${notes}**\n\n`;
-
 
 /* TRAINING */
 const training = document.getElementById('training').value.trim();
@@ -138,36 +136,50 @@ out += '**Route Training Requirements**\n\n';
 out += training + '\n\n';
 }
 
+/* BACKUP BUS LOGIC FIXED */
 
-/* BACKUP BUS */
 const backupRaw = document.getElementById('backup').value.trim();
 
 if(backupRaw){
-const lines = backupRaw.split('\n').map(l=>l.trim()).filter(Boolean);
+
+const lines = backupRaw.split('\n')
+.map(l=>l.trim())
+.filter(Boolean);
+
 const available = [];
 const issues = [];
 
 lines.forEach(l=>{
-if(/avl|available/i.test(l)){
-available.push(l.replace(/avl|available/i,'').trim());
-}else{
+
+l = l.replace(/^[-•]\s*/,''); // remove dash
+
+const isIssue = /issue|tyre|driver|mechanical|ac|pending/i.test(l);
+
+if(isIssue){
 issues.push(l);
+}else{
+available.push(l);
 }
+
 });
 
 out += '**Backup Bus**\n';
 
 if(available.length){
 out += 'Available:\n';
-out += available.join(', ') + '\n\n';
+out += '- ' + available.join(', ') + '\n\n';
 }
 
 if(issues.length){
 out += 'Issues:\n';
+
 issues.forEach(i=>{
-out += '– ' + i + '\n';
+out += '- ' + i + '\n';
 });
 }
+
+}
+
 }
 
 document.getElementById('output').textContent = out.trim();
