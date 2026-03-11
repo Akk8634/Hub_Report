@@ -143,49 +143,31 @@ out += training + '\n\n';
 const backupRaw = document.getElementById('backup').value.trim();
 
 if(backupRaw){
-
-const lines = backupRaw.split('\n')
-.map(l=>l.trim())
-.filter(Boolean);
-
+const lines = backupRaw.split('\n').map(l=>l.trim()).filter(Boolean);
 const available = [];
 const issues = [];
 
 lines.forEach(l=>{
-
 if(/avl|available/i.test(l)){
-
-let bus = l.replace(/avl|available/i,'').trim();
-bus = bus.replace(/[-•]/g,'').trim();
-
-available.push(bus);
-
+available.push(l.replace(/avl|available/i,'').trim());
 }else{
-
 issues.push(l);
-
 }
-
 });
 
 out += '**Backup Bus**\n';
 
 if(available.length){
 out += 'Available:\n';
-out += '- ' + available.join(', ') + '\n\n';
+out += available.join(', ') + '\n\n';
 }
 
 if(issues.length){
 out += 'Issues:\n';
-
 issues.forEach(i=>{
-out += '- ' + i + '\n';
+out += '– ' + i + '\n';
 });
-
 }
-
-}
-
 }
 
 document.getElementById('output').textContent = out.trim();
