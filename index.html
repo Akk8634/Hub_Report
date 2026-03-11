@@ -121,12 +121,9 @@ let mode="morning";
 /* TEXT FORMAT */
 
 function formatText(line){
-
 line=line.replace(/\bc(\d+)/gi,'C$1');
 line=line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
-
 return line.trim();
-
 }
 
 /* ROUTES */
@@ -161,13 +158,10 @@ const nums=[
 /* MODE */
 
 function setMode(m){
-
 mode=m;
 renderRoutes();
-
 document.getElementById("morningExtras").style.display=
 (mode==="morning")?"block":"none";
-
 }
 
 /* RENDER ROUTES */
@@ -180,25 +174,21 @@ let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
 let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
 
 mainRoutes.forEach(route=>{
-
 html+=`
 <div class="section">
 <h3><b>${route}</b></h3>
 <textarea id="${route}"></textarea>
 </div>
 `;
-
 });
 
 secRoutes.forEach(route=>{
-
 html+=`
 <div class="section">
 <h3><b>▪️ ${route}</b></h3>
 <textarea id="${route}"></textarea>
 </div>
 `;
-
 });
 
 document.getElementById("routes").innerHTML=html;
@@ -233,65 +223,42 @@ val.split('\n')
 .map(v=>v.trim())
 .filter(Boolean)
 .forEach(v=>{
-
 let clean=v.replace(/^[-•–]\s*/,'');
 clean=formatText(clean);
-
 obj.data.push(clean);
-
 });
 
-if(obj.secondary){
-filledSec.push(obj);
-}else{
-filledMain.push(obj);
-}
+if(obj.secondary){ filledSec.push(obj); }
+else{ filledMain.push(obj); }
 
 }else{
 
-if(obj.secondary){
-emptySec.push(obj);
-}else{
-emptyMain.push(obj);
-}
+if(obj.secondary){ emptySec.push(obj); }
+else{ emptyMain.push(obj); }
 
 }
 
 });
 
-let routes=[
-...filledMain,
-...filledSec,
-...emptySec,
-...emptyMain
-];
+let routes=[...filledMain,...filledSec,...emptySec,...emptyMain];
 
 let out="✪ Central Hub Update\n\n";
-
 let numIndex=0;
 
 routes.forEach(r=>{
 
 if(!r.secondary){
-
 let num=nums[numIndex] || (numIndex+1)+".";
-
 out+=num+" **"+r.name+"**\n";
-
 numIndex++;
-
 }else{
-
 out+="▪️ **"+r.name+"**\n";
-
 }
 
 if(r.data.length){
-
 r.data.forEach(d=>{
 out+="   – "+d+"\n";
 });
-
 }
 
 });
@@ -301,41 +268,32 @@ out+="   – "+d+"\n";
 if(mode==="morning"){
 
 let notes=document.getElementById("notes").value.trim();
-
-if(!notes){
-notes="Rest All Ready For Tomorrow";
-}
+if(!notes){ notes="Rest All Ready For Tomorrow"; }
 
 out+="\n**"+formatText(notes)+"**\n\n";
 
 const training=document.getElementById("training").value.trim();
 
 if(training){
-
 out+="**Route Training Requirements**\n";
-
 training.split('\n')
 .map(t=>t.trim())
 .filter(Boolean)
 .forEach(t=>{
 out+="   – "+formatText(t)+"\n";
 });
-
 out+="\n";
-
 }
 
 }
 
-/* BACKUP BUS (BOTH MODES) */
+/* BACKUP BUS */
 
 const backupRaw=document.getElementById("backup").value.trim();
 
 if(backupRaw){
 
-const lines=backupRaw.split('\n')
-.map(l=>l.trim())
-.filter(Boolean);
+const lines=backupRaw.split('\n').map(l=>l.trim()).filter(Boolean);
 
 let available=[];
 let issues=[];
@@ -346,11 +304,8 @@ l=l.replace(/^[-•]\s*/,'');
 
 const issue=/issue|tyre|driver|mechanical|ac|pending|rental|\bna\b|\bn\/a\b/i.test(l);
 
-if(issue){
-issues.push(formatText(l));
-}else{
-available.push(formatText(l));
-}
+if(issue){ issues.push(formatText(l)); }
+else{ available.push(formatText(l)); }
 
 });
 
@@ -361,18 +316,73 @@ out+="Available: "+available.join(", ")+"\n";
 }
 
 if(issues.length){
-
 out+="Issues:\n";
-
 issues.forEach(i=>{
 out+="   – "+i+"\n";
 });
-
 }
 
 }
 
 document.getElementById("telegramPreview").innerText=out.trim();
+
+/* AUTO SAVE TO JSONBIN */
+
+const records=parseRecords(routes);
+autoSave(records);
+
+}
+
+/* PARSE STRUCTURED DATA */
+
+function parseRecords(routes){
+
+const date=new Date().toISOString().slice(0,10);
+let records=[];
+
+routes.forEach(r=>{
+r.data.forEach(d=>{
+const bus=d.split(" ")[0];
+const issue=d.replace(bus,"").trim();
+
+records.push({
+date:date,
+mode:mode,
+route:r.name,
+bus:bus,
+issue:issue
+});
+});
+});
+
+return records;
+
+}
+
+/* JSONBIN SAVE */
+
+async function autoSave(records){
+
+const BIN_ID="69b1458ab7ec241ddc5c77b5";
+const API_KEY="$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
+
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+headers:{ "X-Master-Key":API_KEY }
+});
+
+const data=await res.json();
+let db=data.record.reports || [];
+
+db=db.concat(records);
+
+await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+method:"PUT",
+headers:{
+"Content-Type":"application/json",
+"X-Master-Key":API_KEY
+},
+body:JSON.stringify({ reports:db })
+});
 
 }
 
@@ -388,7 +398,6 @@ return;
 }
 
 navigator.clipboard.writeText(txt);
-
 alert("Report copied");
 
 }
