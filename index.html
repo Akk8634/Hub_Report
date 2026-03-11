@@ -21,6 +21,7 @@ margin:auto;
 background:#fff;
 padding:25px;
 border-radius:12px;
+position:relative;
 }
 
 .section{
@@ -51,6 +52,22 @@ background:#16a34a;
 .mode{
 margin-bottom:12px;
 }
+
+/* ANALYTICS BUTTON */
+
+.analyticsBtn{
+position:absolute;
+top:25px;
+right:30px;
+background:#4f46e5;
+color:white;
+border:none;
+padding:10px 20px;
+border-radius:20px;
+cursor:pointer;
+}
+
+/* PREVIEW */
 
 #previewBox{
 margin-top:25px;
@@ -93,6 +110,10 @@ margin-top:5px;
 <div class="container">
 
 <h2>Central Hub Report Builder</h2>
+
+<button class="analyticsBtn" onclick="location.href='analytics.html'">
+📊 Analytics
+</button>
 
 <div class="mode">
 Mode:
@@ -280,127 +301,6 @@ headers:{
 },
 body:JSON.stringify({reports:db})
 });
-
-}
-
-/* FETCH DATA */
-
-async function fetchData(){
-
-const BIN_ID="YOUR_BIN_ID";
-const API_KEY="YOUR_API_KEY";
-
-const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
-headers:{ "X-Master-Key":API_KEY }
-});
-
-const data=await res.json();
-
-return data.record.reports || [];
-
-}
-
-/* CSV DOWNLOAD */
-
-function downloadCSV(records,name){
-
-let csv="date,mode,route,bus,issue\n";
-
-records.forEach(r=>{
-csv+=`${r.date},${r.mode},${r.route},${r.bus},${r.issue}\n`;
-});
-
-const blob=new Blob([csv],{type:"text/csv"});
-
-const url=URL.createObjectURL(blob);
-
-const a=document.createElement("a");
-
-a.href=url;
-a.download=name;
-a.click();
-
-}
-
-/* EXPORT LOGIC */
-
-async function exportReport(){
-
-const type=document.getElementById("reportType").value;
-
-if(type==="month"){
-exportMonth();
-return;
-}
-
-if(type==="year"){
-exportYear();
-return;
-}
-
-let days;
-
-if(type==="custom"){
-days=parseInt(document.getElementById("customDays").value);
-}else{
-days=parseInt(type);
-}
-
-exportDays(days);
-
-}
-
-/* DAYS */
-
-async function exportDays(days){
-
-const data=await fetchData();
-
-const now=new Date();
-
-const start=new Date();
-
-start.setDate(now.getDate()-days);
-
-const filtered=data.filter(r=>new Date(r.date)>=start);
-
-downloadCSV(filtered,days+"_days_report.csv");
-
-}
-
-/* MONTH */
-
-async function exportMonth(){
-
-const data=await fetchData();
-
-const now=new Date();
-
-const m=now.getMonth();
-const y=now.getFullYear();
-
-const filtered=data.filter(r=>{
-let d=new Date(r.date);
-return d.getMonth()==m && d.getFullYear()==y;
-});
-
-downloadCSV(filtered,"monthly_report.csv");
-
-}
-
-/* YEAR */
-
-async function exportYear(){
-
-const data=await fetchData();
-
-const y=new Date().getFullYear();
-
-const filtered=data.filter(r=>{
-return new Date(r.date).getFullYear()==y;
-});
-
-downloadCSV(filtered,"yearly_report.csv");
 
 }
 
