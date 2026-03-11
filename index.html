@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -115,6 +116,8 @@ Mode:
 
 <script>
 
+/* MODE */
+
 let mode="morning";
 
 /* TEXT FORMAT */
@@ -129,27 +132,56 @@ return line.trim();
 
 }
 
-/* ROUTE STRUCTURE */
+/* ROUTES */
 
 const MORNING=[
-['①','T-LP'],['②','Chembur-BKC'],['③','T-BKC'],['④','T-Sobo'],
-['⑤','Chembur-Worli'],['⑥','Mulund-LP'],['⑦','T-NM'],
-['⑧','MULUND - BKC'],['⑨','T-Santacruze'],['⑩','BKC-Metro'],
-['⑪','Worli Metro-LP'],['⑫','Worli-BKC'],['⑬','Chembur-SOBO'],
-['▪️','BKC - Ghatkopar'],['▪️','Mulund-SOBO'],['▪️','MJW-LP'],['▪️','MJW-BKC']
+'T-LP',
+'Chembur-BKC',
+'T-BKC',
+'T-Sobo',
+'Chembur-Worli',
+'Mulund-LP',
+'T-NM',
+'MULUND - BKC',
+'T-Santacruze',
+'BKC-Metro',
+'Worli Metro-LP',
+'Worli-BKC',
+'Chembur-SOBO',
+'BKC - Ghatkopar',
+'Mulund-SOBO',
+'MJW-LP',
+'MJW-BKC'
 ];
 
 const EVENING=[
-['❶','LP - Thane'],['❷','Sobo - Thane'],['❸','BKC - Thane'],
-['❹','LP - Mulund'],['❺','Worli - Chembur'],
-['❻','Worli-BKC'],['❼','Santacruz - Thane'],
-['❽','Worli Metro-LP'],['➒','BKC-Metro'],
-['➓','BKC - Chembur'],['⓫','NM - Thane'],['⓬','SOBO - Chembur'],
-['▪️','Ghatkopar - BKC'],['▪️','SOBO - Mulund'],['▪️','BKC - Mulund'],
-['▪️','LP - MJW'],['▪️','BKC - MJW'],['▪️','BKC - Mulund']
+'LP - Thane',
+'Sobo - Thane',
+'BKC - Thane',
+'LP - Mulund',
+'Worli - Chembur',
+'Worli-BKC',
+'Santacruz - Thane',
+'Worli Metro-LP',
+'BKC-Metro',
+'BKC - Chembur',
+'NM - Thane',
+'SOBO - Chembur',
+'Ghatkopar - BKC',
+'SOBO - Mulund',
+'BKC - Mulund',
+'LP - MJW',
+'BKC - MJW'
 ];
 
-/* MODE */
+/* NUMBER ICONS */
+
+const nums=[
+"①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩",
+"⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"
+];
+
+/* MODE SWITCH */
 
 function setMode(m){
 
@@ -162,7 +194,7 @@ document.getElementById("morningExtras").style.display=
 
 }
 
-/* RENDER ROUTE INPUT */
+/* RENDER ROUTES INPUT */
 
 function renderRoutes(){
 
@@ -170,12 +202,12 @@ const list=(mode==="morning")?MORNING:EVENING;
 
 let html="";
 
-list.forEach(([sym,id])=>{
+list.forEach(route=>{
 
 html+=`
 <div class="section">
-<h3>${sym} ${id}</h3>
-<textarea id="${id}"></textarea>
+<h3>${route}</h3>
+<textarea id="${route}"></textarea>
 </div>
 `;
 
@@ -194,180 +226,12 @@ const list=(mode==="morning")?MORNING:EVENING;
 let filled=[];
 let empty=[];
 
-list.forEach(([sym,id])=>{
+list.forEach(route=>{
 
-const val=document.getElementById(id).value.trim();
+const val=document.getElementById(route).value.trim();
 
-let block=`${sym} ${id}\n`;
-
-if(val){
-
-val.split('\n')
-.map(v=>v.trim())
-.filter(Boolean)
-.forEach(v=>{
-
-let clean=v.replace(/^[-•–]\s*/,'');
-clean=formatText(clean);
-
-block+='– '+clean+'\n';
-
-});
-
-filled.push(block);
-
-}else{
-
-empty.push(block);
-
-}
-
-});
-
-let out="✪ Central Hub Update\n\n";
-
-out+=filled.join("\n");
-
-out+="\n";
-
-out+=empty.join("\n");
-
-/* MORNING EXTRA */
-
-if(mode==="morning"){
-
-let notes=document.getElementById("notes").value.trim();
-
-if(!notes){
-
-notes="Rest All Ready For Tomorrow";
-
-}
-
-out+="\n— — — — — —\n";
-
-out+=formatText(notes)+"\n\n";
-
-const training=document.getElementById("training").value.trim();
-
-if(training){
-
-out+="Route Training Requirements\n";
-
-training.split('\n')
-.map(t=>t.trim())
-.filter(Boolean)
-.forEach(t=>{
-
-out+="– "+formatText(t)+"\n";
-
-});
-
-out+="\n";
-
-}
-
-const backupRaw=document.getElementById("backup").value.trim();
-
-if(backupRaw){
-
-const lines=backupRaw.split('\n')
-.map(l=>l.trim())
-.filter(Boolean);
-
-let available=[];
-let issues=[];
-
-lines.forEach(l=>{
-
-l=l.replace(/^[-•]\s*/,'');
-
-const issue=/issue|tyre|driver|mechanical|ac|pending/i.test(l);
-
-if(issue){
-
-issues.push(formatText(l));
-
-}else{
-
-available.push(formatText(l));
-
-}
-<script>
-
-let mode = "morning";
-
-/* TEXT FORMATTER */
-
-function formatText(line){
-line = line.replace(/\bc(\d+)/gi,'C$1');
-line = line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
-return line.trim();
-}
-
-/* ROUTES */
-
-const MORNING = [
-['①','T-LP'],['②','Chembur-BKC'],['③','T-BKC'],['④','T-Sobo'],
-['⑤','Chembur-Worli'],['⑥','Mulund-LP'],['⑦','T-NM'],
-['⑧','MULUND - BKC'],['⑨','T-Santacruze'],['⑩','BKC-Metro'],
-['⑪','Worli Metro-LP'],['⑫','Worli-BKC'],['⑬','Chembur-SOBO'],
-['▪️','BKC - Ghatkopar'],['▪️','Mulund-SOBO'],['▪️','MJW-LP'],['▪️','MJW-BKC']
-];
-
-const EVENING = [
-['❶','LP - Thane'],['❷','Sobo - Thane'],['❸','BKC - Thane'],
-['❹','LP - Mulund'],['❺','Worli - Chembur'],
-['❻','Worli-BKC'],['❼','Santacruz - Thane'],
-['❽','Worli Metro-LP'],['➒','BKC-Metro'],
-['➓','BKC - Chembur'],['⓫','NM - Thane'],['⓬','SOBO - Chembur'],
-['▪️','Ghatkopar - BKC'],['▪️','SOBO - Mulund'],['▪️','BKC - Mulund'],
-['▪️','LP - MJW'],['▪️','BKC - MJW'],['▪️','BKC - Mulund']
-];
-
-/* MODE */
-
-function setMode(m){
-mode = m;
-renderRoutes();
-document.getElementById("morningExtras").style.display =
-(mode==="morning") ? "block" : "none";
-}
-
-/* RENDER ROUTE INPUT */
-
-function renderRoutes(){
-
-const list = (mode==="morning") ? MORNING : EVENING;
-
-let html="";
-
-list.forEach(([sym,id])=>{
-html += `<div class="section">
-<h3>${sym} ${id}</h3>
-<textarea id="${id}"></textarea>
-</div>`;
-});
-
-document.getElementById("routes").innerHTML = html;
-
-}
-
-/* GENERATE REPORT */
-
-function generate(){
-
-const list = (mode==="morning") ? MORNING : EVENING;
-
-let filled=[];
-let empty=[];
-
-list.forEach(([sym,id])=>{
-
-const val=document.getElementById(id).value.trim();
-
-let route={
-name:id,
+let obj={
+name:route,
 data:[]
 };
 
@@ -377,16 +241,19 @@ val.split('\n')
 .map(v=>v.trim())
 .filter(Boolean)
 .forEach(v=>{
+
 let clean=v.replace(/^[-•–]\s*/,'');
 clean=formatText(clean);
-route.data.push(clean);
+
+obj.data.push(clean);
+
 });
 
-filled.push(route);
+filled.push(obj);
 
 }else{
 
-empty.push(route);
+empty.push(obj);
 
 }
 
@@ -394,28 +261,23 @@ empty.push(route);
 
 let all=[...filled,...empty];
 
-let numbers=[
-"①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩",
-"⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"
-];
-
 let out="✪ Central Hub Update\n\n";
 
 all.forEach((r,i)=>{
 
-let num = numbers[i] || (i+1)+".";
+let num=nums[i] || (i+1)+".";
 
-out += `${num} ${r.name}\n`;
+out+=num+" "+r.name+"\n";
 
 if(r.data.length){
 
 r.data.forEach(d=>{
-out += "– "+d+"\n";
+out+="– "+d+"\n";
 });
 
 }
 
-out += "\n";
+out+="\n";
 
 });
 
@@ -471,9 +333,13 @@ l=l.replace(/^[-•]\s*/,'');
 const issue=/issue|tyre|driver|mechanical|ac|pending/i.test(l);
 
 if(issue){
+
 issues.push(formatText(l));
+
 }else{
+
 available.push(formatText(l));
+
 }
 
 });
@@ -512,9 +378,12 @@ return;
 }
 
 navigator.clipboard.writeText(txt);
+
 alert("Report copied");
 
 }
+
+/* INITIAL LOAD */
 
 setMode("morning");
 
