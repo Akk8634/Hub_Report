@@ -712,7 +712,13 @@ function generate() {
   });
 
   if (!hasContent) { showToast('No route data entered', true); return; }
+  /* PREVIEW */
+  document.getElementById("telegramPreview").innerText = out.trim();
 
+  /* DATABASE SAVE */
+  saveToDatabase(records);
+
+}
   /* MORNING EXTRAS */
   if (mode === 'morning') {
     const backup = document.getElementById('backup').value.trim();
@@ -777,20 +783,45 @@ function toggleCustomDays() {
 }
 
 /* ── JSONBIN SAVE ── */
-async function autoSave(records) {
-  try {
-    const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { headers: { 'X-Master-Key': API_KEY } });
-    const data = await res.json();
-    let db     = (data.record && data.record.reports) ? data.record.reports : [];
-    db         = db.concat(records);
-    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-      body: JSON.stringify({ reports: db })
-    });
-  } catch(e) { console.warn('Save failed:', e); }
+async function saveToDatabase(records){
+
+if(!records.length) return;
+
+try{
+
+const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
+headers:{
+"X-Master-Key": API_KEY
+}
+});
+
+const data = await res.json();
+
+let db = data.record.reports || [];
+
+db = db.concat(records);
+
+await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+method:"PUT",
+headers:{
+"Content-Type":"application/json",
+"X-Master-Key":API_KEY,
+"X-Bin-Versioning":"false"
+},
+body:JSON.stringify({
+reports: db
+})
+});
+
+console.log("Report saved to JSONBin");
+
+}catch(e){
+
+console.error("JSON save error",e);
+
 }
 
+}
 /* ── FETCH DATA ── */
 async function fetchData() {
   const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { headers: { 'X-Master-Key': API_KEY } });
