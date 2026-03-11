@@ -98,11 +98,11 @@ Mode:
 <textarea id="training"></textarea>
 </div>
 
+</div>
+
 <div class="section">
 <h3>Backup Buses</h3>
 <textarea id="backup"></textarea>
-</div>
-
 </div>
 
 <button onclick="generate()">Generate Report</button>
@@ -217,8 +217,6 @@ let filledSec=[];
 let emptyMain=[];
 let emptySec=[];
 
-/* PROCESS ROUTES */
-
 [...mainRoutes,...secRoutes].forEach(route=>{
 
 const val=document.getElementById(route).value.trim();
@@ -261,8 +259,6 @@ emptyMain.push(obj);
 
 });
 
-/* ORDER */
-
 let routes=[
 ...filledMain,
 ...filledSec,
@@ -273,8 +269,6 @@ let routes=[
 let out="✪ Central Hub Update\n\n";
 
 let numIndex=0;
-
-/* PRINT ROUTES */
 
 routes.forEach(r=>{
 
@@ -305,13 +299,6 @@ out+="   – "+d+"\n";
 /* MORNING EXTRA */
 
 if(mode==="morning"){
-   // Notes
-   // Training
-}
-
-if(mode==="morning" || mode==="evening"){
-   // Backup Bus
-}{
 
 let notes=document.getElementById("notes").value.trim();
 
@@ -320,8 +307,6 @@ notes="Rest All Ready For Tomorrow";
 }
 
 out+="\n**"+formatText(notes)+"**\n\n";
-
-/* TRAINING */
 
 const training=document.getElementById("training").value.trim();
 
@@ -340,7 +325,9 @@ out+="\n";
 
 }
 
-/* BACKUP */
+}
+
+/* BACKUP BUS (BOTH MODES) */
 
 const backupRaw=document.getElementById("backup").value.trim();
 
@@ -380,8 +367,6 @@ out+="Issues:\n";
 issues.forEach(i=>{
 out+="   – "+i+"\n";
 });
-
-}
 
 }
 
