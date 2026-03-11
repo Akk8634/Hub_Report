@@ -1,495 +1,920 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Central Hub Report Builder</title>
-
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
-body{
-font-family:Segoe UI;
-background:#eef2ff;
-padding:20px;
+:root {
+  --morning: #f59e0b;
+  --evening: #6366f1;
+  --active: #f59e0b;
+  --bg: #0f1117;
+  --card: #1a1d27;
+  --card2: #20243a;
+  --border: #2e3250;
+  --text: #e8eaf6;
+  --muted: #7c82a8;
+  --green: #10b981;
+  --red: #ef4444;
+  --radius: 10px;
 }
 
-.container{
-max-width:1100px;
-margin:auto;
-background:#fff;
-padding:25px;
-border-radius:12px;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
 }
 
-.section{
-margin-bottom:8px;
+.app {
+  max-width: 1200px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 20px;
+  align-items: start;
 }
 
-textarea{
-width:100%;
-min-height:55px;
-padding:8px;
-font-family:Courier New;
+/* HEADER */
+.header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
 }
 
-button{
-padding:10px 22px;
-background:#4f46e5;
-color:#fff;
-border:none;
-border-radius:18px;
-cursor:pointer;
-margin:4px;
+.header h1 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--active);
 }
 
-.copy{background:#16a34a;}
-.analyticsBtn{background:#0ea5e9;}
+.header h1 span { color: var(--text); }
 
-.mode{
-margin-bottom:12px;
+/* MODE TOGGLE */
+.mode-toggle {
+  display: flex;
+  background: var(--bg);
+  border-radius: 50px;
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--border);
 }
 
-#previewBox{
-margin-top:20px;
-display:flex;
-justify-content:center;
+.mode-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.25s;
 }
 
-#telegramPreview{
-background:#e9f5ff;
-border-radius:10px;
-padding:15px;
-max-width:520px;
-white-space:pre-wrap;
-font-family:Segoe UI;
-box-shadow:0 2px 6px rgba(0,0,0,0.2);
+.mode-btn.active-morning {
+  background: var(--morning);
+  color: #000;
 }
 
-.exportBox{
-margin-top:15px;
-padding:12px;
-border-radius:10px;
-background:#f6f7ff;
+.mode-btn.active-evening {
+  background: var(--evening);
+  color: #fff;
 }
 
-select,input{
-padding:8px;
-border-radius:6px;
-border:1px solid #ccc;
+/* LEFT PANEL */
+.left-panel { display: flex; flex-direction: column; gap: 14px; }
+
+/* SECTION CARD */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--card2);
+  border-bottom: 1px solid var(--border);
+}
+
+.card-header .route-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--active);
+  text-transform: uppercase;
+}
+
+.card-header .secondary-tag {
+  font-size: 0.68rem;
+  background: #2e3250;
+  color: var(--muted);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.card textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  padding: 10px 14px;
+  resize: vertical;
+  min-height: 52px;
+  outline: none;
+}
+
+.card textarea::placeholder { color: #3d4270; }
+.card textarea:focus { background: rgba(255,255,255,0.02); }
+
+/* SECTION DIVIDER */
+.section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  padding: 6px 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* EXTRAS SECTION */
+.extras-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.extras-card textarea {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  padding: 10px 12px;
+  resize: vertical;
+  min-height: 50px;
+  outline: none;
+}
+
+.extras-card textarea:focus {
+  border-color: var(--active);
+}
+
+.extras-card textarea::placeholder { color: #3d4270; }
+
+/* ACTION BUTTONS */
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 11px 22px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.btn-generate {
+  background: var(--active);
+  color: #000;
+  flex: 1;
+}
+
+.btn-generate:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.btn-copy {
+  background: var(--green);
+  color: #fff;
+}
+
+.btn-copy:hover { opacity: 0.85; }
+
+.btn-clear {
+  background: #2e3250;
+  color: var(--muted);
+}
+
+.btn-clear:hover { background: var(--border); }
+
+/* RIGHT PANEL */
+.right-panel {
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* PREVIEW BOX */
+.preview-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--card2);
+  border-bottom: 1px solid var(--border);
+}
+
+.preview-header span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.preview-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.preview-dot.live { background: var(--green); animation: pulse 1.5s infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+#telegramPreview {
+  padding: 16px;
+  white-space: pre-wrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: #c5cae9;
+  min-height: 120px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+#telegramPreview::-webkit-scrollbar { width: 4px; }
+#telegramPreview::-webkit-scrollbar-track { background: transparent; }
+#telegramPreview::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.empty-preview {
+  color: #3d4270;
+  font-style: italic;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* EXPORT CARD */
+.export-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.export-card h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.export-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.export-card select,
+.export-card input {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  outline: none;
+  flex: 1;
+}
+
+.export-card select:focus,
+.export-card input:focus { border-color: var(--active); }
+
+#customDays { display: none; max-width: 100px; }
+
+.btn-export {
+  background: #6366f1;
+  color: #fff;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.btn-export:hover { opacity: 0.85; }
+
+/* STATUS TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--green);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 999;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { background: var(--red); }
+
+/* ROUTE GROUPS */
+.group-divider {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #3d4270;
+  padding: 8px 0 2px;
+  grid-column: 1 / -1;
+}
+
+.routes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .right-panel { position: static; }
+  .routes-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .header { flex-direction: column; gap: 12px; }
+  .routes-grid { grid-template-columns: 1fr; }
+}
+
+/* Evening mode accent */
+body.evening-mode {
+  --active: #818cf8;
+  --morning: #818cf8;
+}
+
+body.evening-mode .mode-btn.active-evening {
+  background: var(--evening);
+}
+
+.char-count {
+  font-size: 0.65rem;
+  color: #3d4270;
+  text-align: right;
+  padding: 2px 14px 6px;
+}
 </style>
 </head>
-
 <body>
 
-<div class="container">
+<div class="app">
 
-<h2>Central Hub Report Builder</h2>
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Central Hub <span>Report Builder</span></h1>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span id="currentDate" style="font-size:0.8rem; color:var(--muted);"></span>
+      <div class="mode-toggle">
+        <button class="mode-btn active-morning" id="btnMorning" onclick="setMode('morning')">☀️ Morning</button>
+        <button class="mode-btn" id="btnEvening" onclick="setMode('evening')">🌙 Evening</button>
+      </div>
+    </div>
+  </div>
 
-<div class="mode">
-Mode:
-<button onclick="setMode('morning')">Morning</button>
-<button onclick="setMode('evening')">Evening</button>
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+
+    <!-- MAIN ROUTES -->
+    <div class="section-title">Main Routes</div>
+    <div class="routes-grid" id="mainRoutes"></div>
+
+    <!-- SECONDARY ROUTES -->
+    <div class="section-title">Secondary Routes ▪️</div>
+    <div class="routes-grid" id="secondaryRoutes"></div>
+
+    <!-- MORNING EXTRAS -->
+    <div id="morningExtras">
+      <div class="section-title">Morning Sections</div>
+      <div class="extras-card">
+        <div>
+          <div class="field-label">Rest / Notes</div>
+          <textarea id="notes" placeholder="Rest All Ready For Tomorrow" rows="2"></textarea>
+        </div>
+        <div>
+          <div class="field-label">Route Training Requirements</div>
+          <textarea id="training" placeholder="Enter training requirements..." rows="2"></textarea>
+        </div>
+        <div>
+          <div class="field-label">Backup Buses</div>
+          <textarea id="backup" placeholder="C101 available&#10;C202 tyre issue&#10;C303 driver pending" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions">
+      <button class="btn btn-generate" onclick="generate()">⚡ Generate Report</button>
+      <button class="btn btn-copy" onclick="copyReport()">📋 Copy</button>
+      <button class="btn btn-clear" onclick="clearAll()">🗑 Clear</button>
+      <a href="analytics.html" style="padding:11px 22px; background:#38bdf8; color:#000; border-radius:50px; font-family:Outfit,sans-serif; font-size:0.88rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">📊 Analytics</a>
+    </div>
+
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+
+    <!-- PREVIEW -->
+    <div class="preview-card">
+      <div class="preview-header">
+        <span>Telegram Preview</span>
+        <div class="preview-dot" id="previewDot"></div>
+      </div>
+      <div id="telegramPreview">
+        <div class="empty-preview">Generate a report to see preview</div>
+      </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="export-card">
+      <h3>📊 Export Report</h3>
+      <div class="export-row">
+        <select id="reportType" onchange="toggleCustomDays()">
+          <option value="1">Last 1 Day</option>
+          <option value="3">Last 3 Days</option>
+          <option value="7">Last 7 Days</option>
+          <option value="30">Last 30 Days</option>
+          <option value="month">This Month</option>
+          <option value="year">This Year</option>
+          <option value="custom">Custom Days</option>
+        </select>
+        <input id="customDays" placeholder="Days" type="number" min="1">
+        <button class="btn-export" onclick="exportReport()">Export CSV</button>
+      </div>
+    </div>
+
+  </div>
+
 </div>
 
-<div id="routes"></div>
-
-<div id="morningExtras">
-
-<div class="section">
-<h3>Rest / Notes</h3>
-<textarea id="notes" placeholder="Rest All Ready For Tomorrow"></textarea>
-</div>
-
-<div class="section">
-<h3>Route Training Requirements</h3>
-<textarea id="training"></textarea>
-</div>
-
-</div>
-
-<div class="section">
-<h3>Backup Buses</h3>
-<textarea id="backup"></textarea>
-</div>
-
-<button onclick="generate()">Generate Report</button>
-<button class="copy" onclick="copyReport()">Copy</button>
-<button class="analyticsBtn" onclick="location.href='analytics.html'">📊 Analytics</button>
-
-<div class="exportBox">
-
-<select id="reportType">
-<option value="1">Last 1 Day</option>
-<option value="3">Last 3 Days</option>
-<option value="7">Last 7 Days</option>
-<option value="30">Last 30 Days</option>
-</select>
-
-<button onclick="exportReport()">Export CSV</button>
-
-</div>
-
-<div id="previewBox">
-<div id="telegramPreview"></div>
-</div>
-
-</div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
 
-let mode="morning";
+/* ─── CONFIG ─── */
+const BIN_ID  = "69b1458ab7ec241ddc5c77b5";
+const API_KEY = "$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
 
-/* JSONBIN API */
+const ISSUE_KEYWORDS = ['issue','tyre','driver','mechanical','ac','pending','rental','na','n/a','breakdown','flat'];
 
-const BIN_ID="69b1458ab7ec241ddc5c77b5";
-const API_KEY="$2a$10$y93q84bYdEx8IjFFWvI2.ejAYbrdjWjC8Jd76a/02A2KFJ/52dyza";
-
-/* TEXT FORMAT */
-
-function formatText(line){
-
-line=line.replace(/\bc(\d+)/gi,'C$1');
-line=line.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
-
-return line.trim();
-
-}
-
-/* ROUTES */
-
-const MAIN_ROUTES=[
-'T-LP','Chembur-BKC','T-BKC','T-Sobo','Chembur-Worli',
-'Mulund-LP','T-NM','MULUND - BKC','T-Santacruze',
-'BKC-Metro','Worli Metro-LP','Worli-BKC','Chembur-SOBO'
+/* ─── ROUTES ─── */
+// Morning routes (as-is), Evening routes are reversed versions
+const MAIN_ROUTES = [
+  'T-Sobo','T-LP','T-BKC','T-Santacruze','Chembur-Worli',
+  'Chembur-SOBO','Chembur-BKC','Worli Metro-LP','Worli-BKC',
+  'Mulund-LP','BKC-Metro','T-NM'
 ];
 
-const SECONDARY_ROUTES=[
-'BKC - Ghatkopar','Mulund-SOBO','MJW-LP','MJW-BKC'
+const SECONDARY_ROUTES = [
+  'SOBO-Mulund','LP-MJW','BKC-Mulund','BKC-MJW','BKC-Ghatkopar'
 ];
 
-const nums=[
-"①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩",
-"⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"
-];
+// Morning display names
+const MORNING_ROUTES = {
+  'T-Sobo':       'T - Sobo',
+  'T-LP':         'T - LP',
+  'T-BKC':        'T - BKC',
+  'T-Santacruze': 'T - Santacruz',
+  'Chembur-Worli':'Chembur - Worli',
+  'Chembur-SOBO': 'Chembur - SOBO',
+  'Chembur-BKC':  'Chembur - BKC',
+  'Worli Metro-LP':'Worli Metro - LP',
+  'Worli-BKC':    'Worli - BKC',
+  'Mulund-LP':    'Mulund - LP',
+  'BKC-Metro':    'BKC - Metro',
+  'T-NM':         'T - NM',
+  'SOBO-Mulund':  'SOBO - Mulund',
+  'LP-MJW':       'LP - MJW',
+  'BKC-Mulund':   'BKC - Mulund',
+  'BKC-MJW':      'BKC - MJW',
+  'BKC-Ghatkopar':'BKC - Ghatkopar'
+};
 
-/* MODE */
+// Evening display names (manually defined to match exact format)
+const EVENING_ROUTES = {
+  'T-Sobo':       'Sobo - Thane',
+  'T-LP':         'LP - Thane',
+  'T-BKC':        'BKC - Thane',
+  'T-Santacruze': 'Santacruz - Thane',
+  'Chembur-Worli':'Worli - Chembur',
+  'Chembur-SOBO': 'SOBO - Chembur',
+  'Chembur-BKC':  'BKC - Chembur',
+  'Worli Metro-LP':'Worli Metro-LP',
+  'Worli-BKC':    'Worli-BKC',
+  'Mulund-LP':    'LP - Mulund',
+  'BKC-Metro':    'BKC-Metro',
+  'T-NM':         'NM - Thane',
+  'SOBO-Mulund':  'SOBO - Mulund',
+  'LP-MJW':       'LP - MJW',
+  'BKC-Mulund':   'BKC - Mulund',
+  'BKC-MJW':      'BKC - MJW',
+  'BKC-Ghatkopar':'BKC - Ghatkopar'
+};
 
-function setMode(m){
+/* ─── STATE ─── */
+let mode = 'morning';
 
-mode=m;
-
-renderRoutes();
-
-document.getElementById("morningExtras").style.display=
-(mode==="morning")?"block":"none";
-
-}
-
-/* RENDER ROUTES */
-
-function renderRoutes(){
-
-let html="";
-
-[...MAIN_ROUTES,...SECONDARY_ROUTES].forEach(route=>{
-
-let symbol=SECONDARY_ROUTES.includes(route)?"▪️ ":"";
-
-html+=`
-<div class="section">
-<h3><b>${symbol}${route}</b></h3>
-<textarea id="${route}"></textarea>
-</div>
-`;
-
+/* ─── INIT ─── */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('currentDate').textContent =
+    new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+  renderRoutes();
+  setMode('morning');
 });
 
-document.getElementById("routes").innerHTML=html;
-
+/* ─── SET MODE ─── */
+function setMode(m) {
+  mode = m;
+  document.body.className = m === 'evening' ? 'evening-mode' : '';
+  document.getElementById('btnMorning').className = 'mode-btn' + (m === 'morning' ? ' active-morning' : '');
+  document.getElementById('btnEvening').className = 'mode-btn' + (m === 'evening' ? ' active-evening' : '');
+  document.getElementById('morningExtras').style.display = m === 'morning' ? 'block' : 'none';
+  renderRoutes();
 }
 
-/* GENERATE REPORT */
+/* ─── RENDER ROUTES ─── */
+function renderRoutes() {
 
-function generate(){
+  // Save existing values before re-render
+  const saved = {};
+  [...MAIN_ROUTES, ...SECONDARY_ROUTES].forEach(r => {
+    const el = document.getElementById(routeId(r));
+    if (el) saved[r] = el.value;
+  });
 
-let filledMain=[];
-let filledSec=[];
-let emptyMain=[];
-let emptySec=[];
+  function makeCard(route, isSecondary) {
+    const id = routeId(route);
+    const displayName = mode === 'evening' ? eveningRoute(route) : (MORNING_ROUTES[route] || route);
+    return `
+      <div class="card">
+        <div class="card-header">
+          <span class="route-label">${isSecondary ? '▪️ ' : ''}<b>${displayName}</b></span>
+          ${isSecondary ? '<span class="secondary-tag">secondary</span>' : ''}
+        </div>
+        <textarea id="${id}" placeholder="Enter bus issues..."></textarea>
+      </div>`;
+  }
 
-let records=[];
+  document.getElementById('mainRoutes').innerHTML =
+    MAIN_ROUTES.map(r => makeCard(r, false)).join('');
+  document.getElementById('secondaryRoutes').innerHTML =
+    SECONDARY_ROUTES.map(r => makeCard(r, true)).join('');
 
-const date=new Date().toISOString().slice(0,10);
-
-[...MAIN_ROUTES,...SECONDARY_ROUTES].forEach(route=>{
-
-const val=document.getElementById(route).value.trim();
-
-let obj={name:route,data:[]};
-
-if(val){
-
-val.split('\n')
-.map(v=>v.trim())
-.filter(Boolean)
-.forEach(v=>{
-
-let clean=v.replace(/^[-•–]\s*/,'');
-clean=formatText(clean);
-
-obj.data.push(clean);
-
-records.push({
-date:date,
-mode:mode,
-route:route,
-bus:clean.split(" ")[0],
-issue:clean.replace(clean.split(" ")[0],"").trim()
-});
-
-});
-
-if(SECONDARY_ROUTES.includes(route)){
-filledSec.push(obj);
-}else{
-filledMain.push(obj);
+  // Restore values after re-render
+  [...MAIN_ROUTES, ...SECONDARY_ROUTES].forEach(r => {
+    const el = document.getElementById(routeId(r));
+    if (el && saved[r]) el.value = saved[r];
+  });
 }
 
-}else{
-
-if(SECONDARY_ROUTES.includes(route)){
-emptySec.push(obj);
-}else{
-emptyMain.push(obj);
+function routeId(r) {
+  return 'route_' + r.replace(/[^a-zA-Z0-9]/g, '_');
 }
 
+/* ─── REVERSE ROUTE FOR EVENING ─── */
+function eveningRoute(route) {
+  return EVENING_ROUTES[route] || route;
 }
 
-});
-
-/* ROUTE SORT */
-
-let routes=[
-...filledMain,
-...filledSec,
-...emptySec,
-...emptyMain
-];
-
-let out="✪ Central Hub Update\n\n";
-
-let numIndex=0;
-
-routes.forEach(r=>{
-
-if(!SECONDARY_ROUTES.includes(r.name)){
-
-let num=nums[numIndex] || (numIndex+1);
-
-out+=num+" **"+r.name+"**\n";
-
-numIndex++;
-
-}else{
-
-out+="▪️ **"+r.name+"**\n";
-
+/* ─── FORMAT TEXT ─── */
+function formatText(line) {
+  line = line.replace(/\bc(\d+)/gi, 'C$1');
+  line = line.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+  return line.trim();
 }
 
-r.data.forEach(d=>{
-out+="– "+d+"\n";
-});
+/* ─── SORT ROUTES ─── */
+// Order: Filled main → Filled secondary → Empty secondary → Empty main
+function getSortedRoutes() {
+  const allRoutes = [
+    ...MAIN_ROUTES.map(r => ({ route: r, secondary: false })),
+    ...SECONDARY_ROUTES.map(r => ({ route: r, secondary: true }))
+  ];
 
-});
+  const filled = [], filledSec = [], emptySec = [], emptyMain = [];
 
-/* MORNING EXTRA */
+  allRoutes.forEach(({ route, secondary }) => {
+    const val = (document.getElementById(routeId(route)) || {}).value || '';
+    const hasFill = val.trim().length > 0;
+    if (hasFill && !secondary) filled.push({ route, secondary });
+    else if (hasFill && secondary) filledSec.push({ route, secondary });
+    else if (!hasFill && secondary) emptySec.push({ route, secondary });
+    else emptyMain.push({ route, secondary });
+  });
 
-if(mode==="morning"){
-
-let notes=document.getElementById("notes").value.trim();
-
-if(!notes){
-notes="Rest All Ready For Tomorrow";
+  return [...filled, ...filledSec, ...emptySec, ...emptyMain];
 }
 
-out+="\n**"+formatText(notes)+"**\n\n";
-
-const training=document.getElementById("training").value.trim();
-
-if(training){
-
-out+="**Route Training Requirements**\n";
-
-training.split('\n')
-.map(t=>t.trim())
-.filter(Boolean)
-.forEach(t=>{
-out+="– "+formatText(t)+"\n";
-});
-
+/* ─── PARSE BACKUP BUSES (MORNING) ─── */
+function parseBackup(raw) {
+  const available = [], issues = [];
+  raw.split('\n').forEach(line => {
+    line = formatText(line.trim());
+    if (!line) return;
+    const low = line.toLowerCase();
+    const hasIssue = ISSUE_KEYWORDS.some(k => low.includes(k));
+    if (hasIssue) issues.push(line);
+    else available.push(line);
+  });
+  return { available, issues };
 }
 
-/* BACKUP BUS */
+/* ─── GENERATE ─── */
+function generate() {
 
-const backupRaw=document.getElementById("backup").value.trim();
+  const sorted = getSortedRoutes();
+  const date   = new Date().toISOString().slice(0, 10);
+  const records = [];
 
-if(backupRaw){
+  const emoji  = mode === 'morning' ? '🌅' : '🌙';
+  const label  = mode === 'morning' ? 'Morning' : 'Evening';
 
-const lines=backupRaw.split('\n')
-.map(l=>l.trim())
-.filter(Boolean);
+  let out = `${emoji} *Central Hub ${label} Update*\n`;
+  out    += `📅 ${new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })}\n\n`;
 
-let available=[];
-let issues=[];
+  let counter = 1;
+  let hasContent = false;
 
-lines.forEach(l=>{
+  sorted.forEach(({ route, secondary }) => {
+    const el = document.getElementById(routeId(route));
+    if (!el) return;
+    const val = el.value.trim();
+    if (!val) return;
 
-l=l.replace(/^[-•]\s*/,'');
+    hasContent = true;
 
-const issue=/issue|tyre|driver|mechanical|ac|pending|rental|\bna\b|\bn\/a\b/i.test(l);
+    const prefix = secondary ? '▪️' : `${counter}.`;
+    if (!secondary) counter++;
 
-if(issue){
-issues.push(formatText(l));
-}else{
-available.push(formatText(l));
+    const displayRoute = mode === 'evening' ? eveningRoute(route) : (MORNING_ROUTES[route] || route);
+    out += `${prefix} *${displayRoute}*\n`;
+
+    val.split('\n').forEach(v => {
+      v = formatText(v);
+      if (!v) return;
+      out += `   – ${v}\n`;
+
+      const parts = v.split(' ');
+      const bus   = parts[0];
+      const issue = parts.slice(1).join(' ').trim();
+      records.push({ date, mode, route, bus, issue });
+    });
+
+    out += '\n';
+  });
+
+  if (!hasContent) {
+    showToast('No route data entered', true);
+    return;
+  }
+
+  /* MORNING EXTRAS */
+  if (mode === 'morning') {
+
+    const backup = document.getElementById('backup').value.trim();
+    if (backup) {
+      const { available, issues } = parseBackup(backup);
+      out += `*🚌 Backup Buses*\n`;
+      if (available.length) {
+        out += `✅ Available:\n`;
+        available.forEach(b => { out += `   – ${b}\n`; });
+      }
+      if (issues.length) {
+        out += `⚠️ Issues:\n`;
+        issues.forEach(b => { out += `   – ${b}\n`; });
+      }
+      out += '\n';
+    }
+
+    const training = document.getElementById('training').value.trim();
+    if (training) {
+      out += `*📋 Training Requirements*\n`;
+      training.split('\n').forEach(t => {
+        t = formatText(t);
+        if (t) out += `   – ${t}\n`;
+      });
+      out += '\n';
+    }
+
+    const notes = document.getElementById('notes').value.trim() || 'Rest All Ready For Tomorrow';
+    out += `*📝 Note:* ${notes}\n`;
+  }
+
+  /* DISPLAY */
+  document.getElementById('telegramPreview').innerText = out;
+  document.getElementById('previewDot').className = 'preview-dot live';
+
+  /* SAVE */
+  if (records.length) autoSave(records);
+
+  showToast('Report generated ✓');
 }
 
-});
-
-out+="\n**Backup Bus**\n";
-
-if(available.length){
-out+="Available: "+available.join(", ")+"\n";
+/* ─── COPY ─── */
+function copyReport() {
+  const txt = document.getElementById('telegramPreview').innerText;
+  if (!txt || txt.includes('Generate a report')) {
+    showToast('Generate report first', true);
+    return;
+  }
+  navigator.clipboard.writeText(txt).then(() => showToast('Copied to clipboard ✓'));
 }
 
-if(issues.length){
-
-out+="Issues:\n";
-
-issues.forEach(i=>{
-out+="– "+i+"\n";
-});
-
+/* ─── CLEAR ─── */
+function clearAll() {
+  [...MAIN_ROUTES, ...SECONDARY_ROUTES].forEach(r => {
+    const el = document.getElementById(routeId(r));
+    if (el) el.value = '';
+  });
+  ['notes','training','backup'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('telegramPreview').innerHTML = '<div class="empty-preview">Generate a report to see preview</div>';
+  document.getElementById('previewDot').className = 'preview-dot';
+  showToast('Cleared');
 }
 
+/* ─── TOAST ─── */
+function showToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (error ? ' error' : '');
+  setTimeout(() => { t.className = 'toast'; }, 2500);
 }
 
+/* ─── CUSTOM DAYS ─── */
+function toggleCustomDays() {
+  const type = document.getElementById('reportType').value;
+  document.getElementById('customDays').style.display = type === 'custom' ? 'block' : 'none';
 }
 
-document.getElementById("telegramPreview").innerText=out.trim();
-
-/* SAVE TO API */
-
-saveToDatabase(records);
-
+/* ─── JSONBIN SAVE ─── */
+async function autoSave(records) {
+  try {
+    const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    const data = await res.json();
+    let db     = (data.record && data.record.reports) ? data.record.reports : [];
+    db         = db.concat(records);
+    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body:    JSON.stringify({ reports: db })
+    });
+  } catch (e) {
+    console.warn('Save failed:', e);
+  }
 }
 
-/* JSONBIN SAVE */
-
-async function saveToDatabase(records){
-
-if(!records.length) return;
-
-const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
-headers:{ "X-Master-Key":API_KEY }
-});
-
-const data=await res.json();
-
-let db=data.record.reports || [];
-
-db=db.concat(records);
-
-await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
-method:"PUT",
-headers:{
-"Content-Type":"application/json",
-"X-Master-Key":API_KEY
-},
-body:JSON.stringify({reports:db})
-});
-
+/* ─── FETCH DATA ─── */
+async function fetchData() {
+  const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+    headers: { 'X-Master-Key': API_KEY }
+  });
+  const data = await res.json();
+  return (data.record && data.record.reports) ? data.record.reports : [];
 }
 
-/* FETCH DATA */
-
-async function fetchDatabase(){
-
-const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
-headers:{ "X-Master-Key":API_KEY }
-});
-
-const data=await res.json();
-
-return data.record.reports || [];
-
+/* ─── CSV DOWNLOAD ─── */
+function downloadCSV(records, name) {
+  let csv = 'date,mode,route,bus,issue\n';
+  records.forEach(r => {
+    csv += `${r.date},${r.mode},"${r.route}","${r.bus}","${r.issue}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = name;
+  a.click();
+  showToast('CSV downloaded ✓');
 }
 
-/* CSV EXPORT */
+/* ─── EXPORT ─── */
+async function exportReport() {
+  const type = document.getElementById('reportType').value;
+  let data;
+  try {
+    data = await fetchData();
+  } catch (e) {
+    showToast('Failed to fetch data', true);
+    return;
+  }
 
-function downloadCSV(records,name){
+  const now = new Date();
+  let filtered, filename;
 
-let csv="date,mode,route,bus,issue\n";
+  if (type === 'month') {
+    const m = now.getMonth(), y = now.getFullYear();
+    filtered = data.filter(r => { const d = new Date(r.date); return d.getMonth() === m && d.getFullYear() === y; });
+    filename = `monthly_${now.toISOString().slice(0,7)}.csv`;
+  } else if (type === 'year') {
+    const y = now.getFullYear();
+    filtered = data.filter(r => new Date(r.date).getFullYear() === y);
+    filename = `yearly_${y}.csv`;
+  } else {
+    let days = type === 'custom'
+      ? parseInt(document.getElementById('customDays').value) || 1
+      : parseInt(type);
+    const start = new Date(); start.setDate(now.getDate() - days);
+    filtered = data.filter(r => new Date(r.date) >= start);
+    filename = `report_${days}days.csv`;
+  }
 
-records.forEach(r=>{
-csv+=`${r.date},${r.mode},${r.route},${r.bus},${r.issue}\n`;
-});
-
-const blob=new Blob([csv],{type:"text/csv"});
-
-const url=URL.createObjectURL(blob);
-
-const a=document.createElement("a");
-
-a.href=url;
-a.download=name;
-a.click();
-
+  if (!filtered.length) { showToast('No data found for selected range', true); return; }
+  downloadCSV(filtered, filename);
 }
-
-/* EXPORT */
-
-async function exportReport(){
-
-const days=parseInt(document.getElementById("reportType").value);
-
-const data=await fetchDatabase();
-
-const now=new Date();
-const start=new Date();
-
-start.setDate(now.getDate()-days);
-
-const filtered=data.filter(r=>new Date(r.date)>=start);
-
-downloadCSV(filtered,"hub_report.csv");
-
-}
-
-/* COPY */
-
-function copyReport(){
-
-const txt=document.getElementById("telegramPreview").innerText;
-
-if(!txt){
-alert("Generate report first");
-return;
-}
-
-navigator.clipboard.writeText(txt);
-
-alert("Report copied");
-
-}
-
-setMode("morning");
 
 </script>
-
 </body>
 </html>
