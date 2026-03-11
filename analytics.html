@@ -454,8 +454,8 @@ canvas { display: block; }
 <div class="toast" id="toast"></div>
 
 <script>
-const BIN_ID  = "69b1458ab7ec241ddc5c77b5";
-const API_KEY = "$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
+const BIN_ID  = "69b1b250c3097a1dd518d2c5";
+const API_KEY = "$2a$10$tTO9TaKMwAvb/32qO/lWVepk4vpPKCpFKuQj02fPoyj1hjBUBB7uq";
 
 const COLORS = ['#f59e0b','#6366f1','#10b981','#38bdf8','#f472b6','#fb923c','#a78bfa','#34d399','#60a5fa','#fbbf24','#818cf8','#4ade80','#22d3ee'];
 
@@ -505,23 +505,24 @@ async function loadData() {
 
     // JSONBin returns { record: { reports: [...] } }
     // Handle all possible JSONBin response structures
-    if (json.record && json.record.reports) {
-      // Structure: { record: { reports: [...] } }
+    if (json.record && json.record.reports && json.record.reports.length) {
       allData = json.record.reports;
-    } else if (json.reports) {
-      // Structure: { reports: [...] }
+    } else if (json.reports && json.reports.length) {
       allData = json.reports;
-    } else if (Array.isArray(json.record)) {
-      // Structure: { record: [...] }
+    } else if (json.record && Array.isArray(json.record)) {
       allData = json.record;
     } else if (Array.isArray(json)) {
-      // Structure: [...]
       allData = json;
     } else {
-      allData = [];
+      // Last resort — try to find any array in response
+      const found = Object.values(json).find(v => Array.isArray(v) && v.length > 0);
+      allData = found || [];
     }
+    debug('allData length after parse: ' + allData.length);
 
     debug('Records found: ' + allData.length);
+    debug('json.reports type: ' + typeof json.reports + ' isArray: ' + Array.isArray(json.reports));
+    if (json.reports) debug('json.reports length: ' + json.reports.length);
 
     if (!allData.length) {
       showToast('No data found in bin', true);
