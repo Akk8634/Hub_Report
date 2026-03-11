@@ -130,9 +130,9 @@ return line.trim();
 
 }
 
-/* MAIN ROUTES */
+/* MORNING ROUTES */
 
-const MAIN_ROUTES=[
+const MORNING_MAIN=[
 'T-LP',
 'Chembur-BKC',
 'T-BKC',
@@ -148,23 +148,45 @@ const MAIN_ROUTES=[
 'Chembur-SOBO'
 ];
 
-/* SECONDARY ROUTES */
-
-const SECONDARY_ROUTES=[
+const MORNING_SECONDARY=[
 'BKC - Ghatkopar',
 'Mulund-SOBO',
 'MJW-LP',
 'MJW-BKC'
 ];
 
-/* NUMBER ICONS */
+/* EVENING ROUTES */
+
+const EVENING_MAIN=[
+'LP - Thane',
+'Sobo - Thane',
+'BKC - Thane',
+'LP - Mulund',
+'Worli - Chembur',
+'Worli-BKC',
+'Santacruz - Thane',
+'Worli Metro-LP',
+'BKC-Metro',
+'BKC - Chembur',
+'NM - Thane',
+'SOBO - Chembur'
+];
+
+const EVENING_SECONDARY=[
+'Ghatkopar - BKC',
+'SOBO - Mulund',
+'BKC - Mulund',
+'LP - MJW',
+'BKC - MJW',
+'BKC - Mulund'
+];
 
 const nums=[
 "①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩",
 "⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"
 ];
 
-/* MODE */
+/* MODE SWITCH */
 
 function setMode(m){
 
@@ -183,9 +205,12 @@ function renderRoutes(){
 
 let html="";
 
-/* MAIN ROUTES */
+let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
+let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
 
-MAIN_ROUTES.forEach(route=>{
+/* MAIN */
+
+mainRoutes.forEach(route=>{
 
 html+=`
 <div class="section">
@@ -196,9 +221,9 @@ html+=`
 
 });
 
-/* SECONDARY ROUTES */
+/* SECONDARY */
 
-SECONDARY_ROUTES.forEach(route=>{
+secRoutes.forEach(route=>{
 
 html+=`
 <div class="section">
@@ -217,14 +242,17 @@ document.getElementById("routes").innerHTML=html;
 
 function generate(){
 
+let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
+let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
+
 let filledMain=[];
 let emptyMain=[];
 let filledSec=[];
 let emptySec=[];
 
-/* MAIN ROUTES */
+/* MAIN */
 
-MAIN_ROUTES.forEach(route=>{
+mainRoutes.forEach(route=>{
 
 const val=document.getElementById(route).value.trim();
 
@@ -236,27 +264,22 @@ val.split('\n')
 .map(v=>v.trim())
 .filter(Boolean)
 .forEach(v=>{
-
 let clean=v.replace(/^[-•–]\s*/,'');
 clean=formatText(clean);
-
 obj.data.push(clean);
-
 });
 
 filledMain.push(obj);
 
 }else{
-
 emptyMain.push(obj);
-
 }
 
 });
 
-/* SECONDARY ROUTES */
+/* SECONDARY */
 
-SECONDARY_ROUTES.forEach(route=>{
+secRoutes.forEach(route=>{
 
 const val=document.getElementById(route).value.trim();
 
@@ -268,62 +291,53 @@ val.split('\n')
 .map(v=>v.trim())
 .filter(Boolean)
 .forEach(v=>{
-
 let clean=v.replace(/^[-•–]\s*/,'');
 clean=formatText(clean);
-
 obj.data.push(clean);
-
 });
 
 filledSec.push(obj);
 
 }else{
-
 emptySec.push(obj);
-
 }
 
 });
 
-/* COMBINE */
-
 let out="✪ Central Hub Update\n\n";
 
-let mainRoutes=[...filledMain,...emptyMain];
+/* MAIN OUTPUT */
 
-mainRoutes.forEach((r,i)=>{
+let main=[...filledMain,...emptyMain];
+
+main.forEach((r,i)=>{
 
 let num=nums[i] || (i+1)+".";
 
 out+=num+" "+r.name+"\n";
 
 if(r.data.length){
-
 r.data.forEach(d=>{
 out+="– "+d+"\n";
 });
-
 }
 
 out+="\n";
 
 });
 
-/* SECONDARY */
+/* SECONDARY OUTPUT */
 
-let secRoutes=[...filledSec,...emptySec];
+let sec=[...filledSec,...emptySec];
 
-secRoutes.forEach(r=>{
+sec.forEach(r=>{
 
 out+="▪️ "+r.name+"\n";
 
 if(r.data.length){
-
 r.data.forEach(d=>{
 out+="– "+d+"\n";
 });
-
 }
 
 out+="\n";
@@ -382,13 +396,9 @@ l=l.replace(/^[-•]\s*/,'');
 const issue=/issue|tyre|driver|mechanical|ac|pending/i.test(l);
 
 if(issue){
-
 issues.push(formatText(l));
-
 }else{
-
 available.push(formatText(l));
-
 }
 
 });
@@ -411,8 +421,6 @@ out+="- "+i+"\n";
 
 }
 
-/* PREVIEW */
-
 document.getElementById("telegramPreview").innerText=out.trim();
 
 }
@@ -433,8 +441,6 @@ navigator.clipboard.writeText(txt);
 alert("Report copied");
 
 }
-
-/* INITIAL LOAD */
 
 setMode("morning");
 
