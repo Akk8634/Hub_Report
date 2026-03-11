@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Hub Operations Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#eef2ff;
+margin:0;
+padding:20px;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.nav button{
+padding:8px 18px;
+border:none;
+border-radius:20px;
+background:#4f46e5;
+color:white;
+cursor:pointer;
+margin-left:8px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+margin-bottom:25px;
+}
+
+.card{
+background:white;
+padding:18px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+.card h3{
+margin:0;
+font-size:16px;
+}
+
+.metric{
+font-size:28px;
+font-weight:bold;
+margin-top:8px;
+}
+
+.chartBox{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-bottom:25px;
+box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+.filter{
+margin-bottom:20px;
+}
+
+select{
+padding:8px;
+border-radius:6px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+
+<h2>Hub Operations Dashboard</h2>
+
+<div class="nav">
+
+<button onclick="location.href='hub-report.html'">
+Hub Report
+</button>
+
+<button onclick="loadData()">
+Refresh
+</button>
+
+</div>
+
+</div>
+
+
+<div class="filter">
+
+<select id="range" onchange="loadData()">
+<option value="7">Last 7 Days</option>
+<option value="30">Last 30 Days</option>
+<option value="90">Last 90 Days</option>
+<option value="365">Last 1 Year</option>
+</select>
+
+</div>
+
+
+<div class="cards">
+
+<div class="card">
+<h3>Total Issues</h3>
+<div class="metric" id="totalIssues">0</div>
+</div>
+
+<div class="card">
+<h3>Driver Shortage</h3>
+<div class="metric" id="driverIssues">0</div>
+</div>
+
+<div class="card">
+<h3>Backup Bus Usage</h3>
+<div class="metric" id="backupUsage">0</div>
+</div>
+
+<div class="card">
+<h3>Reliability Score</h3>
+<div class="metric" id="reliability">0%</div>
+</div>
+
+</div>
+
+
+<div class="chartBox">
+
+<h3>Top Problem Routes</h3>
+
+<canvas id="routeChart"></canvas>
+
+</div>
+
+
+<div class="chartBox">
+
+<h3>Issue Type Distribution</h3>
+
+<canvas id="issueChart"></canvas>
+
+</div>
+
+
+<div class="chartBox">
+
+<h3>Driver Shortage Trend</h3>
+
+<canvas id="driverChart"></canvas>
+
+</div>
+
+
+<div class="chartBox">
+
+<h3>Backup Bus Usage</h3>
+
+<canvas id="backupChart"></canvas>
+
+</div>
+
+</div>
+
+
+<script>
+
+const BIN_ID="69b1458ab7ec241ddc5c77b5";
+const API_KEY="$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
+
+
+async function fetchData(){
+
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+headers:{ "X-Master-Key":API_KEY }
+});
+
+const data=await res.json();
+
+return data.record.reports || [];
+
+}
+
+
+async function loadData(){
+
+const range=parseInt(document.getElementById("range").value);
+
+const raw=await fetchData();
+
+const now=new Date();
+
+const start=new Date();
+
+start.setDate(now.getDate()-range);
+
+const data=raw.filter(r=>new Date(r.date)>=start);
+
+analyze(data);
+
+}
+
+
+function analyze(data){
+
+document.getElementById("totalIssues").innerText=data.length;
+
+let driver=0;
+let backup=0;
+
+const routeMap={};
+const issueMap={};
+const driverTrend={};
+
+data.forEach(r=>{
+
+const issue=r.issue.toLowerCase();
+
+if(issue.includes("driver")) driver++;
+
+if(issue.includes("backup")) backup++;
+
+routeMap[r.route]=(routeMap[r.route]||0)+1;
+
+issueMap[issue]=(issueMap[issue]||0)+1;
+
+const d=r.date;
+
+driverTrend[d]=(driverTrend[d]||0)+(issue.includes("driver")?1:0);
+
+});
+
+
+document.getElementById("driverIssues").innerText=driver;
+
+document.getElementById("backupUsage").innerText=backup;
+
+
+let reliability=100-(data.length*0.5);
+
+if(reliability<0) reliability=0;
+
+document.getElementById("reliability").innerText=Math.round(reliability)+"%";
+
+
+drawRouteChart(routeMap);
+
+drawIssueChart(issueMap);
+
+drawDriverChart(driverTrend);
+
+drawBackupChart(backup);
+
+}
+
+
+/* ROUTE CHART */
+
+function drawRouteChart(map){
+
+new Chart(document.getElementById("routeChart"),{
+type:"bar",
+data:{
+labels:Object.keys(map),
+datasets:[{
+label:"Issues",
+data:Object.values(map)
+}]
+}
+});
+
+}
+
+
+/* ISSUE TYPE CHART */
+
+function drawIssueChart(map){
+
+new Chart(document.getElementById("issueChart"),{
+type:"pie",
+data:{
+labels:Object.keys(map),
+datasets:[{
+data:Object.values(map)
+}]
+}
+});
+
+}
+
+
+/* DRIVER TREND */
+
+function drawDriverChart(map){
+
+new Chart(document.getElementById("driverChart"),{
+type:"line",
+data:{
+labels:Object.keys(map),
+datasets:[{
+label:"Driver Shortage",
+data:Object.values(map),
+fill:false
+}]
+}
+});
+
+}
+
+
+/* BACKUP CHART */
+
+function drawBackupChart(value){
+
+new Chart(document.getElementById("backupChart"),{
+type:"doughnut",
+data:{
+labels:["Backup Usage","Normal"],
+datasets:[{
+data:[value,100-value]
+}]
+}
+});
+
+}
+
+
+loadData();
+
+</script>
+
+</body>
+</html>
