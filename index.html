@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Central Hub Report Builder</title>
 
 <style>
-
 body{
 font-family:Segoe UI;
 background:#eef2ff;
 padding:20px;
 }
-
 .container{
 max-width:1200px;
 margin:auto;
@@ -22,18 +18,13 @@ background:#fff;
 padding:25px;
 border-radius:12px;
 }
-
-.section{
-margin-bottom:10px;
-}
-
+.section{margin-bottom:10px}
 textarea{
 width:100%;
 min-height:60px;
 padding:8px;
 font-family:Courier New;
 }
-
 button{
 padding:10px 24px;
 background:#4f46e5;
@@ -43,14 +34,8 @@ border-radius:20px;
 cursor:pointer;
 margin:5px;
 }
-
-.copy{
-background:#16a34a;
-}
-
-.mode{
-margin-bottom:12px;
-}
+.copy{background:#16a34a}
+.mode{margin-bottom:12px}
 
 #previewBox{
 margin-top:25px;
@@ -67,9 +52,7 @@ white-space:pre-wrap;
 font-family:Segoe UI;
 box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
-
 </style>
-
 </head>
 
 <body>
@@ -107,6 +90,17 @@ Mode:
 
 <button onclick="generate()">Generate Report</button>
 <button class="copy" onclick="copyReport()">Copy</button>
+
+<br><br>
+
+<button onclick="exportDays(1)">1 Day CSV</button>
+<button onclick="exportDays(3)">3 Day CSV</button>
+<button onclick="exportDays(7)">7 Day CSV</button>
+<button onclick="exportMonth()">Monthly CSV</button>
+<button onclick="exportYear()">Yearly CSV</button>
+
+<input id="daysInput" placeholder="Custom days">
+<button onclick="customDays()">Export</button>
 
 <div id="previewBox">
 <div id="telegramPreview"></div>
@@ -170,25 +164,21 @@ function renderRoutes(){
 
 let html="";
 
-let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
-let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
+let mainRoutes=(mode==="morning")?MORNING_MAIN:EVENING_MAIN;
+let secRoutes=(mode==="morning")?MORNING_SECONDARY:EVENING_SECONDARY;
 
 mainRoutes.forEach(route=>{
-html+=`
-<div class="section">
+html+=`<div class="section">
 <h3><b>${route}</b></h3>
 <textarea id="${route}"></textarea>
-</div>
-`;
+</div>`;
 });
 
 secRoutes.forEach(route=>{
-html+=`
-<div class="section">
+html+=`<div class="section">
 <h3><b>▪️ ${route}</b></h3>
 <textarea id="${route}"></textarea>
-</div>
-`;
+</div>`;
 });
 
 document.getElementById("routes").innerHTML=html;
@@ -199,163 +189,49 @@ document.getElementById("routes").innerHTML=html;
 
 function generate(){
 
-let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
-let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
+let mainRoutes=(mode==="morning")?MORNING_MAIN:EVENING_MAIN;
+let secRoutes=(mode==="morning")?MORNING_SECONDARY:EVENING_SECONDARY;
 
-let filledMain=[];
-let filledSec=[];
-let emptyMain=[];
-let emptySec=[];
-
-[...mainRoutes,...secRoutes].forEach(route=>{
-
-const val=document.getElementById(route).value.trim();
-
-let obj={
-name:route,
-data:[],
-secondary:secRoutes.includes(route)
-};
-
-if(val){
-
-val.split('\n')
-.map(v=>v.trim())
-.filter(Boolean)
-.forEach(v=>{
-let clean=v.replace(/^[-•–]\s*/,'');
-clean=formatText(clean);
-obj.data.push(clean);
-});
-
-if(obj.secondary){ filledSec.push(obj); }
-else{ filledMain.push(obj); }
-
-}else{
-
-if(obj.secondary){ emptySec.push(obj); }
-else{ emptyMain.push(obj); }
-
-}
-
-});
-
-let routes=[...filledMain,...filledSec,...emptySec,...emptyMain];
+let routes=[...mainRoutes,...secRoutes];
 
 let out="✪ Central Hub Update\n\n";
-let numIndex=0;
-
-routes.forEach(r=>{
-
-if(!r.secondary){
-let num=nums[numIndex] || (numIndex+1)+".";
-out+=num+" **"+r.name+"**\n";
-numIndex++;
-}else{
-out+="▪️ **"+r.name+"**\n";
-}
-
-if(r.data.length){
-r.data.forEach(d=>{
-out+="   – "+d+"\n";
-});
-}
-
-});
-
-/* MORNING EXTRA */
-
-if(mode==="morning"){
-
-let notes=document.getElementById("notes").value.trim();
-if(!notes){ notes="Rest All Ready For Tomorrow"; }
-
-out+="\n**"+formatText(notes)+"**\n\n";
-
-const training=document.getElementById("training").value.trim();
-
-if(training){
-out+="**Route Training Requirements**\n";
-training.split('\n')
-.map(t=>t.trim())
-.filter(Boolean)
-.forEach(t=>{
-out+="   – "+formatText(t)+"\n";
-});
-out+="\n";
-}
-
-}
-
-/* BACKUP BUS */
-
-const backupRaw=document.getElementById("backup").value.trim();
-
-if(backupRaw){
-
-const lines=backupRaw.split('\n').map(l=>l.trim()).filter(Boolean);
-
-let available=[];
-let issues=[];
-
-lines.forEach(l=>{
-
-l=l.replace(/^[-•]\s*/,'');
-
-const issue=/issue|tyre|driver|mechanical|ac|pending|rental|\bna\b|\bn\/a\b/i.test(l);
-
-if(issue){ issues.push(formatText(l)); }
-else{ available.push(formatText(l)); }
-
-});
-
-out+="**Backup Bus**\n";
-
-if(available.length){
-out+="Available: "+available.join(", ")+"\n";
-}
-
-if(issues.length){
-out+="Issues:\n";
-issues.forEach(i=>{
-out+="   – "+i+"\n";
-});
-}
-
-}
-
-document.getElementById("telegramPreview").innerText=out.trim();
-
-/* AUTO SAVE TO JSONBIN */
-
-const records=parseRecords(routes);
-autoSave(records);
-
-}
-
-/* PARSE STRUCTURED DATA */
-
-function parseRecords(routes){
-
-const date=new Date().toISOString().slice(0,10);
 let records=[];
+const date=new Date().toISOString().slice(0,10);
 
 routes.forEach(r=>{
-r.data.forEach(d=>{
-const bus=d.split(" ")[0];
-const issue=d.replace(bus,"").trim();
+
+const val=document.getElementById(r)?.value?.trim();
+
+if(!val) return;
+
+out+=`**${r}**\n`;
+
+val.split("\n").forEach(v=>{
+v=formatText(v);
+out+="– "+v+"\n";
+
+let bus=v.split(" ")[0];
+let issue=v.replace(bus,"").trim();
 
 records.push({
 date:date,
 mode:mode,
-route:r.name,
+route:r,
 bus:bus,
 issue:issue
 });
-});
+
 });
 
-return records;
+out+="\n";
+
+});
+
+document.getElementById("telegramPreview").innerText=out;
+
+/* AUTO SAVE */
+
+autoSave(records);
 
 }
 
@@ -363,15 +239,15 @@ return records;
 
 async function autoSave(records){
 
-const BIN_ID="69b1458ab7ec241ddc5c77b5";
-const API_KEY="$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
+const BIN_ID="YOUR_BIN_ID";
+const API_KEY="YOUR_API_KEY";
 
 const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
 headers:{ "X-Master-Key":API_KEY }
 });
 
 const data=await res.json();
-let db=data.record.reports || [];
+let db=data.record.reports||[];
 
 db=db.concat(records);
 
@@ -381,8 +257,106 @@ headers:{
 "Content-Type":"application/json",
 "X-Master-Key":API_KEY
 },
-body:JSON.stringify({ reports:db })
+body:JSON.stringify({reports:db})
 });
+
+}
+
+/* FETCH DATA */
+
+async function fetchData(){
+
+const BIN_ID="69b1458ab7ec241ddc5c77b5";
+const API_KEY="$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
+
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+headers:{ "X-Master-Key":API_KEY }
+});
+
+const data=await res.json();
+return data.record.reports||[];
+
+}
+
+/* CSV DOWNLOAD */
+
+function downloadCSV(records,name){
+
+let csv="date,mode,route,bus,issue\n";
+
+records.forEach(r=>{
+csv+=`${r.date},${r.mode},${r.route},${r.bus},${r.issue}\n`;
+});
+
+const blob=new Blob([csv],{type:"text/csv"});
+const url=URL.createObjectURL(blob);
+
+const a=document.createElement("a");
+a.href=url;
+a.download=name;
+a.click();
+
+}
+
+/* DAYS REPORT */
+
+async function exportDays(days){
+
+const data=await fetchData();
+
+const now=new Date();
+const start=new Date();
+start.setDate(now.getDate()-days);
+
+const filtered=data.filter(r=>{
+return new Date(r.date)>=start;
+});
+
+downloadCSV(filtered,days+"_days_report.csv");
+
+}
+
+/* MONTH REPORT */
+
+async function exportMonth(){
+
+const data=await fetchData();
+
+const now=new Date();
+const m=now.getMonth();
+const y=now.getFullYear();
+
+const filtered=data.filter(r=>{
+let d=new Date(r.date);
+return d.getMonth()==m && d.getFullYear()==y;
+});
+
+downloadCSV(filtered,"monthly_report.csv");
+
+}
+
+/* YEAR REPORT */
+
+async function exportYear(){
+
+const data=await fetchData();
+
+const y=new Date().getFullYear();
+
+const filtered=data.filter(r=>{
+return new Date(r.date).getFullYear()==y;
+});
+
+downloadCSV(filtered,"yearly_report.csv");
+
+}
+
+/* CUSTOM DAYS */
+
+function customDays(){
+
+const d=parseInt(document.getElementById("daysInput").value);
+exportDays(d);
 
 }
 
