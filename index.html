@@ -163,7 +163,6 @@ const nums=[
 function setMode(m){
 
 mode=m;
-
 renderRoutes();
 
 document.getElementById("morningExtras").style.display=
@@ -213,18 +212,20 @@ function generate(){
 let mainRoutes = (mode==="morning") ? MORNING_MAIN : EVENING_MAIN;
 let secRoutes = (mode==="morning") ? MORNING_SECONDARY : EVENING_SECONDARY;
 
-let filledMain=[];
-let emptyMain=[];
-let filledSec=[];
-let emptySec=[];
+let filled=[];
+let empty=[];
 
-/* MAIN */
+/* PROCESS ALL ROUTES */
 
-mainRoutes.forEach(route=>{
+[...mainRoutes,...secRoutes].forEach(route=>{
 
 const val=document.getElementById(route).value.trim();
 
-let obj={name:route,data:[]};
+let obj={
+name:route,
+data:[],
+secondary:secRoutes.includes(route)
+};
 
 if(val){
 
@@ -240,75 +241,39 @@ obj.data.push(clean);
 
 });
 
-filledMain.push(obj);
+filled.push(obj);
 
 }else{
-emptyMain.push(obj);
+
+empty.push(obj);
+
 }
 
 });
 
-/* SECONDARY */
-
-secRoutes.forEach(route=>{
-
-const val=document.getElementById(route).value.trim();
-
-let obj={name:route,data:[]};
-
-if(val){
-
-val.split('\n')
-.map(v=>v.trim())
-.filter(Boolean)
-.forEach(v=>{
-
-let clean=v.replace(/^[-•–]\s*/,'');
-clean=formatText(clean);
-
-obj.data.push(clean);
-
-});
-
-filledSec.push(obj);
-
-}else{
-emptySec.push(obj);
-}
-
-});
-
-/* HEADER */
+let routes=[...filled,...empty];
 
 let out="✪ Central Hub Update\n\n";
 
-/* MAIN ROUTES */
+let numIndex=0;
 
-let main=[...filledMain,...emptyMain];
+/* PRINT ROUTES */
 
-main.forEach((r,i)=>{
+routes.forEach(r=>{
 
-let num=nums[i] || (i+1)+".";
+if(!r.secondary){
+
+let num=nums[numIndex] || (numIndex+1)+".";
 
 out+=num+" **"+r.name+"**\n";
 
-if(r.data.length){
+numIndex++;
 
-r.data.forEach(d=>{
-out+="   – "+d+"\n";
-});
-
-}
-
-});
-
-/* SECONDARY ROUTES */
-
-let sec=[...filledSec,...emptySec];
-
-sec.forEach(r=>{
+}else{
 
 out+="▪️ **"+r.name+"**\n";
+
+}
 
 if(r.data.length){
 
@@ -368,7 +333,9 @@ lines.forEach(l=>{
 
 l=l.replace(/^[-•]\s*/,'');
 
-const issue=/issue|tyre|driver|mechanical|ac|pending|rental/i.test(l);
+/* ISSUE DETECTION */
+
+const issue=/issue|tyre|driver|mechanical|ac|pending|rental|\bna\b|\bn\/a\b/i.test(l);
 
 if(issue){
 issues.push(formatText(l));
