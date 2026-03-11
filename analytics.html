@@ -1,352 +1,817 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Hub Operations Dashboard</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<title>Analytics Dashboard – Central Hub</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
-body{
-font-family:Segoe UI;
-background:#eef2ff;
-margin:0;
-padding:20px;
+:root {
+  --bg:     #0f1117;
+  --card:   #1a1d27;
+  --card2:  #20243a;
+  --border: #2e3250;
+  --text:   #e8eaf6;
+  --muted:  #7c82a8;
+  --amber:  #f59e0b;
+  --indigo: #6366f1;
+  --green:  #10b981;
+  --red:    #ef4444;
+  --blue:   #38bdf8;
+  --radius: 10px;
 }
 
-.container{
-max-width:1200px;
-margin:auto;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
 }
 
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
+.wrap { max-width: 1200px; margin: auto; display: flex; flex-direction: column; gap: 18px; }
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
-.nav button{
-padding:8px 18px;
-border:none;
-border-radius:20px;
-background:#4f46e5;
-color:white;
-cursor:pointer;
-margin-left:8px;
+.header h1 { font-size: 1.35rem; font-weight: 800; color: var(--amber); }
+.header h1 span { color: var(--text); }
+
+.back-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 18px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  color: var(--muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.back-btn:hover { color: var(--text); border-color: var(--amber); }
+
+/* FILTER BAR */
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  align-items: center;
 }
 
-.cards{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
-margin-bottom:25px;
+.filters label { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-right: 4px; }
+
+.filters select, .filters input {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem;
+  padding: 7px 12px;
+  outline: none;
+  cursor: pointer;
+}
+.filters select:focus, .filters input:focus { border-color: var(--amber); }
+
+.filter-group { display: flex; align-items: center; gap: 6px; }
+
+.btn-load {
+  padding: 9px 20px;
+  background: var(--amber);
+  color: #000;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-left: auto;
+}
+.btn-load:hover { opacity: 0.85; }
+
+/* STAT CARDS */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
 }
 
-.card{
-background:white;
-padding:18px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.15);
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
 }
 
-.card h3{
-margin:0;
-font-size:16px;
+.stat-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 8px;
 }
 
-.metric{
-font-size:28px;
-font-weight:bold;
-margin-top:8px;
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
-.chartBox{
-background:white;
-padding:20px;
-border-radius:10px;
-margin-bottom:25px;
-box-shadow:0 2px 6px rgba(0,0,0,0.15);
+.stat-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 6px;
 }
 
-.filter{
-margin-bottom:20px;
+.c-amber  { color: var(--amber); }
+.c-green  { color: var(--green); }
+.c-indigo { color: var(--indigo); }
+.c-blue   { color: var(--blue); }
+.c-red    { color: var(--red); }
+
+/* TWO COL */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
-select{
-padding:8px;
-border-radius:6px;
+/* PANEL */
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--card2);
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.panel-body { padding: 16px; }
+
+/* BAR CHART */
+.bar-chart { display: flex; flex-direction: column; gap: 9px; }
+
+.bar-row { display: flex; align-items: center; gap: 10px; }
+
+.bar-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--card2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(.22,1,.36,1);
+}
+
+.bar-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 28px;
+  text-align: right;
+}
+
+/* TABLE */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #1e2135;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-morning { background: rgba(245,158,11,0.15); color: var(--amber); }
+.badge-evening { background: rgba(99,102,241,0.15); color: var(--indigo); }
+
+/* DONUT CHART */
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.donut-svg { flex-shrink: 0; }
+
+.donut-legend { display: flex; flex-direction: column; gap: 8px; }
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-label { color: var(--muted); }
+.legend-val   { color: var(--text); font-weight: 700; margin-left: auto; padding-left: 12px; }
+
+/* TREND LINE */
+canvas { display: block; }
+
+/* LOADING / EMPTY */
+.state-msg {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.state-msg .ico { font-size: 2rem; margin-bottom: 8px; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--green);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 999;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.err  { background: var(--red); }
+
+/* FULL WIDTH PANEL */
+.full-panel { grid-column: 1 / -1; }
+
+@media (max-width: 900px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .two-col   { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 500px) {
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
 </style>
-
 </head>
-
 <body>
 
-<div class="container">
+<div class="wrap">
 
-<div class="header">
+  <!-- HEADER -->
+  <div class="header">
+    <h1>📊 Analytics <span>Dashboard</span></h1>
+    <a class="back-btn" href="report-builder.html">← Back to Builder</a>
+  </div>
 
-<h2>Hub Operations Dashboard</h2>
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="filter-group">
+      <label>Range</label>
+      <select id="rangeFilter" onchange="toggleCustom()">
+        <option value="7">Last 7 Days</option>
+        <option value="30" selected>Last 30 Days</option>
+        <option value="90">Last 90 Days</option>
+        <option value="month">This Month</option>
+        <option value="year">This Year</option>
+        <option value="all">All Time</option>
+        <option value="custom">Custom Days</option>
+      </select>
+      <input id="customDays" type="number" min="1" placeholder="Days" style="display:none; width:80px;">
+    </div>
+    <div class="filter-group">
+      <label>Mode</label>
+      <select id="modeFilter">
+        <option value="all">All</option>
+        <option value="morning">Morning</option>
+        <option value="evening">Evening</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Route</label>
+      <select id="routeFilter">
+        <option value="all">All Routes</option>
+      </select>
+    </div>
+    <button class="btn-load" onclick="loadData()">🔄 Load Data</button>
+  </div>
 
-<div class="nav">
+  <!-- STAT CARDS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Reports</div>
+      <div class="stat-value c-amber" id="s-total">—</div>
+      <div class="stat-sub" id="s-total-sub">entries in range</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Unique Routes</div>
+      <div class="stat-value c-blue" id="s-routes">—</div>
+      <div class="stat-sub">routes with activity</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Morning / Evening</div>
+      <div class="stat-value c-indigo" id="s-split">—</div>
+      <div class="stat-sub">morning vs evening</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Most Active Route</div>
+      <div class="stat-value c-green" id="s-top" style="font-size:1.1rem; padding-top:6px;">—</div>
+      <div class="stat-sub" id="s-top-sub">issues recorded</div>
+    </div>
+  </div>
 
-<button onclick="location.href='index.html'">Hub Report</button>
+  <!-- ROW 1 -->
+  <div class="two-col">
 
-<button onclick="loadData()">
-Refresh
-</button>
+    <!-- ISSUES BY ROUTE -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Issues by Route</span>
+        <span id="route-count" style="font-size:0.7rem; color:var(--muted);"></span>
+      </div>
+      <div class="panel-body">
+        <div class="bar-chart" id="routeChart">
+          <div class="state-msg"><div class="ico">📍</div>Load data to see chart</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MORNING vs EVENING DONUT -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Morning vs Evening Split</span>
+      </div>
+      <div class="panel-body" id="donutWrap">
+        <div class="state-msg"><div class="ico">🌗</div>Load data to see split</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="two-col">
+
+    <!-- DAILY TREND -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Daily Issue Trend</span>
+      </div>
+      <div class="panel-body" style="padding:12px 16px;">
+        <canvas id="trendCanvas" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- TOP BUSES -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Top Reported Buses</span>
+      </div>
+      <div class="panel-body">
+        <div class="bar-chart" id="busChart">
+          <div class="state-msg"><div class="ico">🚌</div>Load data to see buses</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RECENT ENTRIES TABLE -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Recent Entries</span>
+      <span id="table-count" style="font-size:0.7rem; color:var(--muted);"></span>
+    </div>
+    <div style="overflow-x:auto;" id="tableWrap">
+      <div class="state-msg"><div class="ico">📋</div>Load data to see entries</div>
+    </div>
+  </div>
 
 </div>
 
-</div>
-
-
-<div class="filter">
-
-<select id="range" onchange="loadData()">
-<option value="7">Last 7 Days</option>
-<option value="30">Last 30 Days</option>
-<option value="90">Last 90 Days</option>
-<option value="365">Last 1 Year</option>
-</select>
-
-</div>
-
-
-<div class="cards">
-
-<div class="card">
-<h3>Total Issues</h3>
-<div class="metric" id="totalIssues">0</div>
-</div>
-
-<div class="card">
-<h3>Driver Shortage</h3>
-<div class="metric" id="driverIssues">0</div>
-</div>
-
-<div class="card">
-<h3>Backup Bus Usage</h3>
-<div class="metric" id="backupUsage">0</div>
-</div>
-
-<div class="card">
-<h3>Reliability Score</h3>
-<div class="metric" id="reliability">0%</div>
-</div>
-
-</div>
-
-
-<div class="chartBox">
-
-<h3>Top Problem Routes</h3>
-
-<canvas id="routeChart"></canvas>
-
-</div>
-
-
-<div class="chartBox">
-
-<h3>Issue Type Distribution</h3>
-
-<canvas id="issueChart"></canvas>
-
-</div>
-
-
-<div class="chartBox">
-
-<h3>Driver Shortage Trend</h3>
-
-<canvas id="driverChart"></canvas>
-
-</div>
-
-
-<div class="chartBox">
-
-<h3>Backup Bus Usage</h3>
-
-<canvas id="backupChart"></canvas>
-
-</div>
-
-</div>
-
+<div class="toast" id="toast"></div>
 
 <script>
+const BIN_ID  = "69b1458ab7ec241ddc5c77b5";
+const API_KEY = "$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
 
-const BIN_ID="69b1458ab7ec241ddc5c77b5";
-const API_KEY="$2a$10$BWlXER8xOcWhq9v.h03UvODyEb15T1ca3ejRc6kPcRwkJB1xMNj2.";
+const COLORS = ['#f59e0b','#6366f1','#10b981','#38bdf8','#f472b6','#fb923c','#a78bfa','#34d399','#60a5fa','#fbbf24','#818cf8','#4ade80','#22d3ee'];
 
+let allData = [];
 
-async function fetchData(){
+/* ── INIT ── */
+window.addEventListener('DOMContentLoaded', () => { loadData(); });
 
-const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
-headers:{ "X-Master-Key":API_KEY }
-});
-
-const data=await res.json();
-
-return data.record.reports || [];
-
+function toggleCustom() {
+  document.getElementById('customDays').style.display =
+    document.getElementById('rangeFilter').value === 'custom' ? 'inline-block' : 'none';
 }
 
+/* ── FETCH ── */
+async function loadData() {
+  showToast('Loading…');
+  try {
+    const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    const json = await res.json();
+    allData    = (json.record && json.record.reports) ? json.record.reports : [];
 
-async function loadData(){
+    if (!allData.length) { showToast('No data found', true); return; }
 
-const range=parseInt(document.getElementById("range").value);
-
-const raw=await fetchData();
-
-const now=new Date();
-
-const start=new Date();
-
-start.setDate(now.getDate()-range);
-
-const data=raw.filter(r=>new Date(r.date)>=start);
-
-analyze(data);
-
+    populateRouteFilter();
+    render();
+    showToast(`Loaded ${allData.length} records ✓`);
+  } catch (e) {
+    console.error(e);
+    showToast('Failed to load data', true);
+  }
 }
 
+/* ── FILTER ── */
+function getFiltered() {
+  const range  = document.getElementById('rangeFilter').value;
+  const mode   = document.getElementById('modeFilter').value;
+  const route  = document.getElementById('routeFilter').value;
+  const now    = new Date();
+  let startDate = null;
 
-function analyze(data){
+  if (range === 'custom') {
+    const d = parseInt(document.getElementById('customDays').value) || 7;
+    startDate = new Date(); startDate.setDate(now.getDate() - d);
+  } else if (range === 'month') {
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (range === 'year') {
+    startDate = new Date(now.getFullYear(), 0, 1);
+  } else if (range !== 'all') {
+    startDate = new Date(); startDate.setDate(now.getDate() - parseInt(range));
+  }
 
-document.getElementById("totalIssues").innerText=data.length;
-
-let driver=0;
-let backup=0;
-
-const routeMap={};
-const issueMap={};
-const driverTrend={};
-
-data.forEach(r=>{
-
-const issue=r.issue.toLowerCase();
-
-if(issue.includes("driver")) driver++;
-
-if(issue.includes("backup")) backup++;
-
-routeMap[r.route]=(routeMap[r.route]||0)+1;
-
-issueMap[issue]=(issueMap[issue]||0)+1;
-
-const d=r.date;
-
-driverTrend[d]=(driverTrend[d]||0)+(issue.includes("driver")?1:0);
-
-});
-
-
-document.getElementById("driverIssues").innerText=driver;
-
-document.getElementById("backupUsage").innerText=backup;
-
-
-let reliability=100-(data.length*0.5);
-
-if(reliability<0) reliability=0;
-
-document.getElementById("reliability").innerText=Math.round(reliability)+"%";
-
-
-drawRouteChart(routeMap);
-
-drawIssueChart(issueMap);
-
-drawDriverChart(driverTrend);
-
-drawBackupChart(backup);
-
+  return allData.filter(r => {
+    if (startDate && new Date(r.date) < startDate) return false;
+    if (mode  !== 'all' && r.mode  !== mode)  return false;
+    if (route !== 'all' && r.route !== route) return false;
+    return true;
+  });
 }
 
-
-/* ROUTE CHART */
-
-function drawRouteChart(map){
-
-new Chart(document.getElementById("routeChart"),{
-type:"bar",
-data:{
-labels:Object.keys(map),
-datasets:[{
-label:"Issues",
-data:Object.values(map)
-}]
-}
-});
-
+/* ── POPULATE ROUTE FILTER ── */
+function populateRouteFilter() {
+  const sel    = document.getElementById('routeFilter');
+  const routes = [...new Set(allData.map(r => r.route))].sort();
+  sel.innerHTML = '<option value="all">All Routes</option>';
+  routes.forEach(r => { sel.innerHTML += `<option value="${r}">${r}</option>`; });
 }
 
+/* ── RENDER ALL ── */
+function render() {
+  const data = getFiltered();
 
-/* ISSUE TYPE CHART */
-
-function drawIssueChart(map){
-
-new Chart(document.getElementById("issueChart"),{
-type:"pie",
-data:{
-labels:Object.keys(map),
-datasets:[{
-data:Object.values(map)
-}]
-}
-});
-
+  renderStats(data);
+  renderRouteChart(data);
+  renderDonut(data);
+  renderTrend(data);
+  renderBusChart(data);
+  renderTable(data);
 }
 
+/* ── STATS ── */
+function renderStats(data) {
+  const morning = data.filter(r => r.mode === 'morning').length;
+  const evening = data.filter(r => r.mode === 'evening').length;
 
-/* DRIVER TREND */
+  const routeCounts = {};
+  data.forEach(r => { routeCounts[r.route] = (routeCounts[r.route] || 0) + 1; });
+  const topRoute = Object.entries(routeCounts).sort((a,b) => b[1]-a[1])[0];
 
-function drawDriverChart(map){
-
-new Chart(document.getElementById("driverChart"),{
-type:"line",
-data:{
-labels:Object.keys(map),
-datasets:[{
-label:"Driver Shortage",
-data:Object.values(map),
-fill:false
-}]
-}
-});
-
+  document.getElementById('s-total').textContent     = data.length;
+  document.getElementById('s-routes').textContent    = Object.keys(routeCounts).length;
+  document.getElementById('s-split').textContent     = `${morning}/${evening}`;
+  document.getElementById('s-top').textContent       = topRoute ? topRoute[0] : '—';
+  document.getElementById('s-top-sub').textContent   = topRoute ? `${topRoute[1]} issues recorded` : '';
 }
 
+/* ── ROUTE BAR CHART ── */
+function renderRouteChart(data) {
+  const counts = {};
+  data.forEach(r => { counts[r.route] = (counts[r.route] || 0) + 1; });
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 13);
+  const max    = sorted[0] ? sorted[0][1] : 1;
 
-/* BACKUP CHART */
+  document.getElementById('route-count').textContent = `${sorted.length} routes`;
 
-function drawBackupChart(value){
+  if (!sorted.length) {
+    document.getElementById('routeChart').innerHTML = '<div class="state-msg"><div class="ico">📭</div>No data</div>';
+    return;
+  }
 
-new Chart(document.getElementById("backupChart"),{
-type:"doughnut",
-data:{
-labels:["Backup Usage","Normal"],
-datasets:[{
-data:[value,100-value]
-}]
+  document.getElementById('routeChart').innerHTML = sorted.map(([name, count], i) => `
+    <div class="bar-row">
+      <div class="bar-name" title="${name}">${name}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${(count/max*100).toFixed(1)}%; background:${COLORS[i % COLORS.length]};"></div>
+      </div>
+      <div class="bar-count">${count}</div>
+    </div>`).join('');
 }
-});
 
+/* ── DONUT ── */
+function renderDonut(data) {
+  const morning = data.filter(r => r.mode === 'morning').length;
+  const evening = data.filter(r => r.mode === 'evening').length;
+  const total   = morning + evening || 1;
+  const wrap    = document.getElementById('donutWrap');
+
+  if (!data.length) {
+    wrap.innerHTML = '<div class="state-msg"><div class="ico">🌗</div>No data</div>';
+    return;
+  }
+
+  const mPct = (morning / total * 100).toFixed(1);
+  const ePct = (evening / total * 100).toFixed(1);
+
+  // SVG donut
+  const r = 54, cx = 64, cy = 64, circ = 2 * Math.PI * r;
+  const mSlice = (morning / total) * circ;
+  const eSlice = circ - mSlice;
+
+  wrap.innerHTML = `
+    <div class="donut-wrap">
+      <svg class="donut-svg" width="128" height="128" viewBox="0 0 128 128">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#20243a" stroke-width="16"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+          stroke="#f59e0b" stroke-width="16"
+          stroke-dasharray="${mSlice} ${eSlice}"
+          stroke-dashoffset="${circ * 0.25}"
+          transform="rotate(-90 ${cx} ${cy})"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+          stroke="#6366f1" stroke-width="16"
+          stroke-dasharray="${eSlice} ${mSlice}"
+          stroke-dashoffset="${circ * 0.25 - mSlice}"
+          transform="rotate(-90 ${cx} ${cy})"/>
+        <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="#e8eaf6" font-family="Outfit" font-weight="800" font-size="18">${total}</text>
+        <text x="${cx}" y="${cy + 14}" text-anchor="middle" fill="#7c82a8" font-family="Outfit" font-size="9">total</text>
+      </svg>
+      <div class="donut-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--amber)"></div>
+          <span class="legend-label">Morning</span>
+          <span class="legend-val">${morning} <span style="color:var(--muted);font-weight:400;">(${mPct}%)</span></span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--indigo)"></div>
+          <span class="legend-label">Evening</span>
+          <span class="legend-val">${evening} <span style="color:var(--muted);font-weight:400;">(${ePct}%)</span></span>
+        </div>
+        <div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--green)"></div>
+            <span class="legend-label">Total</span>
+            <span class="legend-val">${total}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
 }
 
+/* ── TREND LINE (canvas) ── */
+function renderTrend(data) {
+  const canvas = document.getElementById('trendCanvas');
+  const ctx    = canvas.getContext('2d');
+  const W      = canvas.parentElement.clientWidth - 32;
+  const H      = 160;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0, 0, W, H);
 
-loadData();
+  // Group by date
+  const byDate = {};
+  data.forEach(r => { byDate[r.date] = (byDate[r.date] || 0) + 1; });
+  const entries = Object.entries(byDate).sort((a,b) => a[0] < b[0] ? -1 : 1).slice(-30);
 
+  if (entries.length < 2) {
+    ctx.fillStyle = '#3d4270';
+    ctx.font = '13px Outfit';
+    ctx.textAlign = 'center';
+    ctx.fillText('Not enough data for trend', W/2, H/2);
+    return;
+  }
+
+  const vals = entries.map(e => e[1]);
+  const maxV = Math.max(...vals) || 1;
+  const minV = Math.min(...vals);
+  const pad  = { t: 16, b: 28, l: 30, r: 10 };
+  const gW   = W - pad.l - pad.r;
+  const gH   = H - pad.t - pad.b;
+
+  const xPos = (i) => pad.l + (i / (entries.length - 1)) * gW;
+  const yPos = (v) => pad.t + (1 - (v - minV) / (maxV - minV || 1)) * gH;
+
+  // Grid lines
+  ctx.strokeStyle = '#1e2135';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + (i / 4) * gH;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+  }
+
+  // Fill gradient
+  const grad = ctx.createLinearGradient(0, pad.t, 0, H - pad.b);
+  grad.addColorStop(0, 'rgba(245,158,11,0.3)');
+  grad.addColorStop(1, 'rgba(245,158,11,0)');
+
+  ctx.beginPath();
+  ctx.moveTo(xPos(0), yPos(vals[0]));
+  for (let i = 1; i < entries.length; i++) ctx.lineTo(xPos(i), yPos(vals[i]));
+  ctx.lineTo(xPos(entries.length-1), H - pad.b);
+  ctx.lineTo(xPos(0), H - pad.b);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(xPos(0), yPos(vals[0]));
+  for (let i = 1; i < entries.length; i++) ctx.lineTo(xPos(i), yPos(vals[i]));
+  ctx.strokeStyle = '#f59e0b';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Dots
+  entries.forEach((e, i) => {
+    ctx.beginPath();
+    ctx.arc(xPos(i), yPos(vals[i]), 3.5, 0, Math.PI*2);
+    ctx.fillStyle = '#f59e0b';
+    ctx.fill();
+  });
+
+  // X labels (every N)
+  ctx.fillStyle = '#7c82a8';
+  ctx.font = '10px JetBrains Mono';
+  ctx.textAlign = 'center';
+  const step = Math.ceil(entries.length / 6);
+  entries.forEach((e, i) => {
+    if (i % step === 0 || i === entries.length - 1) {
+      const d = new Date(e[0]);
+      const lbl = `${d.getDate()}/${d.getMonth()+1}`;
+      ctx.fillText(lbl, xPos(i), H - 6);
+    }
+  });
+
+  // Y labels
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const v = minV + (maxV - minV) * (1 - i/4);
+    ctx.fillText(Math.round(v), pad.l - 4, pad.t + (i/4)*gH + 4);
+  }
+}
+
+/* ── BUS CHART ── */
+function renderBusChart(data) {
+  const counts = {};
+  data.forEach(r => {
+    if (!r.bus || r.bus.trim() === '') return;
+    const key = r.bus.toUpperCase().trim();
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 10);
+  const max    = sorted[0] ? sorted[0][1] : 1;
+
+  if (!sorted.length) {
+    document.getElementById('busChart').innerHTML = '<div class="state-msg"><div class="ico">🚌</div>No bus data</div>';
+    return;
+  }
+
+  document.getElementById('busChart').innerHTML = sorted.map(([bus, count], i) => `
+    <div class="bar-row">
+      <div class="bar-name">${bus}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${(count/max*100).toFixed(1)}%; background:${COLORS[(i+3) % COLORS.length]};"></div>
+      </div>
+      <div class="bar-count">${count}</div>
+    </div>`).join('');
+}
+
+/* ── TABLE ── */
+function renderTable(data) {
+  const recent = [...data].sort((a,b) => b.date < a.date ? -1 : 1).slice(0, 50);
+  document.getElementById('table-count').textContent = `${recent.length} of ${data.length}`;
+
+  if (!recent.length) {
+    document.getElementById('tableWrap').innerHTML = '<div class="state-msg"><div class="ico">📭</div>No entries found</div>';
+    return;
+  }
+
+  document.getElementById('tableWrap').innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Mode</th>
+          <th>Route</th>
+          <th>Bus</th>
+          <th>Issue</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${recent.map(r => `
+        <tr>
+          <td>${r.date}</td>
+          <td><span class="badge badge-${r.mode}">${r.mode}</span></td>
+          <td>${r.route}</td>
+          <td style="color:var(--amber); font-weight:700;">${r.bus || '—'}</td>
+          <td style="color:var(--muted);">${r.issue || '—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+/* ── TOAST ── */
+function showToast(msg, err = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast show' + (err ? ' err' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = 'toast'; }, 2800);
+}
 </script>
-
 </body>
 </html>
