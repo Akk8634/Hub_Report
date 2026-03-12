@@ -340,7 +340,7 @@ canvas { display: block; }
   <div class="filters">
     <div class="filter-group">
       <label>Range</label>
-      <select id="rangeFilter" onchange="toggleCustom()">
+      <select id="rangeFilter" onchange="toggleCustom(); if(allData.length) render();">
         <option value="7">Last 7 Days</option>
         <option value="30" selected>Last 30 Days</option>
         <option value="90">Last 90 Days</option>
@@ -353,7 +353,7 @@ canvas { display: block; }
     </div>
     <div class="filter-group">
       <label>Mode</label>
-      <select id="modeFilter">
+      <select id="modeFilter" onchange="if(allData.length) render();">
         <option value="all">All</option>
         <option value="morning">Morning</option>
         <option value="evening">Evening</option>
@@ -361,7 +361,7 @@ canvas { display: block; }
     </div>
     <div class="filter-group">
       <label>Route</label>
-      <select id="routeFilter">
+      <select id="routeFilter" onchange="if(allData.length) render();">
         <option value="all">All Routes</option>
       </select>
     </div>
