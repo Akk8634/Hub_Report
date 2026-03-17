@@ -540,8 +540,7 @@ body.evening-mode .mode-btn.active-evening {
 
 <script>
 
-const BIN_ID  = "69b1b250c3097a1dd518d2c5";
-const API_KEY = "$2a$10$tTO9TaKMwAvb/32qO/lWVepk4vpPKCpFKuQj02fPoyj1hjBUBB7uq";
+/* ── No API keys here! All DB calls go through /.netlify/functions/db ── */
 
 const ISSUE_KEYWORDS = ['issue','tyre','driver','mechanical','ac','pending','rental','na','n/a','breakdown','flat'];
 
@@ -776,44 +775,28 @@ function toggleCustomDays() {
     document.getElementById('reportType').value === 'custom' ? 'block' : 'none';
 }
 
-/* ── JSONBIN SAVE ── */
+/* ── DB via Netlify Function (no keys exposed to browser) ── */
 async function autoSave(records) {
-  await saveToDatabase(records);
-}
-
-async function saveToDatabase(records) {
-  if (!records.length) return;
   try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-      headers: { 'X-Master-Key': API_KEY }
+    const res = await fetch('/.netlify/functions/db', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ records })
     });
-    if (!res.ok) throw new Error('Fetch failed: ' + res.status);
     const data = await res.json();
-    let db = (data && data.record && Array.isArray(data.record.reports)) ? data.record.reports : [];
-    db = db.concat(records);
-    const putRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': API_KEY,
-        'X-Bin-Versioning': 'false'
-      },
-      body: JSON.stringify({ reports: db })
-    });
-    if (!putRes.ok) throw new Error('Save failed: ' + putRes.status);
-    console.log('Saved ' + records.length + ' record(s) to JSONBin');
-    showToast('Saved ' + records.length + ' record(s) to DB');
+    if (data.success) showToast('Saved ' + data.saved + ' record(s) ✓');
+    else showToast('Save failed', true);
   } catch(e) {
-    console.error('JSONBin save error:', e);
+    console.error('Save error:', e);
     showToast('Save failed: ' + e.message, true);
   }
 }
 
 /* ── FETCH DATA ── */
 async function fetchData() {
-  const res  = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { headers: { 'X-Master-Key': API_KEY } });
+  const res  = await fetch('/.netlify/functions/db');
   const data = await res.json();
-  return (data.record && data.record.reports) ? data.record.reports : [];
+  return data.reports || [];
 }
 
 /* ── CSV ── */
