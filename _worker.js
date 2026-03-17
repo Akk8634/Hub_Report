@@ -13,7 +13,7 @@ export default {
     }
 
     // All other requests → serve static files
-    return fetch(request);
+    return env.ASSETS.fetch(request);
   }
 };
 
