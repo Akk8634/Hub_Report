@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleet Adjustment System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap');
+
+  :root {
+    --bg:        #0d0f12;
+    --bg2:       #13171d;
+    --bg3:       #1a1f28;
+    --border:    #2a3040;
+    --border2:   #3a4558;
+    --accent:    #f0a500;
+    --accent2:   #e06c00;
+    --green:     #2dbe6c;
+    --yellow:    #f0c040;
+    --red:       #e05050;
+    --blue:      #4a9eff;
+    --text:      #d8dde8;
+    --text2:     #8a95a8;
+    --text3:     #5a6478;
+    --mono:      'Share Tech Mono', monospace;
+    --sans:      'Barlow', sans-serif;
+    --cond:      'Barlow Condensed', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--bg2);
+    border-bottom: 2px solid var(--accent);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .header-icon svg { width: 16px; height: 16px; fill: #000; }
+  .header-title {
+    font-family: var(--cond);
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .header-title span { color: var(--accent); }
+  .header-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    gap: 2px;
+  }
+  .tab-btn {
+    font-family: var(--cond);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 22px;
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+    position: relative;
+    top: 1px;
+  }
+  .tab-btn:hover { color: var(--text2); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: #000;
+    font-size: 9px;
+    font-weight: 900;
+    border-radius: 2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* ── LAYOUT ── */
+  .main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── SECTION / CARD ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  .card-header {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg3);
+  }
+  .card-title {
+    font-family: var(--cond);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .card-body { padding: 18px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+  /* ── TEXTAREA ── */
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 12px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text3); }
+
+  /* ── INPUTS ── */
+  input[type="text"], input[type="time"], select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 7px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--text3); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: var(--cond);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 9px 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #ffb820; transform: translateY(-1px); }
+  .btn-secondary { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: transparent; border: 1px solid #e05050; color: #e05050; }
+  .btn-danger:hover { background: #e05050; color: #fff; }
+  .btn-success { background: var(--green); color: #000; }
+  .btn-success:hover { background: #38d47e; }
+  .btn-sm { padding: 5px 12px; font-size: 11px; }
+  .btn-icon { padding: 6px 10px; }
+  .btn-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    font-family: var(--cond);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: var(--bg3); }
+  tbody td {
+    padding: 9px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+  }
+  tbody td.bus-num { color: var(--accent); font-weight: 600; }
+  tbody td.route-cell { color: var(--blue); }
+  tbody td.time-cell { color: var(--green); }
+
+  .row-input {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    width: 100%;
+    padding: 4px 6px;
+    border-radius: 2px;
+    outline: none;
+    transition: background 0.1s;
+  }
+  .row-input:focus { background: var(--bg); }
+
+  /* ── STATUS BADGES ── */
+  .badge {
+    display: inline-block;
+    font-family: var(--cond);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+  .badge-green  { background: rgba(45,190,108,.15); color: var(--green); border: 1px solid rgba(45,190,108,.3); }
+  .badge-yellow { background: rgba(240,192,64,.15); color: var(--yellow); border: 1px solid rgba(240,192,64,.3); }
+  .badge-red    { background: rgba(224,80,80,.15);  color: var(--red);    border: 1px solid rgba(224,80,80,.3); }
+  .badge-blue   { background: rgba(74,158,255,.15); color: var(--blue);   border: 1px solid rgba(74,158,255,.3); }
+  .badge-gray   { background: rgba(90,100,120,.15); color: var(--text3);  border: 1px solid var(--border); }
+
+  /* ── ROUTE MAP EDITOR ── */
+  .route-map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .route-group-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px;
+  }
+  .route-group-title {
+    font-family: var(--cond);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  /* ── OUTPUT SPECIFIC ── */
+  .log-entry {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 7px 12px;
+    border-left: 3px solid var(--border2);
+    margin-bottom: 6px;
+    background: var(--bg3);
+    border-radius: 0 3px 3px 0;
+    color: var(--text2);
+  }
+  .log-entry.perfect { border-left-color: var(--green); }
+  .log-entry.similar { border-left-color: var(--yellow); }
+  .log-entry.fallback { border-left-color: var(--red); }
+  .log-entry.info    { border-left-color: var(--blue); }
+
+  .nonop-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(224,80,80,.1);
+    border: 1px solid rgba(224,80,80,.3);
+    border-radius: 3px;
+    padding: 5px 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--red);
+    margin: 4px;
+  }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .stat-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 20px;
+    min-width: 120px;
+    flex: 1;
+  }
+  .stat-value {
+    font-family: var(--cond);
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-family: var(--cond);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .empty-state-icon { font-size: 32px; margin-bottom: 10px; opacity: .4; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .section-label {
+    font-family: var(--cond);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--accent);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 12px 18px;
+    border-radius: 3px;
+    z-index: 9999;
+    transform: translateX(200%);
+    transition: transform 0.25s ease;
+    max-width: 320px;
+  }
+  #toast.show { transform: translateX(0); }
+
+  .highlight-row td { background: rgba(240,165,0,.05) !important; }
+
+  .output-row-perfect td:first-child { border-left: 3px solid var(--green); }
+  .output-row-similar td:first-child { border-left: 3px solid var(--yellow); }
+  .output-row-fallback td:first-child { border-left: 3px solid var(--red); }
+  .output-row-unassigned td:first-child { border-left: 3px solid var(--text3); }
+
+  /* ── MOBILE RESPONSIVE ── */
+  @media (max-width: 768px) {
+    /* Bus master span-2 col → full width on mobile */
+    .bm-table-col { grid-column: span 1 !important; }
+
+    /* Header */
+    .header {
+      padding: 0 14px;
+      gap: 10px;
+      height: auto;
+      min-height: 50px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    .header-title { font-size: 16px; letter-spacing: 1px; }
+    .header-sub { font-size: 9px; letter-spacing: 1px; margin-left: 0; width: 100%; padding-bottom: 4px; }
+
+    /* Tabs — scrollable row */
+    .tabs {
+      padding: 0 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      flex-wrap: nowrap;
+      gap: 0;
+    }
+    .tab-btn {
+      font-size: 11px;
+      padding: 12px 12px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Main padding */
+    .main { padding: 12px; }
+
+    /* All multi-col grids → single column */
+    .two-col,
+    .three-col,
+    .route-map-grid,
+    div[style*="grid-template-columns:1fr 1fr 1fr"],
+    div[style*="grid-template-columns: 1fr 1fr 1fr"],
+    div[style*="grid-template-columns:1fr 1fr"],
+    div[style*="grid-template-columns: 1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* Output layout — full width */
+    div[style*="grid-column: span 2"],
+    div[style*="grid-column:span 2"] {
+      grid-column: span 1 !important;
+    }
+
+    /* Bus master 3-col grid */
+    div[style*="grid-template-columns:1fr 1fr 1fr"] > div[style*="grid-column:span 2"] {
+      grid-column: span 1 !important;
+    }
+
+    /* Card body */
+    .card-body { padding: 12px; }
+    .card-header { padding: 10px 12px; flex-wrap: wrap; gap: 6px; }
+
+    /* Stats bar — 2 per row on mobile */
+    .stats-bar { gap: 8px; }
+    .stat-box {
+      min-width: calc(50% - 4px);
+      padding: 10px 12px;
+      flex: 1 1 calc(50% - 4px);
+    }
+    .stat-value { font-size: 24px; }
+
+    /* Buttons bar */
+    .btn-bar { gap: 6px; }
+    .btn {
+      padding: 8px 14px;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+    .btn-sm { padding: 5px 10px; font-size: 10px; }
+
+    /* Textarea */
+    textarea { font-size: 12px; }
+
+    /* Table — horizontal scroll always */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { font-size: 12px; min-width: 480px; }
+    thead th { font-size: 10px; padding: 8px 8px; }
+    tbody td { padding: 7px 8px; font-size: 11px; }
+
+    /* Logs */
+    .log-entry { font-size: 11px; padding: 6px 10px; }
+
+    /* JSONBin grid */
+    div[style*="grid-template-columns:1fr 1fr;gap:16px"] {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    /* Toast */
+    #toast {
+      bottom: 12px;
+      right: 12px;
+      left: 12px;
+      max-width: unset;
+    }
+
+    /* Chips / excluded */
+    .nonop-chip { font-size: 11px; padding: 4px 8px; }
+  }
+
+  @media (max-width: 480px) {
+    .header-title { font-size: 14px; }
+    .tab-btn { font-size: 10px; padding: 10px 10px; }
+    .stat-box { min-width: calc(50% - 4px); padding: 8px 10px; }
+    .stat-value { font-size: 20px; }
+    .main { padding: 8px; }
+    .card-body { padding: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-icon">
+    <svg viewBox="0 0 24 24"><path d="M3 17h18v2H3zm0-7h18v2H3zm0-7h18v2H3z"/></svg>
+  </div>
+  <div class="header-title">Fleet <span>Adjustment</span> System</div>
+  <div class="header-sub">v2.0 · TIME-FIRST ALGORITHM</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('rowdata')">
+    01 · Row Data
+    <span class="tab-badge" id="badge-rowdata">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('partial')">
+    02 · Partial Fleet
+    <span class="tab-badge" id="badge-partial">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('busmaster')">
+    03 · Bus Master
+    <span class="tab-badge" id="badge-busmaster">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('output')">
+    04 · Output
+    <span class="tab-badge" id="badge-output">0</span>
+  </button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- ══════════════════════════════════════════
+       TAB 1: ROW DATA
+  ═══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-rowdata">
+    <div class="two-col">
+      <!-- RAW INPUT -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 Raw Input Data</div>
+          </div>
+          <div class="card-body">
+            <div class="section-label">Paste raw row data below</div>
+            <textarea id="rawInput" rows="18" placeholder="Chembur - Bkc
+C317
+ALL
+23/27
+8:30 AM
+C11
+ALL
+18/35
+8:45 AM
+Thane South Mumbai
+C135
+ALL
+28/35
+6:15 AM
+C133
+HN MN
+35/35
+6:55 AM"></textarea>
+            <div class="btn-bar">
+              <button class="btn btn-primary" onclick="cleanData()">⚡ Clean Data</button>
+              <button class="btn btn-secondary" onclick="loadSampleData()">Load Sample</button>
+              <button class="btn btn-danger btn-sm" onclick="clearRaw()">Clear</button>
+            </div>
+          </div>
+        </div>
+        <!-- Cleaning Rules Reference -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📖 Parsing Rules</div>
+          </div>
+          <div class="card-body">
+            <div style="font-family:var(--mono);font-size:11px;line-height:2;color:var(--text2);">
+              <div style="color:var(--accent)">Multi-word city phrase  →  <span style="color:var(--text)">Main Route Header (sticky for all buses below)</span></div>
+              <div style="color:var(--accent)">C317, C11, BV3  →  <span style="color:var(--text)">Bus / Vehicle Number</span></div>
+              <div style="color:var(--accent)">ALL / HN MN / NTH EXP / KLS / VV  →  <span style="color:var(--text)">Route for that bus (never treated as header)</span></div>
+              <div style="color:var(--accent)">23/27, 0/35, 35/35  →  <span style="color:var(--text)">Load — ALWAYS SKIPPED</span></div>
+              <div style="color:var(--accent)">8:30 AM, 7:10 AM  →  <span style="color:var(--text)">Slot (Time) — closes the bus entry</span></div>
+              <div style="margin-top:8px;color:var(--text3)">Auto-normalise: HN MN→HNMN · NTH EXP→NTH · KLS EXP→KLS</div>
+              <div style="margin-top:4px;color:var(--text3)">Smart lookahead: if next line is a bus number, current line = header</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLEAN OUTPUT TABLE -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">✅ Cleaned Row Data</div>
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <button class="btn btn-secondary btn-sm" onclick="exportClean()">Export CSV</button>
+              <button class="btn btn-danger btn-sm" onclick="clearClean()">Clear</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Main Route</th>
+                    <th>Bus</th>
+                    <th>Route</th>
+                    <th>Slot (Time)</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="cleanTable">
+                  <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">🚌</div>Paste raw data and click "Clean Data"</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 2: PARTIAL FLEET
+  ═══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-partial">
+    <div class="two-col">
+
+      <!-- LEFT: RAW PASTE -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 Raw Partial Fleet Data</div>
+          </div>
+          <div class="card-body">
+            <div class="section-label">Same format as Row Data — paste directly</div>
+            <textarea id="partialRawInput" rows="18" placeholder="Thane South Mumbai
+C135
+ALL
+28/35
+6:15 AM
+C213
+ALL
+11/35
+6:45 AM
+C133
+HN MN
+35/35
+6:55 AM
+C227
+NTH EXP
+19/35
+7:00 AM"></textarea>
+            <div class="btn-bar">
+              <button class="btn btn-primary" onclick="parsePartialData()">⚡ Parse Fleet</button>
+              <button class="btn btn-secondary btn-sm" onclick="addPartialRow()">+ Add Row</button>
+              <button class="btn btn-danger btn-sm" onclick="clearPartialRaw()">Clear</button>
+            </div>
+          </div>
+        </div>
+        <!-- Info card -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">ℹ️ Format Guide</div></div>
+          <div class="card-body">
+            <div style="font-family:var(--mono);font-size:11px;line-height:2;color:var(--text2);">
+              <div><span style="color:var(--accent)">Same rules as Row Data</span> — header, bus, route, load (skipped), time</div>
+              <div><span style="color:var(--accent)">Each bus</span> becomes one partial fleet slot</div>
+              <div><span style="color:var(--accent)">Parsed rows</span> are fully editable in the table →</div>
+              <div style="margin-top:6px;color:var(--text3)">You can also manually add rows with "+ Add Row"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: PARSED TABLE -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">✅ Parsed Partial Fleet</div>
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <button class="btn btn-secondary btn-sm" onclick="exportPartial()">Export CSV</button>
+              <button class="btn btn-danger btn-sm" onclick="clearPartial()">Clear All</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Slot (Time)</th>
+                    <th>Route</th>
+                    <th>Assigned Bus</th>
+                    <th>Main Route</th>
+                    <th>Notes</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="partialTable">
+                  <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">⏱</div>Paste raw data and click "Parse Fleet"</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 3: BUS MASTER
+  ═══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-busmaster">
+
+    <!-- Cloud status indicator (hidden inputs keep JS working) -->
+    <input type="hidden" id="jb-apikey" />
+    <input type="hidden" id="jb-binid" />
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;font-family:var(--mono);font-size:11px;color:var(--text3)">
+      <span id="cloud-status" class="badge badge-gray">Not connected</span>
+      <span>☁️ Cloud Sync</span>
+      <button class="btn btn-secondary btn-sm" onclick="pushToCloud()">⬆ Push</button>
+      <button class="btn btn-secondary btn-sm" onclick="pullFromCloud()">⬇ Pull</button>
+    </div>
+
+    <div class="three-col">
+
+      <!-- COL 1: ADD / EDIT FORM -->
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">➕ Add / Edit Bus</div></div>
+          <div class="card-body">
+            <div style="display:grid;gap:10px;margin-bottom:12px">
+              <div>
+                <div class="section-label">Bus Number *</div>
+                <input type="text" id="bm-bus" placeholder="e.g. C223" />
+              </div>
+              <div>
+                <div class="section-label">Main Route Group *</div>
+                <select id="bm-mainroute">
+                  <option value="">Select...</option>
+                </select>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px">
+                  Auto-populated from Row Data
+                </div>
+              </div>
+              <div>
+                <div class="section-label">Known Routes (comma-separated)</div>
+                <input type="text" id="bm-routes" placeholder="e.g. HNMN, ALL, NTH" />
+              </div>
+              <div>
+                <div class="section-label">Driver Base / Depot</div>
+                <input type="text" id="bm-base" placeholder="e.g. Thane, Kurla" />
+              </div>
+            </div>
+            <input type="hidden" id="bm-edit-index" value="-1" />
+            <div class="btn-bar">
+              <button class="btn btn-primary" onclick="saveBusMaster()">💾 Save</button>
+              <button class="btn btn-secondary" onclick="cancelBMEdit()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Excluded Buses -->
+        <div class="card" style="margin-top:0">
+          <div class="card-header">
+            <div class="card-title">🚫 Excluded from Partial Fleet</div>
+            <div style="margin-left:auto">
+              <span style="font-family:var(--mono);font-size:10px;color:var(--text3)" id="excl-count">0 buses</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text2);margin-bottom:10px">
+              Buses listed here are <span style="color:var(--red)">automatically skipped</span> when parsing Partial Fleet data.
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:10px">
+              <input type="text" id="excl-input" placeholder="C999, C888 or one at a time"
+                style="flex:1"
+                onkeydown="if(event.key==='Enter')addExcluded()" />
+              <button class="btn btn-primary btn-sm" onclick="addExcluded()">Add</button>
+            </div>
+            <div id="excl-chips" style="display:flex;flex-wrap:wrap;gap:6px;min-height:32px">
+              <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">None added</span>
+            </div>
+            <div class="btn-bar" style="margin-top:10px">
+              <button class="btn btn-danger btn-sm" onclick="clearExcluded()">Clear All</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Last Adjustment Summary -->
+        <div class="card" style="margin-top:0" id="last-summary-card">
+          <div class="card-header">
+            <div class="card-title">📊 Last Adjustment</div>
+            <div style="margin-left:auto">
+              <span style="font-family:var(--mono);font-size:10px;color:var(--text3)" id="summary-time">—</span>
+            </div>
+          </div>
+          <div class="card-body" id="summary-body">
+            <div class="empty-state" style="padding:16px">
+              <div class="empty-state-icon" style="font-size:22px">⚙️</div>
+              <div>Run adjustment to see summary</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COL 2+3: BUS MASTER TABLE (span 2) -->
+      <div class="bm-table-col" style="grid-column:span 2">
+        <div class="card" style="height:100%">
+          <div class="card-header">
+            <div class="card-title">🚌 Bus Master Registry</div>
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+              <span style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="bm-count">0 buses</span>
+              <button class="btn btn-danger btn-sm" onclick="clearBusMaster()">Clear All</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Bus</th>
+                    <th>Main Route</th>
+                    <th>Known Routes</th>
+                    <th>Depot</th>
+                    <th>Excl.</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="bmTable">
+                  <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📋</div>No buses registered. Add buses or pull from cloud.</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /3-col grid -->
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 4: OUTPUT
+  ═══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-output">
+    <div class="btn-bar" style="margin-bottom:20px">
+      <button class="btn btn-success" onclick="adjustFleet()">▶ Run Adjustment</button>
+      <button class="btn btn-secondary" onclick="exportOutput()">Export Results</button>
+      <button class="btn btn-danger btn-sm" onclick="clearOutput()">Clear Output</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-bar" id="statsBar" style="display:none">
+      <div class="stat-box"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total Slots</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-perfect" style="color:var(--green)">0</div><div class="stat-label">Perfect Match</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-similar" style="color:var(--yellow)">0</div><div class="stat-label">Similar Route</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-fallback" style="color:var(--red)">0</div><div class="stat-label">Fallback</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-unassigned" style="color:var(--text3)">0</div><div class="stat-label">Unassigned</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-nonops" style="color:var(--red)">0</div><div class="stat-label">Non-Ops</div></div>
+    </div>
+
+    <div class="three-col">
+      <!-- ADJUSTED PARTIAL FLEET -->
+      <div style="grid-column: span 2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">✅ Adjusted Partial Fleet</div></div>
+          <div class="card-body" style="padding:0">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Slot</th>
+                    <th>Route</th>
+                    <th>Original Bus</th>
+                    <th>Assigned Bus</th>
+                    <th>Match Type</th>
+                    <th>Reason</th>
+                  </tr>
+                </thead>
+                <tbody id="outputTable">
+                  <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">⚙️</div>Click "Run Adjustment" to generate output</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div>
+        <!-- NON-OPS -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">🚫 Non-Ops Buses</div></div>
+          <div class="card-body">
+            <div id="nonOpsContainer"><div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div></div>
+          </div>
+        </div>
+
+        <!-- UNASSIGNED SLOTS -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚠️ Unassigned Slots</div></div>
+          <div class="card-body">
+            <div id="unassignedContainer"><div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📝 Adjustment Logs</div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--green)">■ Perfect</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--yellow)">■ Similar</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--red)">■ Fallback</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--blue)">■ Info</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="logsContainer"><div class="empty-state"><div class="empty-state-icon">📋</div>Logs will appear after running adjustment</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   DATA STORES
+═══════════════════════════════════════════════════ */
+let rowData    = [];   // [{mainRoute, bus, route, slot}]
+let partialFleet = []; // [{slot, route, bus, mainRoute, notes}]
+let busMaster  = [];   // [{bus, mainRoute, knownRoutes:[], driverBase}]
+let outputResult = null;
+
+/* ═══════════════════════════════════════════════════
+   ROUTE GROUPS & MAPPINGS
+═══════════════════════════════════════════════════ */
+const ROUTE_GROUPS = {
+  'THANE SOBO':   ['HNMN','ALL','NTH','VV','KLS','SOBO','THANE','LBS','MULUND'],
+  'BKC CHEMBUR':  ['ALL','BKC','CHEMBUR','KURLA','CST','ANDHERI','COLABA','DADAR']
+};
+
+// All known main routes
+const MAIN_ROUTE_KEYWORDS = {
+  'THANE SOBO':  ['THANE','SOBO','THANESOBO','SOBOTHANE'],
+  'BKC CHEMBUR': ['BKC','CHEMBUR','BKCCHEMBUR','CHEMBURB KC']
+};
+
+function detectMainRouteGroup(str) {
+  const u = str.toUpperCase().replace(/\s+/g,'');
+  for (const [grp, keys] of Object.entries(MAIN_ROUTE_KEYWORDS)) {
+    for (const k of keys) {
+      if (u.includes(k.replace(/\s+/g,''))) return grp;
+    }
+  }
+  return str.toUpperCase().trim();
+}
+
+/* ═══════════════════════════════════════════════════
+   ROUTE NORMALISATION
+═══════════════════════════════════════════════════ */
+function normaliseRoute(r) {
+  if (!r) return 'ALL';
+  r = r.trim().toUpperCase();
+
+  // HN MN / HNMN variants → HNMN
+  r = r.replace(/\bHN\s*MN\b/g, 'HNMN');
+
+  // NTH EXP / NTH EXPRESS / NTH Exp → NTH
+  r = r.replace(/\bNTH\s*(EXP(RESS)?)?\b/g, 'NTH').trim();
+  if (r === 'NTH') r = 'NTH';   // keep clean
+
+  // KLS EXP → KLS
+  r = r.replace(/\bKLS\s*(EXP(RESS)?)?\b/g, 'KLS').trim();
+
+  // VV EXP → VV
+  r = r.replace(/\bVV\s*(EXP(RESS)?)?\b/g, 'VV').trim();
+
+  // Collapse multiple spaces
+  r = r.replace(/\s+/g, ' ').trim();
+
+  return r || 'ALL';
+}
+
+function getMainRoute(route) {
+  const r = normaliseRoute(route);
+  for (const [grp, routes] of Object.entries(ROUTE_GROUPS)) {
+    if (routes.includes(r)) return grp;
+  }
+  return null;
+}
+
+function isSimilarRoute(r1, r2) {
+  const a = normaliseRoute(r1);
+  const b = normaliseRoute(r2);
+  if (a === b) return true;
+  if (a === 'ALL' || b === 'ALL') return true;
+  const g1 = getMainRoute(a);
+  const g2 = getMainRoute(b);
+  if (g1 && g2 && g1 === g2) return true;
+  return false;
+}
+
+function isValidBus(busEntry, route) {
+  if (!busEntry) return false;
+  const r = normaliseRoute(route);
+  const known = busEntry.knownRoutes.map(k => normaliseRoute(k));
+  if (known.includes('ALL')) return true;
+  if (known.includes(r)) return true;
+  for (const k of known) {
+    if (isSimilarRoute(k, r)) return true;
+  }
+  return false;
+}
+
+/* ═══════════════════════════════════════════════════
+   PARSE / CLEAN RAW DATA
+   ───────────────────────────────────────────────────
+   HEADER vs ROUTE disambiguation rules:
+   • A header MUST contain a city/place word OR a dash.
+   • Route codes (HN MN, NTH EXP, KLS, VV, ALL…) contain
+     NONE of these → never treated as headers, ever.
+   • isBusNumber strictly requires  C<digits>  only.
+   • isVehicleNumber handles BV3, ST12, etc.
+   • isTimeString requires  H:MM  with optional AM/PM.
+   • isLoadString matches  N/N  patterns → always skipped.
+═══════════════════════════════════════════════════ */
+
+/* ─── Known place/city words that appear ONLY in headers ─── */
+const PLACE_WORDS = [
+  'MUMBAI','THANE','CHEMBUR','MULUND','SOUTH','NORTH',
+  'EAST','WEST','CENTRAL','SOBO','KURLA','DADAR',
+  'BANDRA','WORLI','ANDHERI','BORIVALI','GHATKOPAR',
+  'VIKHROLI','WADALA','SION','PAREL','MAHIM','COLABA',
+  'CHURCHGATE','FORT','KALYAN','DOMBIVLI','BADLAPUR',
+  'PANVEL','NAVI','VASHI','BELAPUR','AIROLI',
+  'KHARGHAR','TALOJA','ULHASNAGAR','JOGESHWARI',
+  'MALAD','KANDIVALI','GOREGAON','SANTACRUZ',
+  'VILE','PARLE','CHARNI','GRANT','MARINE'
+];
+
+/* Note: BKC alone is NOT in PLACE_WORDS intentionally —
+   "BKC" can appear as both a header component and a route.
+   "Chembur - Bkc" has a dash → caught by dash rule.
+   Pure "BKC" as a single-word line is treated as a route code.   */
+
+/* ─── Primitive classifiers ─────────────────────────────── */
+function isTimeString(s) {
+  // Must be EXACTLY a time: 6:15 AM | 7:10 AM | 8:30 | 10:00 AM
+  // Allows optional leading space, nothing else on the line
+  return /^\d{1,2}:\d{2}(\s*(AM|PM))?$/i.test(s.trim());
+}
+
+function isLoadString(s) {
+  // N/N pattern: 23/27 | 0/35 | 35/35
+  return /^\d+\/\d+$/.test(s.trim());
+}
+
+function isBusNumber(s) {
+  // STRICT: C then digits only, nothing else — C11, C317, C652
+  return /^C\d+$/i.test(s.trim());
+}
+
+function isVehicleNumber(s) {
+  // Non-C fleet with no spaces: BV3, ST12, AC01
+  const t = s.trim();
+  return /^[A-Z]{1,4}\d+$/i.test(t) && !isBusNumber(t);
+}
+
+function isKnownRouteCode(s) {
+  // Explicitly known multi-word route codes that must NEVER be headers
+  const u = s.trim().toUpperCase();
+  const knownRoutes = [
+    'HN MN','HNMN',
+    'NTH EXP','NTH EXPRESS','NTH',
+    'KLS EXP','KLS EXPRESS','KLS',
+    'VV EXP','VV EXPRESS','VV',
+    'LBS EXP','LBS',
+    'ALL'
+  ];
+  return knownRoutes.includes(u);
+}
+
+/* ─── Main-route header detection (city/place keyword OR dash) ── */
+function isMainRouteHeader(line) {
+  const s = line.trim();
+  if (!s)                   return false;
+  if (isTimeString(s))      return false;
+  if (isLoadString(s))      return false;
+  if (isBusNumber(s))       return false;
+  if (isVehicleNumber(s))   return false;
+  if (isKnownRouteCode(s))  return false;  // ← explicit route-code guard
+
+  const upper = s.toUpperCase();
+
+  // Dash/hyphen → header  (e.g. "Chembur - Bkc", "Thane-SOBO")
+  if (/[-–—]/.test(s)) return true;
+
+  // Contains a city/place word → header
+  if (PLACE_WORDS.some(p => new RegExp('\\b' + p + '\\b').test(upper))) return true;
+
+  // Anything else (single or multi-word route codes not in known list) → NOT header
+  return false;
+}
+
+/* ─── Main parser ────────────────────────────────────────── */
+function parseData(rawText) {
+  // Sanitise: strip smart-quotes, zero-width spaces, trailing quote-chars
+  const raw = rawText
+    .replace(/[\u201c\u201d\u2018\u2019\u201a\u201e\u2032\u2033"""'']/g, '')
+    .replace(/[\u200b\u200c\u200d\ufeff]/g, '')
+    .replace(/\u00a0/g, ' ')
+    .trim();
+
+  const lines = raw.split('\n')
+                   .map(l => l.trim())
+                   .filter(l => l.length > 0);
+
+  const results = [];
+  let currentMainRoute = 'UNKNOWN';
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    /* ── CASE 1: Main-route header → update sticky context ── */
+    if (isMainRouteHeader(line)) {
+      currentMainRoute = line.toUpperCase().trim();
+      i++;
+      continue;
+    }
+
+    /* ── CASE 2: Bus / vehicle number → read its block ────── */
+    if (isBusNumber(line) || isVehicleNumber(line)) {
+      const bus = line.trim().toUpperCase();
+      i++;
+
+      let route = 'ALL';
+      let slot  = '';
+
+      // Read lines that belong to this bus until a boundary is hit
+      while (i < lines.length) {
+        const tok = lines[i].trim();
+
+        // Boundary: next bus, next vehicle, or new header → stop
+        if (isBusNumber(tok))      break;
+        if (isVehicleNumber(tok))  break;
+        if (isMainRouteHeader(tok)) break;
+
+        // Load ratio → skip silently
+        if (isLoadString(tok)) { i++; continue; }
+
+        // Time → save as slot, then end this entry
+        if (isTimeString(tok)) {
+          slot = tok;
+          i++;
+          break;
+        }
+
+        // Anything remaining → route code for this bus
+        // (covers ALL, HNMN, HN MN, NTH EXP, KLS, VV, etc.)
+        route = tok;
+        i++;
+      }
+
+      results.push({
+        mainRoute: currentMainRoute,
+        bus,
+        route: normaliseRoute(route),
+        slot:  normaliseTime(slot)
+      });
+      continue;
+    }
+
+    /* ── CASE 3: Unrecognised / orphan line → skip ─────────── */
+    i++;
+  }
+
+  return results;
+}
+
+function normaliseTime(t) {
+  if (!t) return '';
+  t = t.trim();
+  // Normalise to "H:MM AM/PM"
+  const m = t.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if (m) {
+    const h = m[1], min = m[2], ampm = m[3] ? m[3].toUpperCase() : '';
+    return `${h}:${min}${ampm ? ' '+ampm : ''}`;
+  }
+  return t;
+}
+
+/* ═══════════════════════════════════════════════════
+   CLEAN DATA (UI)
+═══════════════════════════════════════════════════ */
+function cleanData() {
+  const raw = document.getElementById('rawInput').value;
+  if (!raw.trim()) { showToast('Paste raw data first'); return; }
+  rowData = parseData(raw);
+  renderCleanTable();
+  updateBadge('rowdata', rowData.length);
+  refreshMainRouteDropdown();
+  showToast(`Parsed ${rowData.length} bus entries`);
+}
+
+function renderCleanTable() {
+  const tbody = document.getElementById('cleanTable');
+  if (!rowData.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">🚌</div>No data</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = rowData.map((r,i) => `
+    <tr>
+      <td style="color:var(--text3);font-size:11px">${i+1}</td>
+      <td>${r.mainRoute}</td>
+      <td class="bus-num">${r.bus}</td>
+      <td class="route-cell">${r.route}</td>
+      <td class="time-cell">${r.slot || '<span style="color:var(--text3)">—</span>'}</td>
+      <td><button class="btn btn-danger btn-sm btn-icon" onclick="removeCleanRow(${i})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function removeCleanRow(i) {
+  rowData.splice(i,1);
+  renderCleanTable();
+  updateBadge('rowdata', rowData.length);
+  refreshMainRouteDropdown();
+}
+
+// ── Auto-populate Main Route dropdown from Row Data ──
+function refreshMainRouteDropdown() {
+  const sel = document.getElementById('bm-mainroute');
+  if (!sel) return;
+  const currentVal = sel.value;
+  // Collect unique mainRoutes from rowData
+  const routes = [...new Set(rowData.map(r => r.mainRoute).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Select...</option>';
+  routes.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r;
+    opt.textContent = r;
+    if (r === currentVal) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  // Always keep current value if still valid
+  if (currentVal && !routes.includes(currentVal)) {
+    const opt = document.createElement('option');
+    opt.value = currentVal;
+    opt.textContent = currentVal;
+    opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+function clearRaw() { document.getElementById('rawInput').value = ''; }
+function clearClean() { rowData = []; renderCleanTable(); updateBadge('rowdata',0); }
+
+function exportClean() {
+  if (!rowData.length) { showToast('No data to export'); return; }
+  const csv = ['Main Route,Bus,Route,Slot',
+    ...rowData.map(r => `"${r.mainRoute}","${r.bus}","${r.route}","${r.slot}"`)
+  ].join('\n');
+  downloadFile(csv, 'row-data.csv', 'text/csv');
+}
+
+/* ═══════════════════════════════════════════════════
+   PARTIAL FLEET
+═══════════════════════════════════════════════════ */
+
+function parsePartialData() {
+  const raw = document.getElementById('partialRawInput').value;
+  if (!raw.trim()) { showToast('Paste partial fleet data first'); return; }
+
+  const parsed = parseData(raw);
+  if (!parsed.length) { showToast('No valid entries found — check format'); return; }
+
+  // Filter out excluded buses
+  const skipped = [];
+  const allowed = parsed.filter(p => {
+    if (excludedBuses.has(p.bus)) { skipped.push(p.bus); return false; }
+    return true;
+  });
+
+  const newEntries = allowed.map(p => ({
+    slot:      p.slot,
+    route:     p.route,
+    bus:       p.bus,
+    mainRoute: p.mainRoute,
+    notes:     ''
+  }));
+
+  partialFleet.push(...newEntries);
+  renderPartialTable();
+  updateBadge('partial', partialFleet.length);
+
+  let msg = `✓ ${newEntries.length} slots added`;
+  if (skipped.length) msg += ` · ${skipped.length} excluded (${skipped.join(', ')})`;
+  showToast(msg);
+}
+
+function addPartialRow(slot='', route='', bus='', mainRoute='', notes='') {
+  partialFleet.push({ slot, route, bus, mainRoute, notes });
+  renderPartialTable();
+  updateBadge('partial', partialFleet.length);
+}
+
+// Build main route <select> dynamically from row data unique mainRoutes
+function buildMainRouteSelect(idx, currentVal) {
+  const routes = [...new Set(rowData.map(r => r.mainRoute).filter(Boolean))].sort();
+  // Also include currentVal if not in rowData (e.g. manually set)
+  if (currentVal && !routes.includes(currentVal)) routes.push(currentVal);
+
+  let opts = `<option value="" ${!currentVal ? 'selected' : ''}>—</option>`;
+  for (const mr of routes) {
+    const sel = mr === currentVal ? 'selected' : '';
+    opts += `<option value="${escHtml(mr)}" ${sel}>${escHtml(mr)}</option>`;
+  }
+  return `<select class="row-input" style="padding:4px 6px" onchange="partialFleet[${idx}].mainRoute=this.value">${opts}</select>`;
+}
+
+function renderPartialTable() {
+  const tbody = document.getElementById('partialTable');
+  if (!partialFleet.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">⏱</div>No partial fleet slots</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = partialFleet.map((r, i) => `
+    <tr>
+      <td style="color:var(--text3);font-size:11px">${i + 1}</td>
+      <td><input class="row-input" value="${escHtml(r.slot)}" placeholder="6:15 AM"
+          onchange="partialFleet[${i}].slot=this.value" /></td>
+      <td><input class="row-input" value="${escHtml(r.route)}" placeholder="HNMN"
+          onchange="partialFleet[${i}].route=normaliseRoute(this.value)" /></td>
+      <td><input class="row-input" value="${escHtml(r.bus)}" placeholder="C223"
+          onchange="partialFleet[${i}].bus=this.value.toUpperCase()" /></td>
+      <td>${buildMainRouteSelect(i, r.mainRoute)}</td>
+      <td><input class="row-input" value="${escHtml(r.notes)}" placeholder="Notes..."
+          onchange="partialFleet[${i}].notes=this.value" /></td>
+      <td><button class="btn btn-danger btn-sm btn-icon" onclick="removePartialRow(${i})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function removePartialRow(i) {
+  partialFleet.splice(i, 1);
+  renderPartialTable();
+  updateBadge('partial', partialFleet.length);
+}
+
+function clearPartialRaw() {
+  document.getElementById('partialRawInput').value = '';
+}
+
+function clearPartial() {
+  partialFleet = [];
+  renderPartialTable();
+  updateBadge('partial', 0);
+}
+
+function exportPartial() {
+  if (!partialFleet.length) { showToast('No data to export'); return; }
+  const csv = ['Slot,Route,Bus,Main Route,Notes',
+    ...partialFleet.map(r =>
+      `"${r.slot}","${r.route}","${r.bus}","${r.mainRoute}","${r.notes}"`)
+  ].join('\n');
+  downloadFile(csv, 'partial-fleet.csv', 'text/csv');
+}
+
+// HTML escape helper to prevent XSS in inline values
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ═══════════════════════════════════════════════════
+   BUS MASTER — CRUD
+═══════════════════════════════════════════════════ */
+function saveBusMaster() {
+  const bus       = document.getElementById('bm-bus').value.trim().toUpperCase();
+  const mainRoute = document.getElementById('bm-mainroute').value;
+  const routes    = document.getElementById('bm-routes').value;
+  const base      = document.getElementById('bm-base').value.trim();
+  const editIdx   = parseInt(document.getElementById('bm-edit-index').value);
+
+  if (!bus) { showToast('Bus number required'); return; }
+
+  const entry = {
+    bus,
+    mainRoute,
+    knownRoutes: routes.split(',').map(r => normaliseRoute(r.trim())).filter(Boolean),
+    driverBase: base
+  };
+
+  if (editIdx >= 0) {
+    busMaster[editIdx] = entry;
+    document.getElementById('bm-edit-index').value = -1;
+  } else {
+    if (busMaster.find(b => b.bus === bus)) {
+      showToast(`${bus} already exists — use Edit`); return;
+    }
+    busMaster.push(entry);
+  }
+
+  persistAll();
+  renderBMTable();
+  resetBMForm();
+  updateBadge('busmaster', busMaster.length);
+  showToast(`✓ Bus ${bus} saved`);
+}
+
+function editBus(i) {
+  const b = busMaster[i];
+  refreshMainRouteDropdown();
+  document.getElementById('bm-bus').value       = b.bus;
+  document.getElementById('bm-mainroute').value = b.mainRoute;
+  document.getElementById('bm-routes').value    = b.knownRoutes.join(', ');
+  document.getElementById('bm-base').value      = b.driverBase || '';
+  document.getElementById('bm-edit-index').value = i;
+  // Scroll form into view
+  document.getElementById('bm-bus').scrollIntoView({ behavior:'smooth', block:'center' });
+  document.getElementById('bm-bus').focus();
+}
+
+function deleteBus(i) {
+  if (!confirm(`Delete bus ${busMaster[i].bus}?`)) return;
+  busMaster.splice(i, 1);
+  persistAll();
+  renderBMTable();
+  updateBadge('busmaster', busMaster.length);
+  showToast('Bus deleted');
+}
+
+function cancelBMEdit() { resetBMForm(); }
+
+function resetBMForm() {
+  document.getElementById('bm-bus').value        = '';
+  document.getElementById('bm-mainroute').value  = '';
+  document.getElementById('bm-routes').value     = '';
+  document.getElementById('bm-base').value       = '';
+  document.getElementById('bm-edit-index').value = -1;
+}
+
+function renderBMTable() {
+  const tbody = document.getElementById('bmTable');
+  if (!busMaster.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">📋</div>No buses registered yet</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = busMaster.map((b, i) => {
+    const isExcl = excludedBuses.has(b.bus);
+    return `<tr ${isExcl ? 'style="opacity:.45"' : ''}>
+      <td class="bus-num">${b.bus}${isExcl ? ' <span class="badge badge-red" style="font-size:9px">EXCL</span>' : ''}</td>
+      <td style="color:var(--text2);font-size:12px">${b.mainRoute || '<span style="color:var(--text3)">—</span>'}</td>
+      <td class="route-cell" style="font-size:11px">${b.knownRoutes.join(', ') || '<span style="color:var(--text3)">—</span>'}</td>
+      <td style="color:var(--text2);font-size:12px">${b.driverBase || '<span style="color:var(--text3)">—</span>'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-secondary btn-sm" onclick="editBus(${i})">Edit</button>
+        <button class="btn btn-danger btn-sm"    onclick="deleteBus(${i})">Del</button>
+        ${isExcl
+          ? `<button class="btn btn-secondary btn-sm" onclick="removeExcluded('${b.bus}')" title="Remove from exclusion">✓ Include</button>`
+          : `<button class="btn btn-secondary btn-sm" style="border-color:#e05050;color:#e05050" onclick="excludeFromTable('${b.bus}')" title="Exclude from partial fleet">🚫 Exclude</button>`
+        }
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function clearBusMaster() {
+  if (!confirm('Clear ALL bus master data? This cannot be undone.')) return;
+  busMaster = [];
+  persistAll();
+  renderBMTable();
+  updateBadge('busmaster', 0);
+  showToast('Bus master cleared');
+}
+
+/* ═══════════════════════════════════════════════════
+   EXCLUDED BUSES
+   — buses that must NEVER appear in Partial Fleet
+═══════════════════════════════════════════════════ */
+let excludedBuses = new Set(); // Set of bus number strings
+
+function addExcluded() {
+  const raw = document.getElementById('excl-input').value.trim();
+  if (!raw) return;
+  // Support comma-separated input e.g. "C999, C888, C777"
+  const nums = raw.split(/[,\s]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+  nums.forEach(n => excludedBuses.add(n));
+  document.getElementById('excl-input').value = '';
+  persistAll();
+  renderExcluded();
+  renderBMTable(); // refresh EXCL badges
+  showToast(`${nums.length} bus(es) excluded`);
+}
+
+function excludeFromTable(busNum) {
+  excludedBuses.add(busNum.toUpperCase());
+  persistAll();
+  renderExcluded();
+  renderBMTable();
+  showToast(`${busNum} excluded from Partial Fleet`);
+}
+
+function removeExcluded(busNum) {
+  excludedBuses.delete(busNum.toUpperCase());
+  persistAll();
+  renderExcluded();
+  renderBMTable();
+  showToast(`${busNum} included again`);
+}
+
+function clearExcluded() {
+  if (!excludedBuses.size) return;
+  if (!confirm('Clear all excluded buses?')) return;
+  excludedBuses.clear();
+  persistAll();
+  renderExcluded();
+  renderBMTable();
+}
+
+function renderExcluded() {
+  const container = document.getElementById('excl-chips');
+  const countEl   = document.getElementById('excl-count');
+  countEl.textContent = `${excludedBuses.size} bus${excludedBuses.size !== 1 ? 'es' : ''}`;
+
+  if (!excludedBuses.size) {
+    container.innerHTML = '<span style="font-family:var(--mono);font-size:11px;color:var(--text3)">None added</span>';
+    return;
+  }
+  container.innerHTML = [...excludedBuses].sort().map(b => `
+    <div style="display:inline-flex;align-items:center;gap:5px;
+         background:rgba(224,80,80,.12);border:1px solid rgba(224,80,80,.35);
+         border-radius:3px;padding:4px 10px;font-family:var(--mono);
+         font-size:12px;color:var(--red)">
+      🚫 ${b}
+      <button onclick="removeExcluded('${b}')"
+        style="background:none;border:none;color:var(--text3);cursor:pointer;
+               font-size:13px;line-height:1;padding:0 0 0 4px"
+        title="Remove exclusion">×</button>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════
+   PERSISTENCE — localStorage + JSONBin
+═══════════════════════════════════════════════════ */
+
+// ── Build the full data payload ──────────────────
+function buildPayload() {
+  return {
+    busMaster,
+    excludedBuses: [...excludedBuses],
+    savedAt: new Date().toISOString()
+  };
+}
+
+// ── localStorage (always used as fallback cache) ─
+function saveToLocal() {
+  try {
+    localStorage.setItem('fas_busMaster', JSON.stringify(busMaster));
+    localStorage.setItem('fas_excluded',  JSON.stringify([...excludedBuses]));
+  } catch(e) { console.warn('localStorage write failed', e); }
+}
+
+function loadFromLocal() {
+  try {
+    const bm = localStorage.getItem('fas_busMaster');
+    const ex = localStorage.getItem('fas_excluded');
+    if (bm) busMaster = JSON.parse(bm);
+    if (ex) excludedBuses = new Set(JSON.parse(ex));
+  } catch(e) { console.warn('localStorage read failed', e); }
+}
+
+// ── persistAll: save local + auto-push ──────────
+async function persistAll() {
+  saveToLocal();
+  const { apiKey, binId } = getJBConfig();
+  if (apiKey && binId && apiKey !== 'YOUR_JSONBIN_API_KEY_HERE') {
+    await pushToCloud(true); // silent push
+  }
+}
+
+// ── JSONBin credentials — hardcoded in backend ──
+const JB_API_KEY = 'YOUR_JSONBIN_API_KEY_HERE';
+const JB_BIN_ID  = 'YOUR_JSONBIN_BIN_ID_HERE';
+
+function saveJBConfig() { /* credentials are hardcoded, nothing to save */ }
+
+// ── Helpers ──────────────────────────────────────
+function getJBConfig() {
+  // Always use hardcoded credentials — ignore hidden inputs
+  return {
+    apiKey: JB_API_KEY,
+    binId:  JB_BIN_ID
+  };
+}
+
+function setCloudStatus(state) {
+  // state: 'ok' | 'error' | 'loading' | 'idle'
+  const el = document.getElementById('cloud-status');
+  const map = {
+    ok:      ['badge-green', '● Connected'],
+    error:   ['badge-red',   '✕ Error'],
+    loading: ['badge-blue',  '⟳ Syncing…'],
+    idle:    ['badge-gray',  'Not connected']
+  };
+  el.className = 'badge ' + (map[state][0] || 'badge-gray');
+  el.textContent = map[state][1] || state;
+}
+
+// ── Test connection ───────────────────────────────
+async function testJSONBin() {
+  const { apiKey, binId } = getJBConfig();
+  if (!apiKey || !binId || apiKey === 'YOUR_JSONBIN_API_KEY_HERE') {
+    showToast('JSONBin credentials not configured'); return;
+  }
+  setCloudStatus('loading');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      headers: { 'X-Master-Key': apiKey }
+    });
+    if (res.ok) {
+      setCloudStatus('ok');
+      showToast('✓ JSONBin connected successfully');
+    } else {
+      const err = await res.json().catch(() => ({}));
+      setCloudStatus('error');
+      showToast(`JSONBin error: ${err.message || res.status}`);
+    }
+  } catch(e) {
+    setCloudStatus('error');
+    showToast('Network error — check API key / Bin ID');
+  }
+}
+
+// ── Push data to cloud ────────────────────────────
+async function pushToCloud(silent = false) {
+  const { apiKey, binId } = getJBConfig();
+  if (!apiKey || !binId) {
+    if (!silent) showToast('Enter API Key and Bin ID first');
+    return;
+  }
+  if (!silent) setCloudStatus('loading');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': apiKey
+      },
+      body: JSON.stringify(buildPayload())
+    });
+    if (res.ok) {
+      setCloudStatus('ok');
+      if (!silent) showToast('✓ Data pushed to cloud');
+    } else {
+      const err = await res.json().catch(() => ({}));
+      setCloudStatus('error');
+      if (!silent) showToast(`Push failed: ${err.message || res.status}`);
+    }
+  } catch(e) {
+    setCloudStatus('error');
+    if (!silent) showToast('Push failed — network error');
+  }
+}
+
+// ── Pull data from cloud ──────────────────────────
+async function pullFromCloud() {
+  const { apiKey, binId } = getJBConfig();
+  if (!apiKey || !binId) { showToast('Enter API Key and Bin ID first'); return; }
+  setCloudStatus('loading');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      headers: { 'X-Master-Key': apiKey }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      setCloudStatus('error');
+      showToast(`Pull failed: ${err.message || res.status}`);
+      return;
+    }
+    const json = await res.json();
+    const data = json.record;
+
+    if (data.busMaster)    busMaster     = data.busMaster;
+    if (data.excludedBuses) excludedBuses = new Set(data.excludedBuses);
+
+    // Refresh UI
+    renderBMTable();
+    renderExcluded();
+    updateBadge('busmaster', busMaster.length);
+    saveToLocal(); // cache locally too
+
+    setCloudStatus('ok');
+    showToast(`✓ Pulled ${busMaster.length} buses + ${excludedBuses.size} excluded`);
+  } catch(e) {
+    setCloudStatus('error');
+    showToast('Pull failed — network error');
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   CORE ALGORITHM — adjustFleet()
+═══════════════════════════════════════════════════ */
+function adjustFleet() {
+  if (!partialFleet.length) { showToast('No partial fleet data'); return; }
+  if (!rowData.length)      { showToast('No row data cleaned'); return; }
+
+  const logs = [];
+  const results = [];
+  const nonOps = [];
+  const unassigned = [];
+  const usedBuses = new Set(); // track buses already assigned in this run
+
+  // Build lookup of row data buses (available pool)
+  const rowBuses = new Set(rowData.map(r => r.bus));
+
+  // Build row-data index keyed by bus for quick lookup
+  const rowByBus = {};
+  for (const r of rowData) rowByBus[r.bus] = r;
+
+  // Step 3: For each partial fleet slot, find best replacement
+  // (Non-Ops calculated AFTER assignment loop — see below)
+  for (const slot of partialFleet) {
+    const originalBus = slot.bus;
+    const slotTime    = normaliseTime(slot.slot);
+    const slotRoute   = normaliseRoute(slot.route || 'ALL');
+    const slotMain    = slot.mainRoute;
+
+    // Is the original bus available in row data? (must not be excluded)
+    if (originalBus && rowByBus[originalBus] && !usedBuses.has(originalBus) && !excludedBuses.has(originalBus)) {
+      // Original bus is fine — still in row data and not excluded
+      usedBuses.add(originalBus);
+      const rd = rowByBus[originalBus];
+      results.push({
+        slot: slotTime, route: slotRoute,
+        originalBus, assignedBus: originalBus,
+        matchType: 'original', reason: 'Bus present in row data',
+        rowTime: rd.slot
+      });
+      logs.push({ type:'perfect', msg:`[${slotTime}] ${originalBus} retained (original bus in row data)` });
+      continue;
+    }
+
+    // Original bus NOT available or excluded — need replacement
+    if (originalBus && excludedBuses.has(originalBus)) {
+      logs.push({ type:'info', msg:`[${slotTime}] ${originalBus} is EXCLUDED — finding replacement for route ${slotRoute}` });
+    } else if (originalBus) {
+      logs.push({ type:'info', msg:`[${slotTime}] ${originalBus} not in row data — finding replacement for route ${slotRoute}` });
+    }
+
+    // ── MAIN ROUTE NORMALISER ──
+    // Raw mainRoute strings from parsed data can vary — normalise to canonical form.
+    function normaliseMainRoute(mr) {
+      if (!mr) return '';
+      const u = mr.toUpperCase().replace(/\s+/g, ' ').trim();
+      // Thane variants
+      if (/THANE/.test(u) && (/SOUTH|SOBO|MUMBAI/.test(u))) return 'THANE SOBO';
+      if (/^THANE\s*SOUTH\s*MUMBAI$/.test(u)) return 'THANE SOBO';
+      // Mulund variants
+      if (/MULUND/.test(u)) return 'MULUND SOBO';
+      // Chembur - BKC variants (dash present or BKC keyword)
+      if (/CHEMBUR/.test(u) && /BKC/.test(u)) return 'CHEMBUR BKC';
+      if (/[-–—]/.test(u) && /BKC/.test(u))   return 'CHEMBUR BKC';
+      if (/[-–—]/.test(u) && /CHEMBUR/.test(u)) return 'CHEMBUR BKC';
+      // Chembur South Mumbai (no BKC)
+      if (/CHEMBUR/.test(u) && /SOUTH|SOBO|MUMBAI/.test(u)) return 'CHEMBUR SOBO';
+      // Fallback: return uppercased as-is
+      return u;
+    }
+
+    // ── CANDIDATE POOL ──
+    // HARD RULE: candidate's mainRoute MUST match slot's mainRoute exactly.
+    // If slot has no mainRoute, skip the main-route boundary check.
+    const normSlotMain = normaliseMainRoute(slotMain);
+
+    const candidates = rowData.filter(r => {
+      if (usedBuses.has(r.bus)) return false;
+      if (excludedBuses.has(r.bus)) return false;   // HARD BLOCK: excluded buses never assigned
+      if (!r.slot && slotTime) return false;
+
+      // HARD BOUNDARY: main route must match
+      if (normSlotMain) {
+        const normCandMain = normaliseMainRoute(r.mainRoute);
+        if (normCandMain !== normSlotMain) return false;
+      }
+
+      return true;
+    });
+
+    // ── EXACT ROUTE MATCH ONLY ──
+    // Bus assigns only when route matches exactly.
+    // ALL is universal — matches any route in both directions.
+    // No similar/fallback assignments.
+
+    function routeExactMatch(candidateRoute, targetRoute) {
+      const cr = normaliseRoute(candidateRoute);
+      const tr = normaliseRoute(targetRoute);
+      if (cr === tr) return true;
+      if (cr === 'ALL' || tr === 'ALL') return true;
+      return false;
+    }
+
+    const exactCandidates = candidates.filter(c => routeExactMatch(c.route, slotRoute));
+
+    // Among exact route matches, prefer same time first
+    exactCandidates.sort((a, b) => {
+      const aExact = slotTime && normaliseTime(a.slot) === slotTime ? 1 : 0;
+      const bExact = slotTime && normaliseTime(b.slot) === slotTime ? 1 : 0;
+      return bExact - aExact;
+    });
+
+    if (exactCandidates.length) {
+      const best = exactCandidates[0];
+      usedBuses.add(best.bus);
+
+      const cTime  = normaliseTime(best.slot);
+      const cRoute = normaliseRoute(best.route);
+
+      let matchType, reason;
+      if (cTime === slotTime) {
+        matchType = 'perfect';
+        reason = `Same time + exact route (${cRoute})`;
+      } else {
+        matchType = 'similar';
+        reason = `Exact route (${cRoute}) — different time (${cTime})`;
+      }
+
+      results.push({
+        slot: slotTime, route: slotRoute,
+        originalBus, assignedBus: best.bus,
+        matchType, reason,
+        rowTime: cTime
+      });
+
+      const replaceTxt = originalBus ? `${best.bus} instead of ${originalBus}` : best.bus;
+      logs.push({
+        type: matchType === 'perfect' ? 'perfect' : 'similar',
+        msg: `[${slotTime}] ${replaceTxt} — ${reason}`
+      });
+
+    } else {
+      // No match — unassigned
+      const noMatchReason = normSlotMain
+        ? `No exact-route match in main route "${normSlotMain}" for ${slotRoute}`
+        : `No exact-route match found for ${slotRoute}`;
+      results.push({
+        slot: slotTime, route: slotRoute,
+        originalBus, assignedBus: null,
+        matchType: 'unassigned', reason: noMatchReason,
+        rowTime: ''
+      });
+      unassigned.push({ slot: slotTime, route: slotRoute, originalBus });
+      logs.push({ type:'fallback', msg:`[${slotTime}] ⚠ ${noMatchReason} — slot unassigned` });
+    }
+  }
+
+  // Calculate Non-Ops AFTER all assignments:
+  // Non-Ops = buses in Row Data that were never assigned (not used) AND not excluded
+  for (const rb of rowBuses) {
+    if (!usedBuses.has(rb) && !excludedBuses.has(rb)) {
+      nonOps.push(rb);
+    }
+  }
+  if (nonOps.length) {
+    logs.push({ type:'info', msg:`Non-Ops (unassigned from row data): ${nonOps.join(', ')}` });
+  }
+
+  outputResult = { results, logs, nonOps, unassigned };
+  renderOutput();
+  renderAdjustmentSummary();
+  switchTab('output');
+  updateBadge('output', results.length);
+  showToast('Adjustment complete');
+}
+
+function renderAdjustmentSummary() {
+  if (!outputResult) return;
+  const { results, nonOps, unassigned } = outputResult;
+
+  const total      = results.length;
+  const assigned   = results.filter(r => r.assignedBus).length;
+  const perfect    = results.filter(r => r.matchType === 'perfect' || r.matchType === 'original').length;
+  const similar    = results.filter(r => r.matchType === 'similar').length;
+  const unassignedN = results.filter(r => r.matchType === 'unassigned').length;
+  const nonOpsN    = nonOps.length;
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+  document.getElementById('summary-time').textContent = `Last run: ${timeStr}`;
+
+  document.getElementById('summary-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 12px">
+        <div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--accent);line-height:1">${total}</div>
+        <div style="font-family:var(--cond);font-size:10px;letter-spacing:2px;color:var(--text3);margin-top:3px;text-transform:uppercase">Total Slots</div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 12px">
+        <div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--green);line-height:1">${assigned}</div>
+        <div style="font-family:var(--cond);font-size:10px;letter-spacing:2px;color:var(--text3);margin-top:3px;text-transform:uppercase">Assigned</div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 12px">
+        <div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--red);line-height:1">${unassignedN}</div>
+        <div style="font-family:var(--cond);font-size:10px;letter-spacing:2px;color:var(--text3);margin-top:3px;text-transform:uppercase">Unassigned</div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 12px">
+        <div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--red);line-height:1">${nonOpsN}</div>
+        <div style="font-family:var(--cond);font-size:10px;letter-spacing:2px;color:var(--text3);margin-top:3px;text-transform:uppercase">Non-Ops</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      <span style="font-family:var(--mono);font-size:11px;background:rgba(45,190,108,.1);border:1px solid rgba(45,190,108,.25);color:var(--green);padding:3px 8px;border-radius:2px">
+        ✓ ${perfect} perfect
+      </span>
+      <span style="font-family:var(--mono);font-size:11px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.25);color:var(--yellow);padding:3px 8px;border-radius:2px">
+        ~ ${similar} similar
+      </span>
+    </div>
+    <button class="btn btn-secondary btn-sm" style="width:100%" onclick="switchTab('output')">
+      View Full Output →
+    </button>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER OUTPUT
+═══════════════════════════════════════════════════ */
+function renderOutput() {
+  if (!outputResult) return;
+  const { results, logs, nonOps, unassigned } = outputResult;
+
+  // Stats
+  const perfect    = results.filter(r => r.matchType === 'perfect' || r.matchType === 'original').length;
+  const similar    = results.filter(r => r.matchType === 'similar').length;
+  const fallback   = results.filter(r => r.matchType === 'fallback').length;
+  const unassignedN = results.filter(r => r.matchType === 'unassigned').length;
+
+  document.getElementById('statsBar').style.display = 'flex';
+  document.getElementById('stat-total').textContent = results.length;
+  document.getElementById('stat-perfect').textContent = perfect;
+  document.getElementById('stat-similar').textContent = similar;
+  document.getElementById('stat-fallback').textContent = fallback;
+  document.getElementById('stat-unassigned').textContent = unassignedN;
+  document.getElementById('stat-nonops').textContent = nonOps.length;
+
+  // Output table
+  const tbody = document.getElementById('outputTable');
+  if (!results.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No results</div></td></tr>';
+  } else {
+    tbody.innerHTML = results.map(r => {
+      const cls = r.matchType === 'perfect' || r.matchType === 'original'
+        ? 'output-row-perfect'
+        : r.matchType === 'similar' ? 'output-row-similar'
+        : r.matchType === 'fallback' ? 'output-row-fallback'
+        : 'output-row-unassigned';
+
+      const badge = r.matchType === 'perfect' || r.matchType === 'original'
+        ? '<span class="badge badge-green">Perfect</span>'
+        : r.matchType === 'similar'
+        ? '<span class="badge badge-yellow">Similar</span>'
+        : r.matchType === 'fallback'
+        ? '<span class="badge badge-red">Fallback</span>'
+        : '<span class="badge badge-gray">Unassigned</span>';
+
+      const assignedCell = r.assignedBus
+        ? `<span style="color:var(--accent);font-family:var(--mono)">${r.assignedBus}</span>`
+        : '<span style="color:var(--text3)">—</span>';
+      const origCell = r.originalBus
+        ? `<span style="color:var(--text2);font-family:var(--mono);text-decoration:${r.assignedBus !== r.originalBus && r.originalBus ? 'line-through' : 'none'}">${r.originalBus}</span>`
+        : '<span style="color:var(--text3)">—</span>';
+
+      return `<tr class="${cls}">
+        <td class="time-cell">${r.slot || '—'}</td>
+        <td class="route-cell">${r.route}</td>
+        <td>${origCell}</td>
+        <td>${assignedCell}</td>
+        <td>${badge}</td>
+        <td style="color:var(--text3);font-size:11px">${r.reason}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Non-Ops
+  const nonOpsDiv = document.getElementById('nonOpsContainer');
+  if (!nonOps.length) {
+    nonOpsDiv.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div>';
+  } else {
+    nonOpsDiv.innerHTML = nonOps.map(b =>
+      `<div class="nonop-chip">🚫 ${b}</div>`
+    ).join('');
+  }
+
+  // Unassigned
+  const unassignedDiv = document.getElementById('unassignedContainer');
+  if (!unassigned.length) {
+    unassignedDiv.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div>';
+  } else {
+    unassignedDiv.innerHTML = unassigned.map(u =>
+      `<div class="log-entry fallback">⚠ ${u.slot || 'No time'} · ${u.route}${u.originalBus ? ' · orig: '+u.originalBus : ''}</div>`
+    ).join('');
+  }
+
+  // Logs
+  const logsDiv = document.getElementById('logsContainer');
+  if (!logs.length) {
+    logsDiv.innerHTML = '<div class="empty-state">No logs</div>';
+  } else {
+    logsDiv.innerHTML = logs.map(l =>
+      `<div class="log-entry ${l.type}">${l.msg}</div>`
+    ).join('');
+  }
+}
+
+function clearOutput() {
+  outputResult = null;
+  document.getElementById('outputTable').innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">⚙️</div>Click "Run Adjustment"</div></td></tr>';
+  document.getElementById('nonOpsContainer').innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div>';
+  document.getElementById('unassignedContainer').innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div>';
+  document.getElementById('logsContainer').innerHTML = '<div class="empty-state">No logs</div>';
+  document.getElementById('statsBar').style.display = 'none';
+  updateBadge('output', 0);
+}
+
+function exportOutput() {
+  if (!outputResult) { showToast('Run adjustment first'); return; }
+  const { results, nonOps } = outputResult;
+  const csv = [
+    'Slot,Route,Original Bus,Assigned Bus,Match Type,Reason',
+    ...results.map(r =>
+      `"${r.slot}","${r.route}","${r.originalBus||''}","${r.assignedBus||''}","${r.matchType}","${r.reason}"`)
+  ].join('\n');
+  downloadFile(csv, 'fleet-adjustment-output.csv', 'text/csv');
+}
+
+/* ═══════════════════════════════════════════════════
+   SAMPLE DATA LOADERS
+═══════════════════════════════════════════════════ */
+function loadSampleData() {
+  document.getElementById('rawInput').value =
+`Chembur - Bkc
+C317
+ALL
+23/27
+8:30 AM
+C11
+ALL
+18/35
+8:45 AM
+C40
+ALL
+9/35
+8:55 AM
+BV3
+ALL
+5/27
+9:00 AM
+C468
+ALL
+12/35
+9:10 AM
+Chembur South Mumbai
+C06
+ALL
+28/35
+8:20 AM
+C463
+ALL
+12/35
+8:45 AM
+C183
+ALL
+4/35
+9:05 AM
+Mulund South Mumbai
+C52
+25/27
+7:20 AM
+C124
+35/35
+7:50 AM
+C558
+17/27
+8:15 AM
+C147
+0/35
+8:40 AM
+Thane South Mumbai
+C135
+ALL
+28/35
+6:15 AM
+C213
+ALL
+11/35
+6:45 AM
+C133
+HN MN
+35/35
+6:55 AM
+C227
+NTH EXP
+19/35
+7:00 AM
+C43
+KLS
+26/40
+7:05 AM
+C50
+HN MN
+23/35
+7:10 AM
+C392
+VV
+29/39
+7:10 AM
+C138
+NTH EXP
+30/35
+7:10 AM
+C132
+VV
+18/35
+7:15 AM
+C295
+KLS
+27/35
+7:15 AM
+C262
+HN MN
+20/35
+7:17 AM
+C234
+VV
+25/39
+7:20 AM
+C181
+KLS
+31/35
+7:20 AM
+C294
+NTH EXP
+15/40
+7:24 AM
+C526
+HN MN
+28/35
+7:24 AM
+C527
+KLS
+35/35
+7:27 AM
+C555
+VV
+33/35
+7:28 AM
+C14
+KLS
+24/27
+7:30 AM
+C528
+VV
+28/35
+7:40 AM
+C290
+NTH EXP
+12/27
+7:40 AM
+C89
+KLS
+20/35
+7:40 AM
+C652
+ALL
+8/35
+8:00 AM
+C223
+KLS
+9/35
+8:00 AM
+C61
+HN MN
+16/35
+8:00 AM
+C224
+VV
+16/35
+8:00 AM
+C273
+NTH EXP
+8/35
+8:00 AM
+C116
+KLS
+18/35
+8:20 AM
+C373
+VV
+15/27
+8:20 AM
+C235
+ALL
+13/35
+8:30 AM
+C144
+ALL
+6/35
+9:00 AM
+C272
+ALL
+9/35
+9:45 AM`;
+  cleanData();
+}
+
+
+function loadSamplePartial() {
+  document.getElementById('partialRawInput').value =
+`Thane South Mumbai
+C135
+ALL
+28/35
+6:15 AM
+C213
+ALL
+11/35
+6:45 AM
+C133
+HN MN
+35/35
+6:55 AM
+C227
+NTH EXP
+19/35
+7:00 AM
+C43
+KLS
+26/40
+7:05 AM
+C50
+HN MN
+23/35
+7:10 AM
+C392
+VV
+29/39
+7:10 AM
+Chembur - Bkc
+C317
+ALL
+23/27
+8:30 AM
+C11
+ALL
+18/35
+8:45 AM
+C40
+ALL
+9/35
+8:55 AM
+Mulund South Mumbai
+C52
+25/27
+7:20 AM
+C124
+35/35
+7:50 AM
+C558
+17/27
+8:15 AM`;
+  parsePartialData();
+}
+
+function loadSampleBusMaster() {
+  const sample = [
+    { bus:'C135', mainRoute:'THANE SOUTH MUMBAI', knownRoutes:['ALL','HNMN','NTH','VV'], driverBase:'Thane' },
+    { bus:'C221', mainRoute:'THANE SOUTH MUMBAI', knownRoutes:['HNMN','ALL','KLS'],      driverBase:'Thane' },
+    { bus:'C433', mainRoute:'THANE SOUTH MUMBAI', knownRoutes:['VV','ALL','NTH'],        driverBase:'Thane' },
+    { bus:'C308', mainRoute:'THANE SOUTH MUMBAI', knownRoutes:['NTH','ALL'],             driverBase:'Kurla' },
+    { bus:'C558', mainRoute:'MULUND SOUTH MUMBAI',knownRoutes:['ALL'],                   driverBase:'Mulund' },
+    { bus:'C124', mainRoute:'MULUND SOUTH MUMBAI',knownRoutes:['ALL'],                   driverBase:'Mulund' },
+    { bus:'C317', mainRoute:'CHEMBUR - BKC',      knownRoutes:['ALL','BKC','CHEMBUR'],   driverBase:'Kurla' },
+    { bus:'C110', mainRoute:'CHEMBUR - BKC',      knownRoutes:['ALL','CST'],             driverBase:'Kurla' },
+  ];
+  for (const s of sample) {
+    if (!busMaster.find(b => b.bus === s.bus)) busMaster.push(s);
+  }
+  persistAll();
+  renderBMTable();
+  updateBadge('busmaster', busMaster.length);
+  showToast('Sample bus master loaded');
+}
+
+/* ═══════════════════════════════════════════════════
+   TAB SWITCHING
+═══════════════════════════════════════════════════ */
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.getAttribute('onclick').includes("'"+name+"'")) b.classList.add('active');
+  });
+  if (name === 'busmaster') refreshMainRouteDropdown();
+}
+
+function updateBadge(tab, count) {
+  const el = document.getElementById('badge-'+tab);
+  if (el) el.textContent = count;
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Load cached data from localStorage immediately (instant, no flicker)
+  loadFromLocal();
+  renderBMTable();
+  renderExcluded();
+  updateBadge('busmaster', busMaster.length);
+
+  // 2. If JSONBin is configured, auto-pull fresh data from cloud
+  const { apiKey, binId } = getJBConfig();
+  if (apiKey && binId && apiKey !== 'YOUR_JSONBIN_API_KEY_HERE') {
+    setCloudStatus('loading');
+    try {
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        headers: { 'X-Master-Key': apiKey }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const data = json.record;
+        if (data.busMaster)     busMaster     = data.busMaster;
+        if (data.excludedBuses) excludedBuses = new Set(data.excludedBuses);
+        renderBMTable();
+        renderExcluded();
+        updateBadge('busmaster', busMaster.length);
+        saveToLocal(); // refresh local cache
+        setCloudStatus('ok');
+      } else {
+        setCloudStatus('error');
+      }
+    } catch(e) {
+      setCloudStatus('error');
+    }
+  }
+});
+</script>
+</body>
+</html>
