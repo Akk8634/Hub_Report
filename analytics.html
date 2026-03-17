@@ -458,7 +458,7 @@ async function loadData() {
   showToast('Loading…');
 
   try {
-    const res  = await fetch('/.netlify/functions/db');
+    const res  = await fetch('/api/db');
     const json = await res.json();
 
     if (!res.ok) {
