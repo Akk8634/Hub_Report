@@ -778,7 +778,7 @@ function toggleCustomDays() {
 /* ── DB via Netlify Function (no keys exposed to browser) ── */
 async function autoSave(records) {
   try {
-    const res = await fetch('/.netlify/functions/db', {
+    const res = await fetch('functions/api/db.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ records })
