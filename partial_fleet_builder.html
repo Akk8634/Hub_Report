@@ -1204,7 +1204,7 @@ function setCloudStatus(state) {
 async function pushToCloud(silent = false) {
   if (!silent) setCloudStatus('loading');
   try {
-    const res = await fetch('/.netlify/functions/fleet', {
+    const res = await fetch('functions/api/fleet.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(buildPayload())
