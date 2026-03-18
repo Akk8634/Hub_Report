@@ -445,7 +445,7 @@ canvas { display: block; }
 const COLORS = ['#f59e0b','#6366f1','#10b981','#38bdf8','#f472b6','#fb923c','#a78bfa','#34d399','#60a5fa','#fbbf24','#818cf8','#4ade80','#22d3ee'];
 
 
-function getFiltered() {let allData = [];
+let allData = [];
 
 /* ── NORMALIZE DATA ── */
 function normalizeData(data) {
@@ -483,14 +483,16 @@ async function loadData() {
       return;
     }
 
-    const raw = json.analytics || [];
+    // ✅ Universal fix (JSONBin formats handle karega)
+    const raw = Array.isArray(json.analytics)
+      ? json.analytics
+      : json.analytics?.record || [];
 
     if (!raw.length) {
       showToast('No data found in bin', true);
       return;
     }
 
-    // ✅ normalize data
     allData = normalizeData(raw);
 
     populateRouteFilter();
@@ -502,6 +504,28 @@ async function loadData() {
     console.error(e);
     showToast('Failed to load: ' + e.message, true);
   }
+}
+
+/* ── FILTER ── */
+function getFiltered() {
+  const range  = document.getElementById('rangeFilter').value;
+  const mode   = document.getElementById('modeFilter').value;
+  const route  = document.getElementById('routeFilter').value;
+
+  const now = new Date();
+  let startDate = null;
+
+  if (range !== 'all') {
+    startDate = new Date();
+    startDate.setDate(now.getDate() - (parseInt(range) || 30));
+  }
+
+  return allData.filter(r => {
+    if (startDate && new Date(r.date) < startDate) return false;
+    if (mode !== 'all' && r.mode !== mode) return false;
+    if (route !== 'all' && r.route !== route) return false;
+    return true;
+  });
 }
 
 /* ── FETCH DATA (optional use) ── */
