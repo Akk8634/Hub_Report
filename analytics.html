@@ -444,16 +444,33 @@ canvas { display: block; }
 
 const COLORS = ['#f59e0b','#6366f1','#10b981','#38bdf8','#f472b6','#fb923c','#a78bfa','#34d399','#60a5fa','#fbbf24','#818cf8','#4ade80','#22d3ee'];
 
-let allData = [];
 
-window.addEventListener('DOMContentLoaded', () => { loadData(); });
+function getFiltered() {let allData = [];
 
-function toggleCustom() {
-  document.getElementById('customDays').style.display =
-    document.getElementById('rangeFilter').value === 'custom' ? 'inline-block' : 'none';
+/* ── NORMALIZE DATA ── */
+function normalizeData(data) {
+  const result = [];
+
+  data.forEach(entry => {
+    const routes = entry.routes || {};
+
+    Object.keys(routes).forEach(route => {
+      if (routes[route]) {
+        result.push({
+          date: entry.timestamp,
+          mode: entry.mode,
+          route: route,
+          issue: routes[route],
+          bus: "-"
+        });
+      }
+    });
+  });
+
+  return result;
 }
 
-/* ── FETCH via Netlify proxy ── */
+/* ── LOAD DATA ── */
 async function loadData() {
   showToast('Loading…');
 
@@ -473,7 +490,8 @@ async function loadData() {
       return;
     }
 
-    allData = normalizeData(raw);   // ✅ FIX
+    // ✅ normalize data
+    allData = normalizeData(raw);
 
     populateRouteFilter();
     render();
@@ -486,7 +504,31 @@ async function loadData() {
   }
 }
 
-function getFiltered() {
+/* ── FETCH DATA (optional use) ── */
+async function fetchData() {
+  const res  = await fetch('/api/data');
+  const json = await res.json();
+  return normalizeData(json.analytics || []);
+}
+
+/* ── CSV EXPORT ── */
+function downloadCSV(records, name) {
+  let csv = 'date,mode,route,bus,issue\n';
+
+  records.forEach(r => {
+    csv += `${r.date},${r.mode},"${r.route}","${r.bus}","${r.issue}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.click();
+
+  showToast('CSV downloaded ✓');
+}
   const range  = document.getElementById('rangeFilter').value;
   const mode   = document.getElementById('modeFilter').value;
   const route  = document.getElementById('routeFilter').value;
