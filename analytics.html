@@ -451,7 +451,8 @@ function normalizeData(data) {
   const result = [];
 
   data.forEach(entry => {
-    // Format 1: { date, mode, route, bus, issue } — JSONBin se aata hai
+
+    // Format A: { date, mode, route, bus, issue } — flat record
     if (entry.date && entry.route) {
       result.push({
         date:  entry.date,
@@ -463,21 +464,36 @@ function normalizeData(data) {
       return;
     }
 
-    // Format 2: { timestamp, mode, routes: { routeName: issueText } } — purana format
-    if (entry.timestamp && entry.routes) {
-      const routes = entry.routes || {};
-      Object.keys(routes).forEach(route => {
-        if (routes[route]) {
+    // Format B: { timestamp, mode, routes: [ {date, mode, route, bus, issue} ] }
+    // — actual format from /api/data
+    if (entry.timestamp && Array.isArray(entry.routes)) {
+      entry.routes.forEach(r => {
+        result.push({
+          date:  r.date  || entry.timestamp.slice(0, 10),
+          mode:  r.mode  || entry.mode || 'morning',
+          route: r.route || '—',
+          bus:   r.bus   || '—',
+          issue: r.issue || '—'
+        });
+      });
+      return;
+    }
+
+    // Format C: { timestamp, mode, routes: { routeName: issueText } } — object routes
+    if (entry.timestamp && entry.routes && !Array.isArray(entry.routes)) {
+      Object.keys(entry.routes).forEach(route => {
+        if (entry.routes[route]) {
           result.push({
-            date:  entry.timestamp,
+            date:  entry.timestamp.slice(0, 10),
             mode:  entry.mode || 'morning',
             route: route,
             bus:   '—',
-            issue: routes[route]
+            issue: entry.routes[route]
           });
         }
       });
     }
+
   });
 
   return result;
@@ -488,28 +504,30 @@ async function loadData() {
   showToast('Loading…');
 
   try {
-    const res  = await fetch('/api/data');
-    const json = await res.json();
-
-    console.log("API DATA:", json); // debug
+    const res = await fetch('/api/data');
 
     if (!res.ok) {
-      showToast('API Error', true);
+      showToast('API Error: ' + res.status, true);
       return;
     }
 
+    const json = await res.json();
+
+    // data.js returns raw JSONBin response: { reports: [...] }
     const raw = Array.isArray(json.reports)
       ? json.reports
-      : (json.record && json.record.reports) || [];
+      : Array.isArray(json.record?.reports)
+      ? json.record.reports
+      : Array.isArray(json)
+      ? json
+      : [];
 
     if (!raw.length) {
-      showToast('No data found ❌', true);
+      showToast('No data found — generate a report first', true);
       return;
     }
 
     allData = normalizeData(raw);
-
-    console.log("Processed:", allData);
 
     populateRouteFilter();
     render();
