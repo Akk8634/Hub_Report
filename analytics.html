@@ -452,7 +452,7 @@ function normalizeData(data) {
 
   data.forEach(entry => {
 
-    // Format A: { date, mode, route, bus, issue } — flat record
+    // Format A: flat record { date, mode, route, bus, issue }
     if (entry.date && entry.route) {
       result.push({
         date:  entry.date,
@@ -461,12 +461,9 @@ function normalizeData(data) {
         bus:   entry.bus   || '—',
         issue: entry.issue || '—'
       });
-      return;
-    }
 
-    // Format B: { timestamp, mode, routes: [ {date, mode, route, bus, issue} ] }
-    // — actual format from /api/data
-    if (entry.timestamp && Array.isArray(entry.routes)) {
+    // Format B: { timestamp, mode, routes: [ {date, route, bus, issue} ] }
+    } else if (entry.timestamp && Array.isArray(entry.routes)) {
       entry.routes.forEach(r => {
         result.push({
           date:  r.date  || entry.timestamp.slice(0, 10),
@@ -476,11 +473,9 @@ function normalizeData(data) {
           issue: r.issue || '—'
         });
       });
-      return;
-    }
 
-    // Format C: { timestamp, mode, routes: { routeName: issueText } } — object routes
-    if (entry.timestamp && entry.routes && !Array.isArray(entry.routes)) {
+    // Format C: { timestamp, mode, routes: { routeName: issueText } }
+    } else if (entry.timestamp && entry.routes && typeof entry.routes === 'object') {
       Object.keys(entry.routes).forEach(route => {
         if (entry.routes[route]) {
           result.push({
@@ -542,11 +537,26 @@ async function loadData() {
 
 /* ── FILTER ── */
 function getFiltered() {
-  const mode  = document.getElementById('modeFilter').value;
-  const route = document.getElementById('routeFilter').value;
+  const range  = document.getElementById('rangeFilter').value;
+  const mode   = document.getElementById('modeFilter').value;
+  const route  = document.getElementById('routeFilter').value;
+  const now    = new Date();
+  let startDate = null;
+
+  if (range === 'custom') {
+    const d = parseInt(document.getElementById('customDays').value) || 7;
+    startDate = new Date(); startDate.setDate(now.getDate() - d);
+  } else if (range === 'month') {
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (range === 'year') {
+    startDate = new Date(now.getFullYear(), 0, 1);
+  } else if (range !== 'all') {
+    startDate = new Date(); startDate.setDate(now.getDate() - parseInt(range));
+  }
 
   return allData.filter(r => {
-    if (mode !== 'all' && r.mode !== mode) return false;
+    if (startDate && new Date(r.date) < startDate) return false;
+    if (mode  !== 'all' && r.mode  !== mode)  return false;
     if (route !== 'all' && r.route !== route) return false;
     return true;
   });
@@ -583,30 +593,7 @@ function downloadCSV(records, name) {
 
   showToast('CSV downloaded ✓');
 }
-  const range  = document.getElementById('rangeFilter').value;
-  const mode   = document.getElementById('modeFilter').value;
-  const route  = document.getElementById('routeFilter').value;
-  const now    = new Date();
-  let startDate = null;
 
-  if (range === 'custom') {
-    const d = parseInt(document.getElementById('customDays').value) || 7;
-    startDate = new Date(); startDate.setDate(now.getDate() - d);
-  } else if (range === 'month') {
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-  } else if (range === 'year') {
-    startDate = new Date(now.getFullYear(), 0, 1);
-  } else if (range !== 'all') {
-    startDate = new Date(); startDate.setDate(now.getDate() - parseInt(range));
-  }
-
-  return allData.filter(r => {
-    if (startDate && new Date(r.date) < startDate) return false;
-    if (mode  !== 'all' && r.mode  !== mode)  return false;
-    if (route !== 'all' && r.route !== route) return false;
-    return true;
-  });
-}
 
 function populateRouteFilter() {
   const sel    = document.getElementById('routeFilter');
