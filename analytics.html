@@ -451,19 +451,33 @@ function normalizeData(data) {
   const result = [];
 
   data.forEach(entry => {
-    const routes = entry.routes || {};
+    // Format 1: { date, mode, route, bus, issue } — JSONBin se aata hai
+    if (entry.date && entry.route) {
+      result.push({
+        date:  entry.date,
+        mode:  entry.mode  || 'morning',
+        route: entry.route || '—',
+        bus:   entry.bus   || '—',
+        issue: entry.issue || '—'
+      });
+      return;
+    }
 
-    Object.keys(routes).forEach(route => {
-      if (routes[route]) {
-        result.push({
-          date: entry.timestamp,
-          mode: entry.mode,
-          route: route,
-          issue: routes[route],
-          bus: "-"
-        });
-      }
-    });
+    // Format 2: { timestamp, mode, routes: { routeName: issueText } } — purana format
+    if (entry.timestamp && entry.routes) {
+      const routes = entry.routes || {};
+      Object.keys(routes).forEach(route => {
+        if (routes[route]) {
+          result.push({
+            date:  entry.timestamp,
+            mode:  entry.mode || 'morning',
+            route: route,
+            bus:   '—',
+            issue: routes[route]
+          });
+        }
+      });
+    }
   });
 
   return result;
