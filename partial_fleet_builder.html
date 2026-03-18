@@ -694,6 +694,7 @@
   <div class="tab-panel" id="tab-output">
     <div class="btn-bar" style="margin-bottom:20px">
       <button class="btn btn-success" onclick="adjustFleet()">▶ Run Adjustment</button>
+      <button class="btn btn-secondary" onclick="copyOutput()">📋 Copy Output</button>
       <button class="btn btn-secondary" onclick="exportOutput()">Export Results</button>
       <button class="btn btn-danger btn-sm" onclick="clearOutput()">Clear Output</button>
     </div>
@@ -1204,7 +1205,7 @@ function setCloudStatus(state) {
 async function pushToCloud(silent = false) {
   if (!silent) setCloudStatus('loading');
   try {
-    const res = await fetch('/api/fleet.js', {
+    const res = await fetch('/api/fleet', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(buildPayload())
@@ -1227,7 +1228,7 @@ async function pushToCloud(silent = false) {
 async function pullFromCloud() {
   setCloudStatus('loading');
   try {
-    const res  = await fetch('/.netlify/functions/fleet');
+    const res  = await fetch('/api/fleet');
     const json = await res.json();
     if (!res.ok) { setCloudStatus('error'); showToast('Pull failed: ' + (json.error || res.status)); return; }
     const data = json.record || json;
@@ -1412,6 +1413,36 @@ function clearOutput() {
   updateBadge('output', 0);
 }
 
+function copyOutput() {
+  if (!outputResult) { showToast('Run adjustment first'); return; }
+  const { results, nonOps, unassigned } = outputResult;
+
+  let text = '✪ Fleet Adjustment Output\n\n';
+
+  text += '📋 ADJUSTED PARTIAL FLEET\n';
+  text += '─'.repeat(50) + '\n';
+  results.forEach(r => {
+    const assigned = r.assignedBus || '—';
+    const orig     = r.originalBus && r.originalBus !== r.assignedBus ? ` (was: ${r.originalBus})` : '';
+    const icon     = r.matchType === 'perfect' || r.matchType === 'original' ? '✓' : r.matchType === 'similar' ? '~' : '⚠';
+    text += `${icon} ${r.slot || '—'} | ${r.route} | ${assigned}${orig}\n`;
+  });
+
+  if (nonOps.length) {
+    text += '\n🚫 NON-OPS\n';
+    text += '─'.repeat(50) + '\n';
+    nonOps.forEach(b => { text += `– ${b}\n`; });
+  }
+
+  if (unassigned.length) {
+    text += '\n⚠️ UNASSIGNED SLOTS\n';
+    text += '─'.repeat(50) + '\n';
+    unassigned.forEach(u => { text += `– ${u.slot || '—'} | ${u.route}${u.originalBus ? ' | orig: '+u.originalBus : ''}\n`; });
+  }
+
+  navigator.clipboard.writeText(text).then(() => showToast('✓ Copied to clipboard'));
+}
+
 function exportOutput() {
   if (!outputResult) { showToast('Run adjustment first'); return; }
   const csv = ['Slot,Route,Original Bus,Assigned Bus,Match Type,Reason', ...outputResult.results.map(r => `"${r.slot}","${r.route}","${r.originalBus||''}","${r.assignedBus||''}","${r.matchType}","${r.reason}"`)].join('\n');
@@ -1465,7 +1496,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Auto-pull from cloud on load
   setCloudStatus('loading');
   try {
-    const res  = await fetch('/.netlify/functions/fleet');
+    const res  = await fetch('/api/fleet');
     if (res.ok) {
       const json = await res.json();
       const data = json.record || json;
