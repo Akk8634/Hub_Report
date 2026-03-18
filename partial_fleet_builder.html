@@ -1263,18 +1263,26 @@ function adjustFleet() {
     const slotRoute   = normaliseRoute(slot.route || 'ALL');
     const slotMain    = slot.mainRoute;
 
-    if (originalBus && rowByBus[originalBus] && !usedBuses.has(originalBus) && !excludedBuses.has(originalBus)) {
+    // ── RULE 1: Partial fleet bus in row data + not excluded → MANDATORY use ──
+    if (originalBus && rowByBus[originalBus] && !excludedBuses.has(originalBus) && !usedBuses.has(originalBus)) {
       usedBuses.add(originalBus);
       const rd = rowByBus[originalBus];
-      results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: originalBus, matchType: 'original', reason: 'Bus present in row data', rowTime: rd.slot });
-      logs.push({ type:'perfect', msg:`[${slotTime}] ${originalBus} retained (original bus in row data)` });
+      results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: originalBus, matchType: 'original', reason: 'Original bus retained (present in row data)', rowTime: rd.slot });
+      logs.push({ type:'perfect', msg:`[${slotTime}] ${originalBus} retained — present in row data` });
       continue;
     }
 
-    if (originalBus && excludedBuses.has(originalBus)) {
-      logs.push({ type:'info', msg:`[${slotTime}] ${originalBus} is EXCLUDED — finding replacement for route ${slotRoute}` });
-    } else if (originalBus) {
+    // ── RULE 2: Partial fleet bus NOT in row data → find replacement from row ──
+    if (originalBus && !rowByBus[originalBus] && !excludedBuses.has(originalBus)) {
       logs.push({ type:'info', msg:`[${slotTime}] ${originalBus} not in row data — finding replacement for route ${slotRoute}` });
+    }
+    // ── Excluded bus → find replacement ──
+    else if (originalBus && excludedBuses.has(originalBus)) {
+      logs.push({ type:'info', msg:`[${slotTime}] ${originalBus} is EXCLUDED — finding replacement for route ${slotRoute}` });
+    }
+    // ── No bus in slot → find from row ──
+    else if (!originalBus) {
+      logs.push({ type:'info', msg:`[${slotTime}] No bus in slot — finding from row data for route ${slotRoute}` });
     }
 
     function normaliseMainRoute(mr) {
@@ -1331,8 +1339,11 @@ function adjustFleet() {
     }
   }
 
+  // Non-Ops = row data buses jo assign nahi hui + excluded buses
   for (const rb of rowBuses) {
-    if (!usedBuses.has(rb) && !excludedBuses.has(rb)) nonOps.push(rb);
+    if (!usedBuses.has(rb)) {
+      nonOps.push(rb);
+    }
   }
   if (nonOps.length) logs.push({ type:'info', msg:`Non-Ops (unassigned from row data): ${nonOps.join(', ')}` });
 
@@ -1453,7 +1464,7 @@ function copyOutput() {
 
   // ── Non-Ops ──
   if (nonOps.length) {
-    text += '\n*🚫 NON-OPS*\n';
+    text += '\n**🚫 NON-OPS**\n';
     text += '─'.repeat(50) + '\n';
     nonOps.forEach(b => { text += `– ${b}\n`; });
   }
