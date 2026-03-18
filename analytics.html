@@ -466,15 +466,18 @@ async function loadData() {
       return;
     }
 
-    allData = json.reports || [];
+    const raw = json.analytics || [];
 
-    if (!allData.length) {
+    if (!raw.length) {
       showToast('No data found in bin', true);
       return;
     }
 
+    allData = normalizeData(raw);   // ✅ FIX
+
     populateRouteFilter();
     render();
+
     showToast('Loaded ' + allData.length + ' records ✓');
 
   } catch (e) {
