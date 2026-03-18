@@ -444,7 +444,6 @@ canvas { display: block; }
 
 const COLORS = ['#f59e0b','#6366f1','#10b981','#38bdf8','#f472b6','#fb923c','#a78bfa','#34d399','#60a5fa','#fbbf24','#818cf8','#4ade80','#22d3ee'];
 
-
 let allData = [];
 
 /* ── NORMALIZE DATA ── */
@@ -478,22 +477,25 @@ async function loadData() {
     const res  = await fetch('/api/data');
     const json = await res.json();
 
+    console.log("API DATA:", json); // debug
+
     if (!res.ok) {
-      showToast('API Error: ' + (json.error || res.status), true);
+      showToast('API Error', true);
       return;
     }
 
-    // ✅ Universal fix (JSONBin formats handle karega)
     const raw = Array.isArray(json.analytics)
       ? json.analytics
       : json.analytics?.record || [];
 
     if (!raw.length) {
-      showToast('No data found in bin', true);
+      showToast('No data found ❌', true);
       return;
     }
 
     allData = normalizeData(raw);
+
+    console.log("Processed:", allData);
 
     populateRouteFilter();
     render();
@@ -502,31 +504,27 @@ async function loadData() {
 
   } catch (e) {
     console.error(e);
-    showToast('Failed to load: ' + e.message, true);
+    showToast('Failed: ' + e.message, true);
   }
 }
 
 /* ── FILTER ── */
 function getFiltered() {
-  const range  = document.getElementById('rangeFilter').value;
-  const mode   = document.getElementById('modeFilter').value;
-  const route  = document.getElementById('routeFilter').value;
-
-  const now = new Date();
-  let startDate = null;
-
-  if (range !== 'all') {
-    startDate = new Date();
-    startDate.setDate(now.getDate() - (parseInt(range) || 30));
-  }
+  const mode  = document.getElementById('modeFilter').value;
+  const route = document.getElementById('routeFilter').value;
 
   return allData.filter(r => {
-    if (startDate && new Date(r.date) < startDate) return false;
     if (mode !== 'all' && r.mode !== mode) return false;
     if (route !== 'all' && r.route !== route) return false;
     return true;
   });
 }
+
+/* ── AUTO LOAD ── */
+window.addEventListener('DOMContentLoaded', () => {
+  loadData();
+});
+
 
 /* ── FETCH DATA (optional use) ── */
 async function fetchData() {
