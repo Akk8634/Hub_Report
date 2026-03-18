@@ -3,25 +3,37 @@ export async function onRequestPost(context) {
     const API_KEY = context.env.JSONBIN_API_KEY;
     const BIN_ID = context.env.JSONBIN_BIN_ID;
 
-    const newData = await context.request.json();
+    const newEntry = await context.request.json();
 
-    // 1. Existing data fetch karo
+    // 1. Existing data fetch
     const oldRes = await fetch(
       `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,
       {
+        method: "GET",
         headers: {
-          "X-Master-Key": API_KEY
+          "X-Master-Key": API_KEY,
+          "X-Bin-Meta": "false"
         }
       }
     );
 
-    const oldJson = await oldRes.json();
-    const oldData = oldJson.record || [];
+    if (!oldRes.ok) {
+      const errText = await oldRes.text();
+      return new Response(
+        JSON.stringify({ error: "Fetch failed", details: errText }),
+        { status: 500 }
+      );
+    }
 
-    // 2. New data add karo
-    const updatedData = [...oldData, newData];
+    const oldData = await oldRes.json();
 
-    // 3. JSONBin me save karo
+    // 2. Ensure array
+    const existing = Array.isArray(oldData) ? oldData : [];
+
+    // 3. Append new entry
+    const updated = [...existing, newEntry];
+
+    // 4. Save to JSONBin
     const saveRes = await fetch(
       `https://api.jsonbin.io/v3/b/${BIN_ID}`,
       {
@@ -30,18 +42,39 @@ export async function onRequestPost(context) {
           "Content-Type": "application/json",
           "X-Master-Key": API_KEY
         },
-        body: JSON.stringify(updatedData)
+        body: JSON.stringify(updated)
       }
     );
 
-    const result = await saveRes.text();
+    const saveText = await saveRes.text();
+
+    if (!saveRes.ok) {
+      return new Response(
+        JSON.stringify({
+          error: "Save failed",
+          details: saveText
+        }),
+        { status: 500 }
+      );
+    }
 
     return new Response(
-  JSON.stringify({
-    success: true,
-    message: "Saved successfully"
-  }),
-  {
-    headers: { "Content-Type": "application/json" }
+      JSON.stringify({
+        success: true,
+        saved: 1
+      }),
+      {
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+
+  } catch (err) {
+    return new Response(
+      JSON.stringify({
+        error: "Server error",
+        message: err.message
+      }),
+      { status: 500 }
+    );
   }
-);
+}
