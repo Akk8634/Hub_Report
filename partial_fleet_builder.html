@@ -810,7 +810,7 @@ function isSimilarRoute(r1, r2) {
   const a = normaliseRoute(r1);
   const b = normaliseRoute(r2);
   if (a === b) return true;
-  if (a === 'ALL' || b === 'ALL') return true;
+  // ALL is a specific route — not universal
   const g1 = getMainRoute(a);
   const g2 = getMainRoute(b);
   if (g1 && g2 && g1 === g2) return true;
@@ -1266,7 +1266,7 @@ function adjustFleet() {
     if (originalBus && rowByBus[originalBus] && !usedBuses.has(originalBus) && !excludedBuses.has(originalBus)) {
       usedBuses.add(originalBus);
       const rd = rowByBus[originalBus];
-      results.push({ slot: slotTime, route: slotRoute, originalBus, assignedBus: originalBus, matchType: 'original', reason: 'Bus present in row data', rowTime: rd.slot });
+      results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: originalBus, matchType: 'original', reason: 'Bus present in row data', rowTime: rd.slot });
       logs.push({ type:'perfect', msg:`[${slotTime}] ${originalBus} retained (original bus in row data)` });
       continue;
     }
@@ -1301,9 +1301,9 @@ function adjustFleet() {
     function routeExactMatch(candidateRoute, targetRoute) {
       const cr = normaliseRoute(candidateRoute);
       const tr = normaliseRoute(targetRoute);
-      if (cr === tr) return true;
-      if (cr === 'ALL' || tr === 'ALL') return true;
-      return false;
+
+      // Strict exact match only — ALL is a specific route, not universal
+      return cr === tr;
     }
 
     const exactCandidates = candidates.filter(c => routeExactMatch(c.route, slotRoute));
@@ -1320,12 +1320,12 @@ function adjustFleet() {
       let matchType, reason;
       if (cTime === slotTime) { matchType = 'perfect'; reason = `Same time + exact route (${cRoute})`; }
       else { matchType = 'similar'; reason = `Exact route (${cRoute}) — different time (${cTime})`; }
-      results.push({ slot: slotTime, route: slotRoute, originalBus, assignedBus: best.bus, matchType, reason, rowTime: cTime });
+      results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: best.bus, matchType, reason, rowTime: cTime });
       const replaceTxt = originalBus ? `${best.bus} instead of ${originalBus}` : best.bus;
       logs.push({ type: matchType === 'perfect' ? 'perfect' : 'similar', msg: `[${slotTime}] ${replaceTxt} — ${reason}` });
     } else {
       const noMatchReason = normSlotMain ? `No exact-route match in main route "${normSlotMain}" for ${slotRoute}` : `No exact-route match found for ${slotRoute}`;
-      results.push({ slot: slotTime, route: slotRoute, originalBus, assignedBus: null, matchType: 'unassigned', reason: noMatchReason, rowTime: '' });
+      results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: null, matchType: 'unassigned', reason: noMatchReason, rowTime: '' });
       unassigned.push({ slot: slotTime, route: slotRoute, originalBus });
       logs.push({ type:'fallback', msg:`[${slotTime}] ⚠ ${noMatchReason} — slot unassigned` });
     }
@@ -1430,7 +1430,7 @@ function copyOutput() {
   });
 
   Object.keys(groups).forEach(grp => {
-    text += `\n*${grp}*\n`;
+    text += `\n**${grp}**\n`;
     groups[grp].forEach(r => {
       const bus  = r.assignedBus || '—';
       const slot = r.slot || '—';
@@ -1445,7 +1445,7 @@ function copyOutput() {
   );
   if (replacements.length) {
     text += '\n' + '─'.repeat(50) + '\n';
-    text += '*REPLACEMENT BUSES*\n';
+    text += '**REPLACEMENT BUSES**\n';
     replacements.forEach(r => {
       text += `${r.originalBus} ---- → ${r.assignedBus}\n`;
     });
