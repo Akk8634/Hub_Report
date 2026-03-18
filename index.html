@@ -794,7 +794,7 @@ async function autoSave(records) {
 
 /* ── FETCH DATA ── */
 async function fetchData() {
-  const res  = await fetch('/.netlify/functions/db');
+  const res  = await fetch('/api/data');
   const data = await res.json();
   return data.reports || [];
 }
