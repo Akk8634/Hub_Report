@@ -458,7 +458,7 @@ async function loadData() {
   showToast('Loading…');
 
   try {
-    const res  = await fetch('functions/api/db.js');
+    const res  = await fetch('/api/data');
     const json = await res.json();
 
     if (!res.ok) {
