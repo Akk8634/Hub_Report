@@ -1418,24 +1418,49 @@ function copyOutput() {
   const { results, nonOps, unassigned } = outputResult;
 
   let text = '✪ Fleet Adjustment Output\n\n';
-
   text += '📋 ADJUSTED PARTIAL FLEET\n';
   text += '─'.repeat(50) + '\n';
+
+  // ── Group by mainRoute ──
+  const groups = {};
   results.forEach(r => {
-    const assigned = r.assignedBus || '—';
-    const orig     = r.originalBus && r.originalBus !== r.assignedBus ? ` (was: ${r.originalBus})` : '';
-    const icon     = r.matchType === 'perfect' || r.matchType === 'original' ? '✓' : r.matchType === 'similar' ? '~' : '⚠';
-    text += `${icon} ${r.slot || '—'} | ${r.route} | ${assigned}${orig}\n`;
+    const grp = r.mainRoute || 'OTHER';
+    if (!groups[grp]) groups[grp] = [];
+    groups[grp].push(r);
   });
 
+  Object.keys(groups).forEach(grp => {
+    text += `\n*${grp}*\n`;
+    groups[grp].forEach(r => {
+      const bus  = r.assignedBus || '—';
+      const slot = r.slot || '—';
+      const icon = r.matchType === 'perfect' || r.matchType === 'original' ? '✓' : r.matchType === 'similar' ? '~' : '⚠';
+      text += `${icon} ${bus} ${slot} ${r.route}\n`;
+    });
+  });
+
+  // ── Replacement buses section ──
+  const replacements = results.filter(r =>
+    r.originalBus && r.assignedBus && r.originalBus !== r.assignedBus
+  );
+  if (replacements.length) {
+    text += '\n' + '─'.repeat(50) + '\n';
+    text += '*REPLACEMENT BUSES*\n';
+    replacements.forEach(r => {
+      text += `${r.originalBus} ---- → ${r.assignedBus}\n`;
+    });
+  }
+
+  // ── Non-Ops ──
   if (nonOps.length) {
-    text += '\n🚫 NON-OPS\n';
+    text += '\n*🚫 NON-OPS*\n';
     text += '─'.repeat(50) + '\n';
     nonOps.forEach(b => { text += `– ${b}\n`; });
   }
 
+  // ── Unassigned ──
   if (unassigned.length) {
-    text += '\n⚠️ UNASSIGNED SLOTS\n';
+    text += '\n*⚠️ UNASSIGNED SLOTS*\n';
     text += '─'.repeat(50) + '\n';
     unassigned.forEach(u => { text += `– ${u.slot || '—'} | ${u.route}${u.originalBus ? ' | orig: '+u.originalBus : ''}\n`; });
   }
