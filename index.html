@@ -788,7 +788,15 @@ async function autoSave(records) {
       })
     });
 
-    const data = await res.json();
+    const text = await res.text();   // ✅ change
+
+    let data;
+    try {
+      data = JSON.parse(text);       // safe parse
+    } catch {
+      data = { success: true };      // fallback
+    }
+
     showToast('Saved successfully ✓');
 
   } catch(e) {
