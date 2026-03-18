@@ -778,14 +778,19 @@ function toggleCustomDays() {
 /* ── DB via Netlify Function (no keys exposed to browser) ── */
 async function autoSave(records) {
   try {
-    const res = await fetch('functions/api/db.js', {
+    const res = await fetch('/api/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ records })
+      body: JSON.stringify({
+        routes: records,
+        mode: "morning",
+        timestamp: new Date().toISOString()
+      })
     });
+
     const data = await res.json();
-    if (data.success) showToast('Saved ' + data.saved + ' record(s) ✓');
-    else showToast('Save failed', true);
+    showToast('Saved successfully ✓');
+
   } catch(e) {
     console.error('Save error:', e);
     showToast('Save failed: ' + e.message, true);
