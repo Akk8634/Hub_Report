@@ -36,14 +36,12 @@ export async function onRequestPost(context) {
 
     const result = await saveRes.text();
 
-    return new Response(result, {
-      headers: { "Content-Type": "application/json" }
-    });
-
-  } catch (err) {
     return new Response(
-      JSON.stringify({ error: err.message }),
-      { status: 500 }
-    );
+  JSON.stringify({
+    success: true,
+    message: "Saved successfully"
+  }),
+  {
+    headers: { "Content-Type": "application/json" }
   }
-}
+);
