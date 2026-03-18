@@ -484,9 +484,9 @@ async function loadData() {
       return;
     }
 
-    const raw = Array.isArray(json.analytics)
-      ? json.analytics
-      : json.analytics?.record || [];
+    const raw = Array.isArray(json.reports)
+      ? json.reports
+      : (json.record && json.record.reports) || [];
 
     if (!raw.length) {
       showToast('No data found ❌', true);
@@ -530,7 +530,7 @@ window.addEventListener('DOMContentLoaded', () => {
 async function fetchData() {
   const res  = await fetch('/api/data');
   const json = await res.json();
-  return normalizeData(json.analytics || []);
+  return normalizeData(json.reports || []);
 }
 
 /* ── CSV EXPORT ── */
