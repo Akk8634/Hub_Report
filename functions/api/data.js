@@ -1,21 +1,20 @@
 export async function onRequestGet(context) {
   try {
-    const BIN_ID = context.env.JSONBIN_ID;
-    const API_KEY = context.env.JSONBIN_KEY;
+    const BIN_ID = context.env.JSONBIN_BIN_ID;
+    const API_KEY = context.env.JSONBIN_API_KEY;
 
-    const url = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
-
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        "X-Master-Key": API_KEY,
-        "X-Bin-Meta": "false"
+    const res = await fetch(
+      `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,
+      {
+        headers: {
+          "X-Master-Key": API_KEY,
+          "X-Bin-Meta": "false"
+        }
       }
-    });
+    );
 
     const text = await res.text();
 
-    // Debug response (important)
     if (!res.ok) {
       return new Response(
         JSON.stringify({
@@ -28,17 +27,12 @@ export async function onRequestGet(context) {
     }
 
     return new Response(text, {
-      headers: {
-        "Content-Type": "application/json"
-      }
+      headers: { "Content-Type": "application/json" }
     });
 
   } catch (err) {
     return new Response(
-      JSON.stringify({
-        error: "Server error",
-        message: err.message
-      }),
+      JSON.stringify({ error: err.message }),
       { status: 500 }
     );
   }
