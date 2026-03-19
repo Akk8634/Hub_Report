@@ -19,6 +19,8 @@
     --yellow:    #f0c040;
     --red:       #e05050;
     --blue:      #4a9eff;
+    --morning:   #f97316;
+    --evening:   #818cf8;
     --text:      #d8dde8;
     --text2:     #8a95a8;
     --text3:     #5a6478;
@@ -154,6 +156,56 @@
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
 
+  /* ── SHIFT SECTION HEADERS ── */
+  .shift-section {
+    margin-bottom: 24px;
+  }
+  .shift-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: 4px 4px 0 0;
+    border: 1px solid;
+    border-bottom: none;
+    font-family: var(--cond);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .shift-header.morning {
+    background: rgba(249,115,22,.08);
+    border-color: rgba(249,115,22,.3);
+    color: var(--morning);
+  }
+  .shift-header.evening {
+    background: rgba(129,140,248,.08);
+    border-color: rgba(129,140,248,.3);
+    color: var(--evening);
+  }
+  .shift-header.unknown {
+    background: rgba(90,100,120,.08);
+    border-color: rgba(90,100,120,.3);
+    color: var(--text3);
+  }
+  .shift-body {
+    border: 1px solid;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+  }
+  .shift-body.morning { border-color: rgba(249,115,22,.3); }
+  .shift-body.evening { border-color: rgba(129,140,248,.3); }
+  .shift-body.unknown { border-color: rgba(90,100,120,.3); }
+
+  /* ── SHIFT SIDE BY SIDE ── */
+  .shift-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
   /* ── TEXTAREA ── */
   textarea {
     width: 100%;
@@ -275,29 +327,13 @@
     padding: 3px 8px;
     border-radius: 2px;
   }
-  .badge-green  { background: rgba(45,190,108,.15); color: var(--green); border: 1px solid rgba(45,190,108,.3); }
-  .badge-yellow { background: rgba(240,192,64,.15); color: var(--yellow); border: 1px solid rgba(240,192,64,.3); }
-  .badge-red    { background: rgba(224,80,80,.15);  color: var(--red);    border: 1px solid rgba(224,80,80,.3); }
-  .badge-blue   { background: rgba(74,158,255,.15); color: var(--blue);   border: 1px solid rgba(74,158,255,.3); }
-  .badge-gray   { background: rgba(90,100,120,.15); color: var(--text3);  border: 1px solid var(--border); }
-
-  /* ── ROUTE MAP EDITOR ── */
-  .route-map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .route-group-card {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 14px;
-  }
-  .route-group-title {
-    font-family: var(--cond);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 8px;
-  }
+  .badge-green   { background: rgba(45,190,108,.15);  color: var(--green);   border: 1px solid rgba(45,190,108,.3); }
+  .badge-yellow  { background: rgba(240,192,64,.15);  color: var(--yellow);  border: 1px solid rgba(240,192,64,.3); }
+  .badge-red     { background: rgba(224,80,80,.15);   color: var(--red);     border: 1px solid rgba(224,80,80,.3); }
+  .badge-blue    { background: rgba(74,158,255,.15);  color: var(--blue);    border: 1px solid rgba(74,158,255,.3); }
+  .badge-gray    { background: rgba(90,100,120,.15);  color: var(--text3);   border: 1px solid var(--border); }
+  .badge-morning { background: rgba(249,115,22,.15);  color: var(--morning); border: 1px solid rgba(249,115,22,.3); }
+  .badge-evening { background: rgba(129,140,248,.15); color: var(--evening); border: 1px solid rgba(129,140,248,.3); }
 
   /* ── OUTPUT SPECIFIC ── */
   .log-entry {
@@ -310,10 +346,10 @@
     border-radius: 0 3px 3px 0;
     color: var(--text2);
   }
-  .log-entry.perfect { border-left-color: var(--green); }
-  .log-entry.similar { border-left-color: var(--yellow); }
+  .log-entry.perfect  { border-left-color: var(--green); }
+  .log-entry.similar  { border-left-color: var(--yellow); }
   .log-entry.fallback { border-left-color: var(--red); }
-  .log-entry.info    { border-left-color: var(--blue); }
+  .log-entry.info     { border-left-color: var(--blue); }
 
   .nonop-chip {
     display: inline-flex;
@@ -341,24 +377,40 @@
     border: 1px solid var(--border);
     border-radius: 4px;
     padding: 14px 20px;
-    min-width: 120px;
+    min-width: 100px;
     flex: 1;
   }
   .stat-value {
     font-family: var(--cond);
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 900;
     line-height: 1;
     color: var(--accent);
   }
   .stat-label {
     font-family: var(--cond);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--text3);
     margin-top: 4px;
+  }
+
+  /* ── SHIFT STATS ── */
+  .shift-stats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+  .shift-stat {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 2px;
   }
 
   /* ── EMPTY STATE ── */
@@ -407,11 +459,9 @@
   }
   #toast.show { transform: translateX(0); }
 
-  .highlight-row td { background: rgba(240,165,0,.05) !important; }
-
-  .output-row-perfect td:first-child { border-left: 3px solid var(--green); }
-  .output-row-similar td:first-child { border-left: 3px solid var(--yellow); }
-  .output-row-fallback td:first-child { border-left: 3px solid var(--red); }
+  .output-row-perfect   td:first-child { border-left: 3px solid var(--green); }
+  .output-row-similar   td:first-child { border-left: 3px solid var(--yellow); }
+  .output-row-fallback  td:first-child { border-left: 3px solid var(--red); }
   .output-row-unassigned td:first-child { border-left: 3px solid var(--text3); }
 
   /* ── MOBILE RESPONSIVE ── */
@@ -423,7 +473,7 @@
     .tabs { padding: 0 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; gap: 0; }
     .tab-btn { font-size: 11px; padding: 12px 12px; letter-spacing: 1px; white-space: nowrap; flex-shrink: 0; }
     .main { padding: 12px; }
-    .two-col, .three-col, .route-map-grid { grid-template-columns: 1fr !important; }
+    .two-col, .three-col, .shift-split { grid-template-columns: 1fr !important; }
     .card-body { padding: 12px; }
     .card-header { padding: 10px 12px; flex-wrap: wrap; gap: 6px; }
     .stats-bar { gap: 8px; }
@@ -460,7 +510,7 @@
     <svg viewBox="0 0 24 24"><path d="M3 17h18v2H3zm0-7h18v2H3zm0-7h18v2H3z"/></svg>
   </div>
   <div class="header-title">Fleet <span>Adjustment</span> System</div>
-  <div class="header-sub">v2.0 · TIME-FIRST ALGORITHM</div>
+  <div class="header-sub">v3.0 · DUAL-SHIFT ALGORITHM</div>
 </div>
 
 <!-- TABS -->
@@ -493,8 +543,8 @@
         <div class="card">
           <div class="card-header"><div class="card-title">📋 Raw Input Data</div></div>
           <div class="card-body">
-            <div class="section-label">Paste raw row data below</div>
-            <textarea id="rawInput" rows="18" placeholder="Chembur - Bkc&#10;C317&#10;ALL&#10;23/27&#10;8:30 AM"></textarea>
+            <div class="section-label">Paste raw row data below (Morning + Evening dono ek saath)</div>
+            <textarea id="rawInput" rows="18" placeholder="Chembur - Bkc&#10;C317&#10;ALL&#10;23/27&#10;8:30 AM&#10;&#10;Chembur - Bkc&#10;C500&#10;ALL&#10;15/27&#10;4:30 PM"></textarea>
             <div class="btn-bar">
               <button class="btn btn-primary" onclick="cleanData()">⚡ Clean Data</button>
               <button class="btn btn-secondary" onclick="loadSampleData()">Load Sample</button>
@@ -511,7 +561,13 @@
               <div style="color:var(--accent)">ALL / HN MN / NTH EXP / KLS / VV  →  <span style="color:var(--text)">Route</span></div>
               <div style="color:var(--accent)">23/27, 0/35  →  <span style="color:var(--text)">Load — ALWAYS SKIPPED</span></div>
               <div style="color:var(--accent)">8:30 AM  →  <span style="color:var(--text)">Slot (Time)</span></div>
-              <div style="margin-top:8px;color:var(--text3)">Auto-normalise: HN MN→HNMN · NTH EXP→NTH · KLS EXP→KLS</div>
+              <div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:3px;border-left:3px solid var(--morning)">
+                <span style="color:var(--morning)">🌅 Morning:</span> 6:00 AM – 10:59 AM
+              </div>
+              <div style="margin-top:6px;padding:8px;background:var(--bg3);border-radius:3px;border-left:3px solid var(--evening)">
+                <span style="color:var(--evening)">🌆 Evening:</span> 3:00 PM – 9:30 PM
+              </div>
+              <div style="margin-top:6px;color:var(--text3)">Auto-normalise: HN MN→HNMN · NTH EXP→NTH · KLS EXP→KLS</div>
             </div>
           </div>
         </div>
@@ -520,7 +576,9 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">✅ Cleaned Row Data</div>
-            <div style="margin-left:auto;display:flex;gap:8px">
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+              <span class="badge badge-morning" id="rd-morning-count">🌅 0</span>
+              <span class="badge badge-evening" id="rd-evening-count">🌆 0</span>
               <button class="btn btn-secondary btn-sm" onclick="exportClean()">Export CSV</button>
               <button class="btn btn-danger btn-sm" onclick="clearClean()">Clear</button>
             </div>
@@ -528,9 +586,9 @@
           <div class="card-body" style="padding:0">
             <div class="table-wrap">
               <table>
-                <thead><tr><th>#</th><th>Main Route</th><th>Bus</th><th>Route</th><th>Slot (Time)</th><th></th></tr></thead>
+                <thead><tr><th>#</th><th>Shift</th><th>Main Route</th><th>Bus</th><th>Route</th><th>Slot (Time)</th><th></th></tr></thead>
                 <tbody id="cleanTable">
-                  <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">🚌</div>Paste raw data and click "Clean Data"</div></td></tr>
+                  <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🚌</div>Paste raw data and click "Clean Data"</div></td></tr>
                 </tbody>
               </table>
             </div>
@@ -547,8 +605,8 @@
         <div class="card">
           <div class="card-header"><div class="card-title">📋 Raw Partial Fleet Data</div></div>
           <div class="card-body">
-            <div class="section-label">Same format as Row Data — paste directly</div>
-            <textarea id="partialRawInput" rows="18" placeholder="Thane South Mumbai&#10;C135&#10;ALL&#10;28/35&#10;6:15 AM"></textarea>
+            <div class="section-label">Morning + Evening dono ek saath paste karo</div>
+            <textarea id="partialRawInput" rows="18" placeholder="Thane South Mumbai&#10;C135&#10;ALL&#10;28/35&#10;6:15 AM&#10;&#10;Thane South Mumbai&#10;C200&#10;ALL&#10;20/35&#10;4:30 PM"></textarea>
             <div class="btn-bar">
               <button class="btn btn-primary" onclick="parsePartialData()">⚡ Parse Fleet</button>
               <button class="btn btn-secondary btn-sm" onclick="addPartialRow()">+ Add Row</button>
@@ -561,7 +619,8 @@
           <div class="card-body">
             <div style="font-family:var(--mono);font-size:11px;line-height:2;color:var(--text2);">
               <div><span style="color:var(--accent)">Same rules as Row Data</span> — header, bus, route, load (skipped), time</div>
-              <div><span style="color:var(--accent)">Each bus</span> becomes one partial fleet slot</div>
+              <div><span style="color:var(--morning)">🌅 Morning + Evening</span> ek saath paste karo</div>
+              <div><span style="color:var(--accent)">Shift auto-detect</span> from AM/PM time</div>
               <div style="margin-top:6px;color:var(--text3)">You can also manually add rows with "+ Add Row"</div>
             </div>
           </div>
@@ -571,7 +630,9 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">✅ Parsed Partial Fleet</div>
-            <div style="margin-left:auto;display:flex;gap:8px">
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+              <span class="badge badge-morning" id="pf-morning-count">🌅 0</span>
+              <span class="badge badge-evening" id="pf-evening-count">🌆 0</span>
               <button class="btn btn-secondary btn-sm" onclick="exportPartial()">Export CSV</button>
               <button class="btn btn-danger btn-sm" onclick="clearPartial()">Clear All</button>
             </div>
@@ -579,9 +640,9 @@
           <div class="card-body" style="padding:0">
             <div class="table-wrap">
               <table>
-                <thead><tr><th>#</th><th>Slot (Time)</th><th>Route</th><th>Assigned Bus</th><th>Main Route</th><th>Notes</th><th></th></tr></thead>
+                <thead><tr><th>#</th><th>Shift</th><th>Slot (Time)</th><th>Route</th><th>Assigned Bus</th><th>Main Route</th><th>Notes</th><th></th></tr></thead>
                 <tbody id="partialTable">
-                  <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">⏱</div>Paste raw data and click "Parse Fleet"</div></td></tr>
+                  <tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">⏱</div>Paste raw data and click "Parse Fleet"</div></td></tr>
                 </tbody>
               </table>
             </div>
@@ -694,49 +755,86 @@
   <div class="tab-panel" id="tab-output">
     <div class="btn-bar" style="margin-bottom:20px">
       <button class="btn btn-success" onclick="adjustFleet()">▶ Run Adjustment</button>
-      <button class="btn btn-secondary" onclick="copyOutput()">📋 Copy Output</button>
+      <button class="btn btn-primary" onclick="copyOutput()">📋 Copy Output</button>
       <button class="btn btn-secondary" onclick="exportOutput()">Export Results</button>
       <button class="btn btn-danger btn-sm" onclick="clearOutput()">Clear Output</button>
     </div>
 
+    <!-- Overall Stats -->
     <div class="stats-bar" id="statsBar" style="display:none">
       <div class="stat-box"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total Slots</div></div>
-      <div class="stat-box"><div class="stat-value" id="stat-perfect" style="color:var(--green)">0</div><div class="stat-label">Perfect Match</div></div>
-      <div class="stat-box"><div class="stat-value" id="stat-similar" style="color:var(--yellow)">0</div><div class="stat-label">Similar Route</div></div>
-      <div class="stat-box"><div class="stat-value" id="stat-fallback" style="color:var(--red)">0</div><div class="stat-label">Fallback</div></div>
-      <div class="stat-box"><div class="stat-value" id="stat-unassigned" style="color:var(--text3)">0</div><div class="stat-label">Unassigned</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-perfect" style="color:var(--green)">0</div><div class="stat-label">Perfect</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-similar" style="color:var(--yellow)">0</div><div class="stat-label">Similar</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-unassigned" style="color:var(--red)">0</div><div class="stat-label">Unassigned</div></div>
       <div class="stat-box"><div class="stat-value" id="stat-nonops" style="color:var(--red)">0</div><div class="stat-label">Non-Ops</div></div>
+      <div class="stat-box" style="border-color:rgba(249,115,22,.3)"><div class="stat-value" id="stat-morning" style="color:var(--morning)">0</div><div class="stat-label">🌅 Morning</div></div>
+      <div class="stat-box" style="border-color:rgba(129,140,248,.3)"><div class="stat-value" id="stat-evening" style="color:var(--evening)">0</div><div class="stat-label">🌆 Evening</div></div>
     </div>
 
-    <div class="three-col">
-      <div style="grid-column: span 2">
-        <div class="card">
-          <div class="card-header"><div class="card-title">✅ Adjusted Partial Fleet</div></div>
-          <div class="card-body" style="padding:0">
+    <!-- SIDE BY SIDE: Morning | Evening -->
+    <div class="shift-split" id="shiftSplit" style="display:none">
+
+      <!-- MORNING -->
+      <div>
+        <div class="shift-section">
+          <div class="shift-header morning">
+            🌅 Morning Shift
+            <span id="out-morning-stats" style="margin-left:auto;font-size:11px;font-weight:400;letter-spacing:1px"></span>
+          </div>
+          <div class="shift-body morning">
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Slot</th><th>Route</th><th>Original Bus</th><th>Assigned Bus</th><th>Match Type</th><th>Reason</th></tr></thead>
-                <tbody id="outputTable">
-                  <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">⚙️</div>Click "Run Adjustment" to generate output</div></td></tr>
+                <thead><tr><th>Slot</th><th>Route</th><th>Orig Bus</th><th>Assigned</th><th>Match</th></tr></thead>
+                <tbody id="outputTableMorning">
+                  <tr><td colspan="5"><div class="empty-state" style="padding:20px">No morning slots</div></td></tr>
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-      </div>
-      <div>
+
         <div class="card">
-          <div class="card-header"><div class="card-title">🚫 Non-Ops Buses</div></div>
-          <div class="card-body"><div id="nonOpsContainer"><div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div></div></div>
+          <div class="card-header" style="border-color:rgba(249,115,22,.2)"><div class="card-title" style="color:var(--morning)">🚫 Morning Non-Ops</div></div>
+          <div class="card-body"><div id="nonOpsMorning"><div class="empty-state" style="padding:16px"><div class="empty-state-icon" style="font-size:20px">✓</div>None</div></div></div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="card-title">⚠️ Unassigned Slots</div></div>
-          <div class="card-body"><div id="unassignedContainer"><div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div></div></div>
+          <div class="card-header" style="border-color:rgba(249,115,22,.2)"><div class="card-title" style="color:var(--morning)">⚠️ Morning Unassigned</div></div>
+          <div class="card-body"><div id="unassignedMorning"><div class="empty-state" style="padding:16px"><div class="empty-state-icon" style="font-size:20px">✓</div>None</div></div></div>
+        </div>
+      </div>
+
+      <!-- EVENING -->
+      <div>
+        <div class="shift-section">
+          <div class="shift-header evening">
+            🌆 Evening Shift
+            <span id="out-evening-stats" style="margin-left:auto;font-size:11px;font-weight:400;letter-spacing:1px"></span>
+          </div>
+          <div class="shift-body evening">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Slot</th><th>Route</th><th>Orig Bus</th><th>Assigned</th><th>Match</th></tr></thead>
+                <tbody id="outputTableEvening">
+                  <tr><td colspan="5"><div class="empty-state" style="padding:20px">No evening slots</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header" style="border-color:rgba(129,140,248,.2)"><div class="card-title" style="color:var(--evening)">🚫 Evening Non-Ops</div></div>
+          <div class="card-body"><div id="nonOpsEvening"><div class="empty-state" style="padding:16px"><div class="empty-state-icon" style="font-size:20px">✓</div>None</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header" style="border-color:rgba(129,140,248,.2)"><div class="card-title" style="color:var(--evening)">⚠️ Evening Unassigned</div></div>
+          <div class="card-body"><div id="unassignedEvening"><div class="empty-state" style="padding:16px"><div class="empty-state-icon" style="font-size:20px">✓</div>None</div></div></div>
         </div>
       </div>
     </div>
 
-    <div class="card">
+    <!-- LOGS -->
+    <div class="card" id="logsCard" style="display:none">
       <div class="card-header">
         <div class="card-title">📝 Adjustment Logs</div>
         <div style="margin-left:auto;display:flex;gap:8px">
@@ -746,8 +844,17 @@
           <span style="font-family:var(--mono);font-size:10px;color:var(--blue)">■ Info</span>
         </div>
       </div>
-      <div class="card-body"><div id="logsContainer"><div class="empty-state"><div class="empty-state-icon">📋</div>Logs will appear after running adjustment</div></div></div>
+      <div class="card-body"><div id="logsContainer"></div></div>
     </div>
+
+    <!-- Empty state before run -->
+    <div id="outputEmpty">
+      <div class="empty-state" style="padding:60px">
+        <div class="empty-state-icon">⚙️</div>
+        Click "Run Adjustment" to generate Morning + Evening output
+      </div>
+    </div>
+
   </div>
 
 </div><!-- /main -->
@@ -762,6 +869,43 @@ let rowData      = [];
 let partialFleet = [];
 let busMaster    = [];
 let outputResult = null;
+
+/* ═══════════════════════════════════════════════════
+   SHIFT DETECTION
+   Morning: 6:00 AM – 10:59 AM
+   Evening: 3:00 PM – 9:30 PM
+═══════════════════════════════════════════════════ */
+function detectShift(timeStr) {
+  if (!timeStr) return 'unknown';
+  timeStr = timeStr.trim().toUpperCase();
+
+  const m = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if (!m) return 'unknown';
+
+  let hour   = parseInt(m[1]);
+  let minute = parseInt(m[2]);
+  const ampm = m[3] ? m[3].toUpperCase() : '';
+
+  // Convert to 24h
+  if (ampm === 'PM' && hour !== 12) hour += 12;
+  if (ampm === 'AM' && hour === 12) hour = 0;
+
+  const totalMin = hour * 60 + minute;
+
+  // Morning: 6:00 AM (360) to 10:59 AM (659)
+  if (totalMin >= 360 && totalMin <= 659) return 'morning';
+
+  // Evening: 3:00 PM (900) to 10:00 PM (1320)
+  if (totalMin >= 900 && totalMin <= 1320) return 'evening';
+
+  return 'unknown';
+}
+
+function shiftBadge(shift) {
+  if (shift === 'morning') return '<span class="badge badge-morning">🌅 Morning</span>';
+  if (shift === 'evening') return '<span class="badge badge-evening">🌆 Evening</span>';
+  return '<span class="badge badge-gray">Unknown</span>';
+}
 
 /* ═══════════════════════════════════════════════════
    ROUTE GROUPS & MAPPINGS
@@ -791,7 +935,6 @@ function normaliseRoute(r) {
   r = r.trim().toUpperCase();
   r = r.replace(/\bHN\s*MN\b/g, 'HNMN');
   r = r.replace(/\bNTH\s*(EXP(RESS)?)?\b/g, 'NTH').trim();
-  if (r === 'NTH') r = 'NTH';
   r = r.replace(/\bKLS\s*(EXP(RESS)?)?\b/g, 'KLS').trim();
   r = r.replace(/\bVV\s*(EXP(RESS)?)?\b/g, 'VV').trim();
   r = r.replace(/\s+/g, ' ').trim();
@@ -810,22 +953,9 @@ function isSimilarRoute(r1, r2) {
   const a = normaliseRoute(r1);
   const b = normaliseRoute(r2);
   if (a === b) return true;
-  // ALL is a specific route — not universal
   const g1 = getMainRoute(a);
   const g2 = getMainRoute(b);
   if (g1 && g2 && g1 === g2) return true;
-  return false;
-}
-
-function isValidBus(busEntry, route) {
-  if (!busEntry) return false;
-  const r = normaliseRoute(route);
-  const known = busEntry.knownRoutes.map(k => normaliseRoute(k));
-  if (known.includes('ALL')) return true;
-  if (known.includes(r)) return true;
-  for (const k of known) {
-    if (isSimilarRoute(k, r)) return true;
-  }
   return false;
 }
 
@@ -899,7 +1029,9 @@ function parseData(rawText) {
         i++;
       }
 
-      results.push({ mainRoute: currentMainRoute, bus, route: normaliseRoute(route), slot: normaliseTime(slot) });
+      const normTime = normaliseTime(slot);
+      const shift    = detectShift(normTime);
+      results.push({ mainRoute: currentMainRoute, bus, route: normaliseRoute(route), slot: normTime, shift });
       continue;
     }
     i++;
@@ -928,18 +1060,26 @@ function cleanData() {
   renderCleanTable();
   updateBadge('rowdata', rowData.length);
   refreshMainRouteDropdown();
-  showToast(`Parsed ${rowData.length} bus entries`);
+  const mCount = rowData.filter(r => r.shift === 'morning').length;
+  const eCount = rowData.filter(r => r.shift === 'evening').length;
+  showToast(`Parsed ${rowData.length} entries — 🌅 ${mCount} Morning · 🌆 ${eCount} Evening`);
 }
 
 function renderCleanTable() {
   const tbody = document.getElementById('cleanTable');
+  const mCount = rowData.filter(r => r.shift === 'morning').length;
+  const eCount = rowData.filter(r => r.shift === 'evening').length;
+  document.getElementById('rd-morning-count').textContent = `🌅 ${mCount}`;
+  document.getElementById('rd-evening-count').textContent = `🌆 ${eCount}`;
+
   if (!rowData.length) {
-    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">🚌</div>No data</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🚌</div>No data</div></td></tr>';
     return;
   }
   tbody.innerHTML = rowData.map((r,i) => `
     <tr>
       <td style="color:var(--text3);font-size:11px">${i+1}</td>
+      <td>${shiftBadge(r.shift)}</td>
       <td>${r.mainRoute}</td>
       <td class="bus-num">${r.bus}</td>
       <td class="route-cell">${r.route}</td>
@@ -975,7 +1115,7 @@ function clearClean() { rowData = []; renderCleanTable(); updateBadge('rowdata',
 
 function exportClean() {
   if (!rowData.length) { showToast('No data to export'); return; }
-  const csv = ['Main Route,Bus,Route,Slot', ...rowData.map(r => `"${r.mainRoute}","${r.bus}","${r.route}","${r.slot}"`)].join('\n');
+  const csv = ['Shift,Main Route,Bus,Route,Slot', ...rowData.map(r => `"${r.shift}","${r.mainRoute}","${r.bus}","${r.route}","${r.slot}"`)].join('\n');
   downloadFile(csv, 'row-data.csv', 'text/csv');
 }
 
@@ -989,17 +1129,20 @@ function parsePartialData() {
   if (!parsed.length) { showToast('No valid entries found — check format'); return; }
   const skipped = [];
   const allowed = parsed.filter(p => { if (excludedBuses.has(p.bus)) { skipped.push(p.bus); return false; } return true; });
-  const newEntries = allowed.map(p => ({ slot: p.slot, route: p.route, bus: p.bus, mainRoute: p.mainRoute, notes: '' }));
+  const newEntries = allowed.map(p => ({ slot: p.slot, route: p.route, bus: p.bus, mainRoute: p.mainRoute, notes: '', shift: p.shift }));
   partialFleet.push(...newEntries);
   renderPartialTable();
   updateBadge('partial', partialFleet.length);
-  let msg = `✓ ${newEntries.length} slots added`;
-  if (skipped.length) msg += ` · ${skipped.length} excluded (${skipped.join(', ')})`;
+  const mC = newEntries.filter(e => e.shift === 'morning').length;
+  const eC = newEntries.filter(e => e.shift === 'evening').length;
+  let msg = `✓ ${newEntries.length} slots — 🌅 ${mC} Morning · 🌆 ${eC} Evening`;
+  if (skipped.length) msg += ` · ${skipped.length} excluded`;
   showToast(msg);
 }
 
 function addPartialRow(slot='', route='', bus='', mainRoute='', notes='') {
-  partialFleet.push({ slot, route, bus, mainRoute, notes });
+  const shift = detectShift(slot);
+  partialFleet.push({ slot, route, bus, mainRoute, notes, shift });
   renderPartialTable();
   updateBadge('partial', partialFleet.length);
 }
@@ -1017,14 +1160,20 @@ function buildMainRouteSelect(idx, currentVal) {
 
 function renderPartialTable() {
   const tbody = document.getElementById('partialTable');
+  const mCount = partialFleet.filter(r => r.shift === 'morning').length;
+  const eCount = partialFleet.filter(r => r.shift === 'evening').length;
+  document.getElementById('pf-morning-count').textContent = `🌅 ${mCount}`;
+  document.getElementById('pf-evening-count').textContent = `🌆 ${eCount}`;
+
   if (!partialFleet.length) {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">⏱</div>No partial fleet slots</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">⏱</div>No partial fleet slots</div></td></tr>';
     return;
   }
   tbody.innerHTML = partialFleet.map((r, i) => `
     <tr>
       <td style="color:var(--text3);font-size:11px">${i + 1}</td>
-      <td><input class="row-input" value="${escHtml(r.slot)}" placeholder="6:15 AM" onchange="partialFleet[${i}].slot=this.value" /></td>
+      <td>${shiftBadge(r.shift)}</td>
+      <td><input class="row-input" value="${escHtml(r.slot)}" placeholder="6:15 AM" onchange="partialFleet[${i}].slot=this.value;partialFleet[${i}].shift=detectShift(this.value);renderPartialTable()" /></td>
       <td><input class="row-input" value="${escHtml(r.route)}" placeholder="HNMN" onchange="partialFleet[${i}].route=normaliseRoute(this.value)" /></td>
       <td><input class="row-input" value="${escHtml(r.bus)}" placeholder="C223" onchange="partialFleet[${i}].bus=this.value.toUpperCase()" /></td>
       <td>${buildMainRouteSelect(i, r.mainRoute)}</td>
@@ -1040,7 +1189,7 @@ function clearPartial() { partialFleet = []; renderPartialTable(); updateBadge('
 
 function exportPartial() {
   if (!partialFleet.length) { showToast('No data to export'); return; }
-  const csv = ['Slot,Route,Bus,Main Route,Notes', ...partialFleet.map(r => `"${r.slot}","${r.route}","${r.bus}","${r.mainRoute}","${r.notes}"`)].join('\n');
+  const csv = ['Shift,Slot,Route,Bus,Main Route,Notes', ...partialFleet.map(r => `"${r.shift}","${r.slot}","${r.route}","${r.bus}","${r.mainRoute}","${r.notes}"`)].join('\n');
   downloadFile(csv, 'partial-fleet.csv', 'text/csv');
 }
 
@@ -1081,8 +1230,10 @@ function editBus(i) {
 }
 
 function deleteBus(i) {
-  if (!confirm(`Delete bus ${busMaster[i].bus}?`)) return;
-  busMaster.splice(i, 1); persistAll(); renderBMTable(); updateBadge('busmaster', busMaster.length); showToast('Bus deleted');
+  const busNum = busMaster[i].bus;
+  busMaster.splice(i, 1);
+  persistAll(); renderBMTable(); updateBadge('busmaster', busMaster.length);
+  showToast(`✓ Bus ${busNum} deleted`);
 }
 
 function cancelBMEdit() { resetBMForm(); }
@@ -1121,7 +1272,6 @@ function renderBMTable() {
 }
 
 function clearBusMaster() {
-  if (!confirm('Clear ALL bus master data?')) return;
   busMaster = []; persistAll(); renderBMTable(); updateBadge('busmaster', 0); showToast('Bus master cleared');
 }
 
@@ -1144,8 +1294,8 @@ function excludeFromTable(busNum) { excludedBuses.add(busNum.toUpperCase()); per
 function removeExcluded(busNum)  { excludedBuses.delete(busNum.toUpperCase()); persistAll(); renderExcluded(); renderBMTable(); showToast(`${busNum} included again`); }
 function clearExcluded() {
   if (!excludedBuses.size) return;
-  if (!confirm('Clear all excluded buses?')) return;
   excludedBuses.clear(); persistAll(); renderExcluded(); renderBMTable();
+  showToast('All excluded buses cleared');
 }
 
 function renderExcluded() {
@@ -1165,8 +1315,7 @@ function renderExcluded() {
 }
 
 /* ═══════════════════════════════════════════════════
-   PERSISTENCE — localStorage only
-   (Cloud sync via Netlify Function proxy — no keys in browser)
+   PERSISTENCE
 ═══════════════════════════════════════════════════ */
 function buildPayload() {
   return { busMaster, excludedBuses: [...excludedBuses], savedAt: new Date().toISOString() };
@@ -1190,7 +1339,6 @@ function loadFromLocal() {
 
 async function persistAll() {
   saveToLocal();
-  // Auto-push to cloud silently
   await pushToCloud(true);
 }
 
@@ -1201,7 +1349,6 @@ function setCloudStatus(state) {
   el.textContent = map[state][1] || state;
 }
 
-/* ── Push to cloud via Netlify proxy ── */
 async function pushToCloud(silent = false) {
   if (!silent) setCloudStatus('loading');
   try {
@@ -1224,7 +1371,6 @@ async function pushToCloud(silent = false) {
   }
 }
 
-/* ── Pull from cloud via Netlify proxy ── */
 async function pullFromCloud() {
   setCloudStatus('loading');
   try {
@@ -1246,242 +1392,398 @@ async function pullFromCloud() {
 
 /* ═══════════════════════════════════════════════════
    CORE ALGORITHM — adjustFleet()
+   Shift-aware: Morning row data → Morning slots only
+                Evening row data → Evening slots only
 ═══════════════════════════════════════════════════ */
-function adjustFleet() {
-  if (!partialFleet.length) { showToast('No partial fleet data'); return; }
-  if (!rowData.length)      { showToast('No row data cleaned'); return; }
+function normaliseMainRoute(mr) {
+  if (!mr) return '';
+  const u = mr.toUpperCase().replace(/\s+/g, ' ').trim();
+  if (/THANE/.test(u) && /SOUTH|SOBO|MUMBAI/.test(u)) return 'THANE SOBO';
+  if (/^THANE\s*SOUTH\s*MUMBAI$/.test(u)) return 'THANE SOBO';
+  if (/MULUND/.test(u)) return 'MULUND SOBO';
+  if (/CHEMBUR/.test(u) && /BKC/.test(u)) return 'CHEMBUR BKC';
+  if (/[-–—]/.test(u) && /BKC/.test(u))   return 'CHEMBUR BKC';
+  if (/[-–—]/.test(u) && /CHEMBUR/.test(u)) return 'CHEMBUR BKC';
+  if (/CHEMBUR/.test(u) && /SOUTH|SOBO|MUMBAI/.test(u)) return 'CHEMBUR SOBO';
+  return u;
+}
 
+function runShiftAdjustment(shiftSlots, shiftRowData, shiftName) {
   const logs = [], results = [], nonOps = [], unassigned = [];
   const usedBuses = new Set();
-  const rowBuses  = new Set(rowData.map(r => r.bus));
-  const rowByBus  = {};
-  for (const r of rowData) rowByBus[r.bus] = r;
+  const rowBuses  = new Set(shiftRowData.map(r => r.bus));
 
-  for (const slot of partialFleet) {
+  for (const slot of shiftSlots) {
     const originalBus = slot.bus;
     const slotTime    = normaliseTime(slot.slot);
     const slotRoute   = normaliseRoute(slot.route || 'ALL');
     const slotMain    = slot.mainRoute;
-
-    // ── RULE 1: Partial fleet bus in row data + not excluded → MANDATORY use ──
-    if (originalBus && rowByBus[originalBus] && !excludedBuses.has(originalBus) && !usedBuses.has(originalBus)) {
-      usedBuses.add(originalBus);
-      const rd = rowByBus[originalBus];
-      results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: originalBus, matchType: 'original', reason: 'Original bus retained (present in row data)', rowTime: rd.slot });
-      logs.push({ type:'perfect', msg:`[${slotTime}] ${originalBus} retained — present in row data` });
-      continue;
-    }
-
-    // ── RULE 2: Partial fleet bus NOT in row data → find replacement from row ──
-    if (originalBus && !rowByBus[originalBus] && !excludedBuses.has(originalBus)) {
-      logs.push({ type:'info', msg:`[${slotTime}] ${originalBus} not in row data — finding replacement for route ${slotRoute}` });
-    }
-    // ── Excluded bus → find replacement ──
-    else if (originalBus && excludedBuses.has(originalBus)) {
-      logs.push({ type:'info', msg:`[${slotTime}] ${originalBus} is EXCLUDED — finding replacement for route ${slotRoute}` });
-    }
-    // ── No bus in slot → find from row ──
-    else if (!originalBus) {
-      logs.push({ type:'info', msg:`[${slotTime}] No bus in slot — finding from row data for route ${slotRoute}` });
-    }
-
-    function normaliseMainRoute(mr) {
-      if (!mr) return '';
-      const u = mr.toUpperCase().replace(/\s+/g, ' ').trim();
-      if (/THANE/.test(u) && /SOUTH|SOBO|MUMBAI/.test(u)) return 'THANE SOBO';
-      if (/^THANE\s*SOUTH\s*MUMBAI$/.test(u)) return 'THANE SOBO';
-      if (/MULUND/.test(u)) return 'MULUND SOBO';
-      if (/CHEMBUR/.test(u) && /BKC/.test(u)) return 'CHEMBUR BKC';
-      if (/[-–—]/.test(u) && /BKC/.test(u))   return 'CHEMBUR BKC';
-      if (/[-–—]/.test(u) && /CHEMBUR/.test(u)) return 'CHEMBUR BKC';
-      if (/CHEMBUR/.test(u) && /SOUTH|SOBO|MUMBAI/.test(u)) return 'CHEMBUR SOBO';
-      return u;
-    }
-
     const normSlotMain = normaliseMainRoute(slotMain);
-    const candidates = rowData.filter(r => {
-      if (usedBuses.has(r.bus) || excludedBuses.has(r.bus)) return false;
-      if (!r.slot && slotTime) return false;
-      if (normSlotMain) { const normCandMain = normaliseMainRoute(r.mainRoute); if (normCandMain !== normSlotMain) return false; }
+
+    // ── Step 1: Find all valid candidates for this slot ──
+    // Slot is center: match by route + main route, exclude used + excluded buses
+    const candidates = shiftRowData.filter(r => {
+      if (usedBuses.has(r.bus))    return false; // already used this shift
+      if (excludedBuses.has(r.bus)) return false; // permanently excluded
+      if (normSlotMain) {
+        const normCandMain = normaliseMainRoute(r.mainRoute);
+        if (normCandMain !== normSlotMain) return false; // wrong main route
+      }
+      if (normaliseRoute(r.route) !== slotRoute) return false; // wrong route
       return true;
     });
 
-    function routeExactMatch(candidateRoute, targetRoute) {
-      const cr = normaliseRoute(candidateRoute);
-      const tr = normaliseRoute(targetRoute);
+    if (!candidates.length) {
+      // ── Bus Master Fallback ──
+      // Row data mein match nahi mila → Bus Master mein dhundho
+      // Sirf wo buses jo row data mein hain (aaj available) + known route match karta ho
+      const rowBusSet = new Set(shiftRowData.map(r => r.bus));
+      const bmFallback = busMaster.filter(bm => {
+        if (excludedBuses.has(bm.bus))  return false; // excluded
+        if (usedBuses.has(bm.bus))      return false; // already used
+        if (!rowBusSet.has(bm.bus))     return false; // aaj available nahi
+        // known routes mein slot route hona chahiye
+        const known = bm.knownRoutes.map(r => normaliseRoute(r));
+        return known.includes(slotRoute);
+      });
 
-      // Strict exact match only — ALL is a specific route, not universal
-      return cr === tr;
-    }
+      if (bmFallback.length) {
+        // Among fallback candidates, prefer same main route
+        const bmSorted = bmFallback.sort((a, b) => {
+          const aMain = normaliseMainRoute(a.mainRoute) === normSlotMain ? 1 : 0;
+          const bMain = normaliseMainRoute(b.mainRoute) === normSlotMain ? 1 : 0;
+          return bMain - aMain;
+        });
+        const best = bmSorted[0];
+        usedBuses.add(best.bus);
+        const replaceTxt = originalBus ? `${best.bus} replaces ${originalBus}` : best.bus;
+        const reason = `Bus Master fallback — ${best.bus} knows route ${slotRoute}`;
+        results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: best.bus, matchType: 'similar', reason, rowTime: '' });
+        logs.push({ type:'similar', msg:`[${shiftName}][${slotTime}] ${replaceTxt} — ${reason}` });
+        continue;
+      }
 
-    const exactCandidates = candidates.filter(c => routeExactMatch(c.route, slotRoute));
-    exactCandidates.sort((a, b) => {
-      const aExact = slotTime && normaliseTime(a.slot) === slotTime ? 1 : 0;
-      const bExact = slotTime && normaliseTime(b.slot) === slotTime ? 1 : 0;
-      return bExact - aExact;
-    });
-
-    if (exactCandidates.length) {
-      const best = exactCandidates[0];
-      usedBuses.add(best.bus);
-      const cTime = normaliseTime(best.slot), cRoute = normaliseRoute(best.route);
-      let matchType, reason;
-      if (cTime === slotTime) { matchType = 'perfect'; reason = `Same time + exact route (${cRoute})`; }
-      else { matchType = 'similar'; reason = `Exact route (${cRoute}) — different time (${cTime})`; }
-      results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: best.bus, matchType, reason, rowTime: cTime });
-      const replaceTxt = originalBus ? `${best.bus} instead of ${originalBus}` : best.bus;
-      logs.push({ type: matchType === 'perfect' ? 'perfect' : 'similar', msg: `[${slotTime}] ${replaceTxt} — ${reason}` });
-    } else {
-      const noMatchReason = normSlotMain ? `No exact-route match in main route "${normSlotMain}" for ${slotRoute}` : `No exact-route match found for ${slotRoute}`;
-      results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: null, matchType: 'unassigned', reason: noMatchReason, rowTime: '' });
+      // No match anywhere → Unassigned
+      const reason = normSlotMain
+        ? `No match in "${normSlotMain}" for route ${slotRoute}`
+        : `No match for route ${slotRoute}`;
+      results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: null, matchType: 'unassigned', reason, rowTime: '' });
       unassigned.push({ slot: slotTime, route: slotRoute, originalBus });
-      logs.push({ type:'fallback', msg:`[${slotTime}] ⚠ ${noMatchReason} — slot unassigned` });
+      logs.push({ type:'fallback', msg:`[${shiftName}][${slotTime}] ⚠ ${reason} — unassigned` });
+      continue;
     }
+
+    // ── Step 2: Priority scoring among candidates ──
+    // P1: original bus from partial fleet (if in candidates) — mandatory preference
+    // P2: same time match
+    // P3: any candidate (first available)
+
+    let best = null;
+    let matchType = '';
+    let reason = '';
+
+    // P1 — original bus is in candidates → mandatory use
+    if (originalBus && !excludedBuses.has(originalBus)) {
+      const origCandidate = candidates.find(c => c.bus === originalBus);
+      if (origCandidate) {
+        best = origCandidate;
+        matchType = 'original';
+        reason = 'Original bus retained (present in row data)';
+        logs.push({ type:'perfect', msg:`[${shiftName}][${slotTime}] ${originalBus} retained — mandatory preference` });
+      }
+    }
+
+    // P2 — same time match among candidates
+    if (!best) {
+      const sameTime = candidates.filter(c => normaliseTime(c.slot) === slotTime);
+      if (sameTime.length) {
+        best = sameTime[0];
+        matchType = 'perfect';
+        reason = `Same time + exact route (${slotRoute})`;
+        const replaceTxt = originalBus ? `${best.bus} replaces ${originalBus}` : best.bus;
+        logs.push({ type:'perfect', msg:`[${shiftName}][${slotTime}] ${replaceTxt} — perfect time match` });
+      }
+    }
+
+    // P3 — any candidate (different time)
+    if (!best) {
+      best = candidates[0];
+      matchType = 'similar';
+      const cTime = normaliseTime(best.slot);
+      reason = `Exact route (${slotRoute}) — different time (${cTime})`;
+      const replaceTxt = originalBus ? `${best.bus} replaces ${originalBus}` : best.bus;
+      logs.push({ type:'similar', msg:`[${shiftName}][${slotTime}] ${replaceTxt} — ${reason}` });
+    }
+
+    usedBuses.add(best.bus);
+    results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: best.bus, matchType, reason, rowTime: normaliseTime(best.slot) });
   }
 
-  // Non-Ops = row data buses jo assign nahi hui + excluded buses
+  // Non-Ops = row data buses not used this shift
   for (const rb of rowBuses) {
-    if (!usedBuses.has(rb)) {
-      nonOps.push(rb);
-    }
+    if (!usedBuses.has(rb) && !excludedBuses.has(rb)) nonOps.push(rb);
   }
-  if (nonOps.length) logs.push({ type:'info', msg:`Non-Ops (unassigned from row data): ${nonOps.join(', ')}` });
+  if (nonOps.length) logs.push({ type:'info', msg:`[${shiftName}] Non-Ops: ${nonOps.join(', ')}` });
 
-  outputResult = { results, logs, nonOps, unassigned };
-  renderOutput(); renderAdjustmentSummary();
-  switchTab('output'); updateBadge('output', results.length);
-  showToast('Adjustment complete');
+  return { results, logs, nonOps, unassigned };
 }
 
-function renderAdjustmentSummary() {
-  if (!outputResult) return;
-  const { results, nonOps, unassigned } = outputResult;
-  const total       = results.length;
-  const assigned    = results.filter(r => r.assignedBus).length;
-  const perfect     = results.filter(r => r.matchType === 'perfect' || r.matchType === 'original').length;
-  const similar     = results.filter(r => r.matchType === 'similar').length;
-  const unassignedN = results.filter(r => r.matchType === 'unassigned').length;
-  const now = new Date();
-  document.getElementById('summary-time').textContent = `Last run: ${now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'})}`;
-  document.getElementById('summary-body').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 12px"><div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--accent);line-height:1">${total}</div><div style="font-family:var(--cond);font-size:10px;letter-spacing:2px;color:var(--text3);margin-top:3px;text-transform:uppercase">Total Slots</div></div>
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 12px"><div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--green);line-height:1">${assigned}</div><div style="font-family:var(--cond);font-size:10px;letter-spacing:2px;color:var(--text3);margin-top:3px;text-transform:uppercase">Assigned</div></div>
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 12px"><div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--red);line-height:1">${unassignedN}</div><div style="font-family:var(--cond);font-size:10px;letter-spacing:2px;color:var(--text3);margin-top:3px;text-transform:uppercase">Unassigned</div></div>
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 12px"><div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--red);line-height:1">${nonOps.length}</div><div style="font-family:var(--cond);font-size:10px;letter-spacing:2px;color:var(--text3);margin-top:3px;text-transform:uppercase">Non-Ops</div></div>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-      <span style="font-family:var(--mono);font-size:11px;background:rgba(45,190,108,.1);border:1px solid rgba(45,190,108,.25);color:var(--green);padding:3px 8px;border-radius:2px">✓ ${perfect} perfect</span>
-      <span style="font-family:var(--mono);font-size:11px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.25);color:var(--yellow);padding:3px 8px;border-radius:2px">~ ${similar} similar</span>
-    </div>
-    <button class="btn btn-secondary btn-sm" style="width:100%" onclick="switchTab('output')">View Full Output →</button>`;
+function adjustFleet() {
+  if (!partialFleet.length) { showToast('No partial fleet data'); return; }
+  if (!rowData.length)      { showToast('No row data cleaned'); return; }
+
+  // Split by shift
+  const morningSlots   = partialFleet.filter(s => s.shift === 'morning');
+  const eveningSlots   = partialFleet.filter(s => s.shift === 'evening');
+  const unknownSlots   = partialFleet.filter(s => s.shift === 'unknown');
+
+  // Shift-specific pools — bus can appear in both shifts with different routes
+  const morningRowData = rowData.filter(r => r.shift === 'morning');
+  const eveningRowData = rowData.filter(r => r.shift === 'evening');
+  const unknownRowData = rowData.filter(r => r.shift === 'unknown');
+
+  const morningResult = runShiftAdjustment(morningSlots, morningRowData, 'Morning');
+  const eveningResult = runShiftAdjustment(eveningSlots, eveningRowData, 'Evening');
+  const unknownResult = runShiftAdjustment(unknownSlots, unknownRowData.length ? unknownRowData : rowData, 'Unknown');
+
+  outputResult = { morningResult, eveningResult, unknownResult };
+  renderOutput();
+  renderAdjustmentSummary();
+  switchTab('output');
+
+  const totalSlots = morningSlots.length + eveningSlots.length + unknownSlots.length;
+  updateBadge('output', totalSlots);
+  showToast(`Adjustment done — 🌅 ${morningSlots.length} Morning · 🌆 ${eveningSlots.length} Evening`);
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER OUTPUT
+═══════════════════════════════════════════════════ */
+function renderShiftTable(tbodyId, results) {
+  const tbody = document.getElementById(tbodyId);
+  if (!results.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state" style="padding:20px">No slots</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = results.map(r => {
+    const cls   = r.matchType === 'perfect' || r.matchType === 'original' ? 'output-row-perfect' : r.matchType === 'similar' ? 'output-row-similar' : 'output-row-unassigned';
+    const badge = r.matchType === 'perfect' || r.matchType === 'original' ? '<span class="badge badge-green">✓ Perfect</span>' : r.matchType === 'similar' ? '<span class="badge badge-yellow">~ Similar</span>' : '<span class="badge badge-gray">⚠ Unassigned</span>';
+    const assignedCell = r.assignedBus ? `<span style="color:var(--accent);font-family:var(--mono)">${r.assignedBus}</span>` : '<span style="color:var(--text3)">—</span>';
+    const origCell     = r.originalBus ? `<span style="color:var(--text2);font-family:var(--mono);${r.assignedBus !== r.originalBus && r.originalBus ? 'text-decoration:line-through;opacity:.5' : ''}">${r.originalBus}</span>` : '<span style="color:var(--text3)">—</span>';
+    return `<tr class="${cls}" title="${escHtml(r.reason)}"><td class="time-cell">${r.slot||'—'}</td><td class="route-cell">${r.route}</td><td>${origCell}</td><td>${assignedCell}</td><td>${badge}</td></tr>`;
+  }).join('');
+}
+
+function renderNonOps(containerId, nonOps) {
+  const div = document.getElementById(containerId);
+  div.innerHTML = nonOps.length
+    ? nonOps.map(b => `<div class="nonop-chip">🚫 ${b}</div>`).join('')
+    : '<div class="empty-state" style="padding:16px"><div class="empty-state-icon" style="font-size:20px">✓</div>None</div>';
+}
+
+function renderUnassigned(containerId, unassigned) {
+  const div = document.getElementById(containerId);
+  div.innerHTML = unassigned.length
+    ? unassigned.map(u => `<div class="log-entry fallback">⚠ ${u.slot||'No time'} · ${u.route}${u.originalBus?' · orig: '+u.originalBus:''}</div>`).join('')
+    : '<div class="empty-state" style="padding:16px"><div class="empty-state-icon" style="font-size:20px">✓</div>None</div>';
+}
+
+function shiftStats(results) {
+  const total   = results.length;
+  const perfect = results.filter(r => r.matchType === 'perfect' || r.matchType === 'original').length;
+  const similar = results.filter(r => r.matchType === 'similar').length;
+  const unassig = results.filter(r => r.matchType === 'unassigned').length;
+  return { total, perfect, similar, unassig };
 }
 
 function renderOutput() {
   if (!outputResult) return;
-  const { results, logs, nonOps, unassigned } = outputResult;
-  const perfect     = results.filter(r => r.matchType === 'perfect' || r.matchType === 'original').length;
-  const similar     = results.filter(r => r.matchType === 'similar').length;
-  const fallback    = results.filter(r => r.matchType === 'fallback').length;
-  const unassignedN = results.filter(r => r.matchType === 'unassigned').length;
-  document.getElementById('statsBar').style.display = 'flex';
-  document.getElementById('stat-total').textContent      = results.length;
-  document.getElementById('stat-perfect').textContent    = perfect;
-  document.getElementById('stat-similar').textContent    = similar;
-  document.getElementById('stat-fallback').textContent   = fallback;
-  document.getElementById('stat-unassigned').textContent = unassignedN;
-  document.getElementById('stat-nonops').textContent     = nonOps.length;
+  const { morningResult, eveningResult, unknownResult } = outputResult;
 
-  const tbody = document.getElementById('outputTable');
-  if (!results.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No results</div></td></tr>'; }
-  else {
-    tbody.innerHTML = results.map(r => {
-      const cls   = r.matchType === 'perfect' || r.matchType === 'original' ? 'output-row-perfect' : r.matchType === 'similar' ? 'output-row-similar' : r.matchType === 'fallback' ? 'output-row-fallback' : 'output-row-unassigned';
-      const badge = r.matchType === 'perfect' || r.matchType === 'original' ? '<span class="badge badge-green">Perfect</span>' : r.matchType === 'similar' ? '<span class="badge badge-yellow">Similar</span>' : r.matchType === 'fallback' ? '<span class="badge badge-red">Fallback</span>' : '<span class="badge badge-gray">Unassigned</span>';
-      const assignedCell = r.assignedBus ? `<span style="color:var(--accent);font-family:var(--mono)">${r.assignedBus}</span>` : '<span style="color:var(--text3)">—</span>';
-      const origCell     = r.originalBus ? `<span style="color:var(--text2);font-family:var(--mono);text-decoration:${r.assignedBus !== r.originalBus && r.originalBus ? 'line-through' : 'none'}">${r.originalBus}</span>` : '<span style="color:var(--text3)">—</span>';
-      return `<tr class="${cls}"><td class="time-cell">${r.slot||'—'}</td><td class="route-cell">${r.route}</td><td>${origCell}</td><td>${assignedCell}</td><td>${badge}</td><td style="color:var(--text3);font-size:11px">${r.reason}</td></tr>`;
-    }).join('');
-  }
+  document.getElementById('outputEmpty').style.display = 'none';
+  document.getElementById('statsBar').style.display    = 'flex';
+  document.getElementById('shiftSplit').style.display  = 'grid';
+  document.getElementById('logsCard').style.display    = 'block';
 
-  const nonOpsDiv = document.getElementById('nonOpsContainer');
-  nonOpsDiv.innerHTML = nonOps.length ? nonOps.map(b => `<div class="nonop-chip">🚫 ${b}</div>`).join('') : '<div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div>';
+  const allResults = [...morningResult.results, ...eveningResult.results, ...unknownResult.results];
+  const allNonOps  = [...morningResult.nonOps,  ...eveningResult.nonOps];
 
-  const unassignedDiv = document.getElementById('unassignedContainer');
-  unassignedDiv.innerHTML = unassigned.length ? unassigned.map(u => `<div class="log-entry fallback">⚠ ${u.slot||'No time'} · ${u.route}${u.originalBus?' · orig: '+u.originalBus:''}</div>`).join('') : '<div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div>';
+  const ms = shiftStats(morningResult.results);
+  const es = shiftStats(eveningResult.results);
 
+  // Overall stats
+  document.getElementById('stat-total').textContent      = allResults.length;
+  document.getElementById('stat-perfect').textContent    = allResults.filter(r => r.matchType === 'perfect' || r.matchType === 'original').length;
+  document.getElementById('stat-similar').textContent    = allResults.filter(r => r.matchType === 'similar').length;
+  document.getElementById('stat-unassigned').textContent = allResults.filter(r => r.matchType === 'unassigned').length;
+  document.getElementById('stat-nonops').textContent     = allNonOps.length;
+  document.getElementById('stat-morning').textContent    = morningResult.results.length;
+  document.getElementById('stat-evening').textContent    = eveningResult.results.length;
+
+  // Per-shift header stats
+  document.getElementById('out-morning-stats').textContent =
+    `${ms.total} slots · ✓${ms.perfect} ~${ms.similar} ⚠${ms.unassig}`;
+  document.getElementById('out-evening-stats').textContent =
+    `${es.total} slots · ✓${es.perfect} ~${es.similar} ⚠${es.unassig}`;
+
+  // Tables
+  renderShiftTable('outputTableMorning', morningResult.results);
+  renderShiftTable('outputTableEvening', eveningResult.results);
+
+  // Non-Ops & Unassigned per shift
+  renderNonOps('nonOpsMorning', morningResult.nonOps);
+  renderNonOps('nonOpsEvening', eveningResult.nonOps);
+  renderUnassigned('unassignedMorning', morningResult.unassigned);
+  renderUnassigned('unassignedEvening', eveningResult.unassigned);
+
+  // Logs — all combined
+  const allLogs = [
+    ...morningResult.logs,
+    ...eveningResult.logs,
+    ...unknownResult.logs
+  ];
   const logsDiv = document.getElementById('logsContainer');
-  logsDiv.innerHTML = logs.length ? logs.map(l => `<div class="log-entry ${l.type}">${l.msg}</div>`).join('') : '<div class="empty-state">No logs</div>';
+  logsDiv.innerHTML = allLogs.length
+    ? allLogs.map(l => `<div class="log-entry ${l.type}">${l.msg}</div>`).join('')
+    : '<div class="empty-state">No logs</div>';
+}
+
+function renderAdjustmentSummary() {
+  if (!outputResult) return;
+  const { morningResult, eveningResult } = outputResult;
+  const ms = shiftStats(morningResult.results);
+  const es = shiftStats(eveningResult.results);
+  const now = new Date();
+  document.getElementById('summary-time').textContent = `Last run: ${now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'})}`;
+  document.getElementById('summary-body').innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:2px;color:var(--morning);margin-bottom:6px;text-transform:uppercase">🌅 Morning</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:8px 10px"><div style="font-family:var(--cond);font-size:18px;font-weight:900;color:var(--morning);line-height:1">${ms.total}</div><div style="font-family:var(--cond);font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase">Slots</div></div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:8px 10px"><div style="font-family:var(--cond);font-size:18px;font-weight:900;color:var(--red);line-height:1">${ms.unassig}</div><div style="font-family:var(--cond);font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase">Unassigned</div></div>
+      </div>
+      <div style="font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:2px;color:var(--evening);margin-bottom:6px;text-transform:uppercase">🌆 Evening</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:8px 10px"><div style="font-family:var(--cond);font-size:18px;font-weight:900;color:var(--evening);line-height:1">${es.total}</div><div style="font-family:var(--cond);font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase">Slots</div></div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:8px 10px"><div style="font-family:var(--cond);font-size:18px;font-weight:900;color:var(--red);line-height:1">${es.unassig}</div><div style="font-family:var(--cond);font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase">Unassigned</div></div>
+      </div>
+    </div>
+    <button class="btn btn-secondary btn-sm" style="width:100%" onclick="switchTab('output')">View Full Output →</button>`;
 }
 
 function clearOutput() {
   outputResult = null;
-  document.getElementById('outputTable').innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">⚙️</div>Click "Run Adjustment"</div></td></tr>';
-  document.getElementById('nonOpsContainer').innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div>';
-  document.getElementById('unassignedContainer').innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-state-icon">✓</div>None</div>';
-  document.getElementById('logsContainer').innerHTML = '<div class="empty-state">No logs</div>';
-  document.getElementById('statsBar').style.display = 'none';
+  document.getElementById('outputEmpty').style.display = 'block';
+  document.getElementById('statsBar').style.display    = 'none';
+  document.getElementById('shiftSplit').style.display  = 'none';
+  document.getElementById('logsCard').style.display    = 'none';
   updateBadge('output', 0);
 }
 
+/* ═══════════════════════════════════════════════════
+   COPY OUTPUT — Morning pehle, phir Evening
+═══════════════════════════════════════════════════ */
 function copyOutput() {
   if (!outputResult) { showToast('Run adjustment first'); return; }
-  const { results, nonOps, unassigned } = outputResult;
+  const { morningResult, eveningResult } = outputResult;
 
-  let text = '✪ Partial Fleet Readiness\n\n';
-  text += '📋 ADJUSTED PARTIAL FLEET\n';
-  text += '─'.repeat(50) + '\n';
+  function buildShiftText(label, emoji, shiftResult) {
+    if (!shiftResult.results.length) return '';
+    let text = `**${emoji} ${label.toUpperCase()}**\n${'─'.repeat(40)}\n`;
 
-  // ── Group by mainRoute ──
-  const groups = {};
-  results.forEach(r => {
-    const grp = r.mainRoute || 'OTHER';
-    if (!groups[grp]) groups[grp] = [];
-    groups[grp].push(r);
-  });
-
-  Object.keys(groups).forEach(grp => {
-    text += `\n**${grp}**\n`;
-    groups[grp].forEach(r => {
-      const bus  = r.assignedBus || '—';
-      const slot = r.slot || '—';
-      const icon = r.matchType === 'perfect' || r.matchType === 'original' ? '✓' : r.matchType === 'similar' ? '~' : '⚠';
-      text += `${icon} ${bus} ${slot} ${r.route}\n`;
+    const groups = {};
+    shiftResult.results.forEach(r => {
+      const grp = r.mainRoute || 'OTHER';
+      if (!groups[grp]) groups[grp] = [];
+      groups[grp].push(r);
     });
-  });
 
-  // ── Replacement buses section ──
-  const replacements = results.filter(r =>
-    r.originalBus && r.assignedBus && r.originalBus !== r.assignedBus
-  );
-  if (replacements.length) {
-    text += '\n' + '─'.repeat(50) + '\n';
-    text += '**REPLACEMENT BUSES**\n';
-    replacements.forEach(r => {
-      text += `${r.originalBus} ---- → ${r.assignedBus}\n`;
+    Object.keys(groups).forEach(grp => {
+      // Only rows where something changed — skip if original === assigned
+      const changed = groups[grp].filter(r =>
+        !(r.originalBus && r.assignedBus && r.originalBus === r.assignedBus)
+      );
+      if (!changed.length) return;
+      text += `\n**${grp}**\n`;
+      changed.forEach(r => {
+        const bus  = r.assignedBus || '—';
+        const slot = r.slot || '—';
+        text += `${bus} ${slot} ${r.route}\n`;
+      });
     });
+
+    // Replacements
+    const replacements = shiftResult.results.filter(r => r.originalBus && r.assignedBus && r.originalBus !== r.assignedBus);
+    if (replacements.length) {
+      text += `\n**REPLACEMENT BUSES**\n`;
+      replacements.forEach(r => { text += `${r.originalBus} → ${r.assignedBus}\n`; });
+    }
+
+    // Unassigned
+    if (shiftResult.unassigned.length) {
+      text += `\n**UNASSIGNED**\n`;
+      shiftResult.unassigned.forEach(u => { text += `${u.slot||'—'} ${u.route}${u.originalBus?' (orig: '+u.originalBus+')':''}\n`; });
+    }
+
+    return text + '\n';
   }
 
-  // ── Non-Ops ──
-  if (nonOps.length) {
-    text += '\n**🚫 NON-OPS**\n';
-    text += '─'.repeat(50) + '\n';
-    nonOps.forEach(b => { text += `– ${b}\n`; });
+  let text = '**Partial Fleet Readiness**\n\n';
+  text += buildShiftText('Morning', , morningResult);
+  text += buildShiftText('Evening', , eveningResult);
+
+  // Combined Non-Ops at end — comma separated
+  const allNonOps = [...new Set([...morningResult.nonOps, ...eveningResult.nonOps])].sort();
+  if (allNonOps.length) {
+    text += `**NON OPS**\n${'─'.repeat(40)}\n`;
+    const chunkSize = 6;
+    for (let i = 0; i < allNonOps.length; i += chunkSize) {
+      text += allNonOps.slice(i, i + chunkSize).join(',') + '\n';
+    }
   }
 
-  // ── Unassigned ──
-  if (unassigned.length) {
-    text += '\n*⚠️ UNASSIGNED SLOTS*\n';
-    text += '─'.repeat(50) + '\n';
-    unassigned.forEach(u => { text += `– ${u.slot || '—'} | ${u.route}${u.originalBus ? ' | orig: '+u.originalBus : ''}\n`; });
-  }
+  copyToClipboard(text);
+}
 
-  navigator.clipboard.writeText(text).then(() => showToast('✓ Copied to clipboard'));
+function copyToClipboard(text) {
+  // Method 1: Modern Clipboard API
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => showToast('✓ Copied — Morning + Evening'))
+      .catch(() => fallbackCopy(text));
+    return;
+  }
+  // Method 2: Fallback for older browsers / file:// protocol
+  fallbackCopy(text);
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;width:2em;height:2em;opacity:0;border:none;outline:none';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    const ok = document.execCommand('copy');
+    showToast(ok ? '✓ Copied — Morning + Evening' : '✗ Copy failed — try selecting manually');
+  } catch(e) {
+    showToast('✗ Copy failed — try selecting manually');
+  }
+  document.body.removeChild(ta);
 }
 
 function exportOutput() {
   if (!outputResult) { showToast('Run adjustment first'); return; }
-  const csv = ['Slot,Route,Original Bus,Assigned Bus,Match Type,Reason', ...outputResult.results.map(r => `"${r.slot}","${r.route}","${r.originalBus||''}","${r.assignedBus||''}","${r.matchType}","${r.reason}"`)].join('\n');
+  const { morningResult, eveningResult, unknownResult } = outputResult;
+  const all = [
+    ...morningResult.results.map(r => ({...r, shift:'Morning'})),
+    ...eveningResult.results.map(r => ({...r, shift:'Evening'})),
+    ...unknownResult.results.map(r => ({...r, shift:'Unknown'}))
+  ];
+  const csv = ['Shift,Slot,Route,Original Bus,Assigned Bus,Match Type,Reason',
+    ...all.map(r => `"${r.shift}","${r.slot}","${r.route}","${r.originalBus||''}","${r.assignedBus||''}","${r.matchType}","${r.reason}"`)
+  ].join('\n');
   downloadFile(csv, 'fleet-adjustment-output.csv', 'text/csv');
 }
 
@@ -1489,7 +1791,8 @@ function exportOutput() {
    SAMPLE DATA
 ═══════════════════════════════════════════════════ */
 function loadSampleData() {
-  document.getElementById('rawInput').value = `Chembur - Bkc\nC317\nALL\n23/27\n8:30 AM\nC11\nALL\n18/35\n8:45 AM\nThane South Mumbai\nC135\nALL\n28/35\n6:15 AM\nC133\nHN MN\n35/35\n6:55 AM\nC227\nNTH EXP\n19/35\n7:00 AM`;
+  document.getElementById('rawInput').value =
+    `Chembur - Bkc\nC317\nALL\n23/27\n8:30 AM\nC11\nALL\n18/35\n8:45 AM\nThane South Mumbai\nC135\nALL\n28/35\n6:15 AM\nC133\nHN MN\n35/35\n6:55 AM\nC227\nNTH EXP\n19/35\n7:00 AM\nChembur - Bkc\nC320\nALL\n20/27\n4:30 PM\nC55\nALL\n22/35\n5:15 PM\nThane South Mumbai\nC140\nHN MN\n30/35\n4:45 PM\nC228\nNTH EXP\n18/35\n6:00 PM`;
   cleanData();
 }
 
@@ -1529,7 +1832,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderBMTable(); renderExcluded();
   updateBadge('busmaster', busMaster.length);
 
-  // Auto-pull from cloud on load
   setCloudStatus('loading');
   try {
     const res  = await fetch('/api/fleet');
