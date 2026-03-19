@@ -1411,7 +1411,8 @@ function normaliseMainRoute(mr) {
 function runShiftAdjustment(shiftSlots, shiftRowData, shiftName) {
   const logs = [], results = [], nonOps = [], unassigned = [];
   const usedBuses = new Set();
-  const rowBuses  = new Set(shiftRowData.map(r => r.bus));
+  // rowBuses = all unique buses in this shift's row data
+  const rowBuses = [...new Set(shiftRowData.map(r => r.bus))];
 
   for (const slot of shiftSlots) {
     const originalBus = slot.bus;
@@ -1519,10 +1520,11 @@ function runShiftAdjustment(shiftSlots, shiftRowData, shiftName) {
     results.push({ slot: slotTime, route: slotRoute, mainRoute: slotMain, originalBus, assignedBus: best.bus, matchType, reason, rowTime: normaliseTime(best.slot) });
   }
 
-  // Non-Ops = row data buses not used this shift
+  // Non-Ops = row data buses of this shift not used
   for (const rb of rowBuses) {
     if (!usedBuses.has(rb) && !excludedBuses.has(rb)) nonOps.push(rb);
   }
+  nonOps.sort();
   if (nonOps.length) logs.push({ type:'info', msg:`[${shiftName}] Non-Ops: ${nonOps.join(', ')}` });
 
   return { results, logs, nonOps, unassigned };
@@ -1713,7 +1715,14 @@ function copyOutput() {
     });
 
     // Replacements
-    const replacements = shiftResult.results.filter(r => r.originalBus && r.assignedBus && r.originalBus !== r.assignedBus);
+    const allAssigned = new Set(shiftResult.results.map(r => r.assignedBus).filter(Boolean));
+    const replacements = shiftResult.results.filter(r =>
+      r.originalBus &&
+      r.assignedBus &&
+      r.originalBus !== r.assignedBus &&
+      r.matchType !== 'original' &&
+      !allAssigned.has(r.originalBus)
+    );
     if (replacements.length) {
       text += `\n**REPLACEMENT BUSES**\n`;
       replacements.forEach(r => { text += `${r.originalBus} → ${r.assignedBus}\n`; });
@@ -1732,8 +1741,12 @@ function copyOutput() {
   text += buildShiftText('Morning', '', morningResult);
   text += buildShiftText('Evening', '', eveningResult);
 
-  // Combined Non-Ops at end — comma separated
-  const allNonOps = [...new Set([...morningResult.nonOps, ...eveningResult.nonOps])].sort();
+  // Combined Non-Ops at end — row data unused + excluded buses, unique, sorted
+  const allNonOps = [...new Set([
+    ...morningResult.nonOps,
+    ...eveningResult.nonOps,
+    ...[...excludedBuses].sort()
+  ])].sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
   if (allNonOps.length) {
     text += `**NON OPS**\n${'─'.repeat(40)}\n`;
     const chunkSize = 6;
