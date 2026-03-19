@@ -1689,7 +1689,7 @@ function copyOutput() {
 
   function buildShiftText(label, emoji, shiftResult) {
     if (!shiftResult.results.length) return '';
-    let text = `**${emoji} ${label.toUpperCase()}**\n${'─'.repeat(40)}\n`;
+    let text = `**${label.toUpperCase()}**\n${'─'.repeat(40)}\n`;
 
     const groups = {};
     shiftResult.results.forEach(r => {
@@ -1729,8 +1729,8 @@ function copyOutput() {
   }
 
   let text = '**Partial Fleet Readiness**\n\n';
-  text += buildShiftText('Morning', '🌅', morningResult);
-  text += buildShiftText('Evening', '🌆', eveningResult);
+  text += buildShiftText('Morning', '', morningResult);
+  text += buildShiftText('Evening', '', eveningResult);
 
   // Combined Non-Ops at end — comma separated
   const allNonOps = [...new Set([...morningResult.nonOps, ...eveningResult.nonOps])].sort();
