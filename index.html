@@ -71,7 +71,6 @@ body {
   flex-wrap: wrap;
 }
 
-/* HUB TABS */
 .hub-tabs {
   display: flex;
   background: var(--bg);
@@ -104,7 +103,6 @@ body.evening-mode .hub-btn.active {
   color: #fff;
 }
 
-/* MODE TOGGLE */
 .mode-toggle {
   display: flex;
   background: var(--bg);
@@ -428,13 +426,11 @@ body.evening-mode { --active: #818cf8; }
   <div class="header">
     <h1>Hub <span>Report Builder</span></h1>
     <div class="header-right">
-      <!-- HUB TABS -->
       <div class="hub-tabs">
         <button class="hub-btn active" id="hubCentral" onclick="setHub('central')">🏙 Central</button>
         <button class="hub-btn" id="hubHarbour" onclick="setHub('harbour')">⚓ Harbour</button>
         <button class="hub-btn" id="hubWestern" onclick="setHub('western')">🌇 Western</button>
       </div>
-      <!-- MODE TOGGLE -->
       <div class="mode-toggle">
         <button class="mode-btn active-morning" id="btnMorning" onclick="setMode('morning')">☀️ Morning</button>
         <button class="mode-btn" id="btnEvening" onclick="setMode('evening')">🌙 Evening</button>
@@ -515,7 +511,6 @@ body.evening-mode { --active: #818cf8; }
 const NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
 const ISSUE_KEYWORDS = ['issue','tyre','driver','mechanical','ac','pending','rental','na','n/a','breakdown','flat'];
 
-/* ── HUB DEFINITIONS ── */
 const HUBS = {
 
   central: {
@@ -585,7 +580,6 @@ const HUBS = {
   }
 };
 
-/* Shortcut map for output text */
 const SHORTCUTS = {
   'Navi Mumbai': 'NM',
   'Lower Parel': 'LP',
@@ -607,7 +601,6 @@ let currentHub = 'central';
 let mode = 'morning';
 
 document.addEventListener('DOMContentLoaded', () => {
-
   document.getElementById('currentDate').textContent =
     new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
   setHub('central');
@@ -694,22 +687,31 @@ function parseBackup(raw) {
   return { available, issues };
 }
 
+/* ── SORTING FOR WESTERN & HARBOUR ── */
+function getSortedOtherHub(hub) {
+  const filled = [], empty = [];
+  hub.main.forEach(r => {
+    const val = (document.getElementById(rid(r)) || {}).value || '';
+    val.trim() ? filled.push({ r, secondary: false }) : empty.push({ r, secondary: false });
+  });
+  return [...filled, ...empty];
+}
+
 function generate() {
   const hub = HUBS[currentHub];
-  const allRoutes = [...hub.main, ...hub.secondary];
   const date = new Date().toISOString().slice(0, 10);
   const records = [];
   const hubLabel = hub.label;
 
-  let out = `✪ ${hubLabel} Update\n\n`;
+  let out = `✪ **${hubLabel} Update**\n\n`;
   let hasContent = false;
 
-  // Central: sorted (filled first), others: fixed order with numbers
   let routeList;
   if (currentHub === 'central') {
     routeList = getSortedCentral(hub);
   } else {
-    routeList = allRoutes.map(r => ({ r, secondary: false }));
+    // Western & Harbour: filled routes first, empty routes last
+    routeList = getSortedOtherHub(hub);
   }
 
   let numIdx = 0;
@@ -718,7 +720,6 @@ function generate() {
     if (!el) return;
     const val = el.value.trim();
     const displayName = mode === 'evening' ? r.evening : r.morning;
-    // For output, apply shortcuts for western/harbour
     const outputName = (currentHub === 'central') ? displayName : applyShortcuts(displayName);
     const prefix = secondary ? '▪️' : NUMS[numIdx++];
 
