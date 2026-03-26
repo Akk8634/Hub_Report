@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Central Hub Report Builder</title>
+<title>Hub Report Builder</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
@@ -41,16 +41,17 @@ body {
   align-items: start;
 }
 
-/* HEADER */
 .header {
   grid-column: 1 / -1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 18px 24px;
   background: var(--card);
   border-radius: var(--radius);
   border: 1px solid var(--border);
+  gap: 14px;
 }
 
 .header h1 {
@@ -58,9 +59,50 @@ body {
   font-weight: 800;
   letter-spacing: -0.5px;
   color: var(--active);
+  text-align: center;
+}
+.header h1 span { color: var(--text); }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.header h1 span { color: var(--text); }
+/* HUB TABS */
+.hub-tabs {
+  display: flex;
+  background: var(--bg);
+  border-radius: 50px;
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--border);
+}
+
+.hub-btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.25s;
+}
+
+.hub-btn.active {
+  background: var(--active);
+  color: #000;
+}
+
+body.evening-mode .hub-btn.active {
+  background: var(--evening);
+  color: #fff;
+}
 
 /* MODE TOGGLE */
 .mode-toggle {
@@ -85,20 +127,11 @@ body {
   transition: all 0.25s;
 }
 
-.mode-btn.active-morning {
-  background: var(--morning);
-  color: #000;
-}
+.mode-btn.active-morning { background: var(--morning); color: #000; }
+.mode-btn.active-evening { background: var(--evening); color: #fff; }
 
-.mode-btn.active-evening {
-  background: var(--evening);
-  color: #fff;
-}
-
-/* LEFT PANEL */
 .left-panel { display: flex; flex-direction: column; gap: 14px; }
 
-/* SECTION CARD */
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -147,7 +180,6 @@ body {
 .card textarea::placeholder { color: #3d4270; }
 .card textarea:focus { background: rgba(255,255,255,0.02); }
 
-/* SECTION DIVIDER */
 .section-title {
   font-size: 0.72rem;
   font-weight: 700;
@@ -167,7 +199,6 @@ body {
   background: var(--border);
 }
 
-/* EXTRAS SECTION */
 .extras-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -201,13 +232,9 @@ body {
   outline: none;
 }
 
-.extras-card textarea:focus {
-  border-color: var(--active);
-}
-
+.extras-card textarea:focus { border-color: var(--active); }
 .extras-card textarea::placeholder { color: #3d4270; }
 
-/* ACTION BUTTONS */
 .actions {
   display: flex;
   gap: 10px;
@@ -225,29 +252,13 @@ body {
   transition: all 0.2s;
 }
 
-.btn-generate {
-  background: var(--active);
-  color: #000;
-  flex: 1;
-}
-
+.btn-generate { background: var(--active); color: #000; flex: 1; }
 .btn-generate:hover { opacity: 0.85; transform: translateY(-1px); }
-
-.btn-copy {
-  background: var(--green);
-  color: #fff;
-}
-
+.btn-copy { background: var(--green); color: #fff; }
 .btn-copy:hover { opacity: 0.85; }
-
-.btn-clear {
-  background: #2e3250;
-  color: var(--muted);
-}
-
+.btn-clear { background: #2e3250; color: var(--muted); }
 .btn-clear:hover { background: var(--border); }
 
-/* RIGHT PANEL */
 .right-panel {
   position: sticky;
   top: 20px;
@@ -256,7 +267,6 @@ body {
   gap: 14px;
 }
 
-/* PREVIEW BOX */
 .preview-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -281,12 +291,7 @@ body {
   letter-spacing: 1px;
 }
 
-.preview-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--muted);
-}
-
+.preview-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
 .preview-dot.live { background: var(--green); animation: pulse 1.5s infinite; }
 
 @keyframes pulse {
@@ -317,7 +322,6 @@ body {
   padding: 40px 20px;
 }
 
-/* EXPORT CARD */
 .export-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -334,15 +338,9 @@ body {
   margin-bottom: 12px;
 }
 
-.export-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
+.export-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
-.export-card select,
-.export-card input {
+.export-card select, .export-card input {
   background: var(--card2);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -354,9 +352,7 @@ body {
   flex: 1;
 }
 
-.export-card select:focus,
-.export-card input:focus { border-color: var(--active); }
-
+.export-card select:focus, .export-card input:focus { border-color: var(--active); }
 #customDays { display: none; max-width: 100px; }
 
 .btn-export {
@@ -372,10 +368,8 @@ body {
   transition: opacity 0.2s;
   white-space: nowrap;
 }
-
 .btn-export:hover { opacity: 0.85; }
 
-/* STATUS TOAST */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -392,20 +386,8 @@ body {
   transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
   z-index: 999;
 }
-
 .toast.show { transform: translateY(0); opacity: 1; }
 .toast.error { background: var(--red); }
-
-/* ROUTE GROUPS */
-.group-divider {
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: #3d4270;
-  padding: 8px 0 2px;
-  grid-column: 1 / -1;
-}
 
 .routes-grid {
   display: grid;
@@ -418,28 +400,24 @@ body {
   .right-panel { position: static; }
   .routes-grid { grid-template-columns: 1fr; }
 }
-
 @media (max-width: 600px) {
-  .header { flex-direction: column; gap: 12px; }
+  body { padding: 10px; }
+  .app { gap: 12px; }
+  .header { padding: 14px 12px; gap: 10px; }
+  .header h1 { font-size: 1.15rem; }
+  .header-right { gap: 8px; flex-direction: column; align-items: center; }
+  .hub-tabs { width: 100%; justify-content: center; }
+  .hub-btn { padding: 7px 12px; font-size: 0.78rem; flex: 1; text-align: center; }
+  .mode-toggle { width: 100%; justify-content: center; }
+  .mode-btn { padding: 7px 0; font-size: 0.78rem; flex: 1; text-align: center; }
   .routes-grid { grid-template-columns: 1fr; }
+  .actions { gap: 8px; }
+  .btn { padding: 10px 14px; font-size: 0.82rem; }
+  .actions a { padding: 10px 14px !important; font-size: 0.82rem !important; }
+  #telegramPreview { font-size: 0.72rem; }
 }
 
-/* Evening mode accent */
-body.evening-mode {
-  --active: #818cf8;
-  --morning: #818cf8;
-}
-
-body.evening-mode .mode-btn.active-evening {
-  background: var(--evening);
-}
-
-.char-count {
-  font-size: 0.65rem;
-  color: #3d4270;
-  text-align: right;
-  padding: 2px 14px 6px;
-}
+body.evening-mode { --active: #818cf8; }
 </style>
 </head>
 <body>
@@ -448,26 +426,26 @@ body.evening-mode .mode-btn.active-evening {
 
   <!-- HEADER -->
   <div class="header">
-    <h1>Central Hub <span>Report Builder</span></h1>
-    <div style="display:flex; align-items:center; gap:12px;">
-      <span id="currentDate" style="font-size:0.8rem; color:var(--muted);"></span>
+    <h1>Hub <span>Report Builder</span></h1>
+    <div class="header-right">
+      <!-- HUB TABS -->
+      <div class="hub-tabs">
+        <button class="hub-btn active" id="hubCentral" onclick="setHub('central')">🏙 Central</button>
+        <button class="hub-btn" id="hubHarbour" onclick="setHub('harbour')">⚓ Harbour</button>
+        <button class="hub-btn" id="hubWestern" onclick="setHub('western')">🌇 Western</button>
+      </div>
+      <!-- MODE TOGGLE -->
       <div class="mode-toggle">
         <button class="mode-btn active-morning" id="btnMorning" onclick="setMode('morning')">☀️ Morning</button>
         <button class="mode-btn" id="btnEvening" onclick="setMode('evening')">🌙 Evening</button>
       </div>
+      <span id="currentDate" style="font-size:0.8rem; color:var(--muted);"></span>
     </div>
   </div>
 
   <!-- LEFT PANEL -->
   <div class="left-panel">
-
-    <!-- MAIN ROUTES -->
-    <div class="section-title">Main Routes</div>
-    <div class="routes-grid" id="mainRoutes"></div>
-
-    <!-- SECONDARY ROUTES -->
-    <div class="section-title">Secondary Routes ▪️</div>
-    <div class="routes-grid" id="secondaryRoutes"></div>
+    <div id="routeSections"></div>
 
     <!-- MORNING EXTRAS -->
     <div id="morningExtras">
@@ -493,16 +471,13 @@ body.evening-mode .mode-btn.active-evening {
       <button class="btn btn-generate" onclick="generate()">⚡ Generate Report</button>
       <button class="btn btn-copy" onclick="copyReport()">📋 Copy</button>
       <button class="btn btn-clear" onclick="clearAll()">🗑 Clear</button>
-      <a href="https://hub-report.pages.dev/analytics" style="padding:11px 22px; background:#38bdf8; color:#000; border-radius:50px; font-family:Outfit,sans-serif; font-size:0.88rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">📊 Analytics</a>
-      <a href="https://hub-report.pages.dev/partial_fleet_builder" style="padding:11px 22px; background:#a855f7; color:#fff; border-radius:50px; font-family:Outfit,sans-serif; font-size:0.88rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">🚌 Partial Fleet</a>
+      <a href="https://hub-report.pages.dev/analytics" style="padding:11px 22px; background:#38bdf8; color:#000; border-radius:50px; font-family:Outfit,sans-serif; font-size:0.88rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">📊 Analytics</a>
+      <a href="https://hub-report.pages.dev/partial_fleet_builder" style="padding:11px 22px; background:#a855f7; color:#fff; border-radius:50px; font-family:Outfit,sans-serif; font-size:0.88rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">🚌 Partial Fleet</a>
     </div>
-
   </div>
 
   <!-- RIGHT PANEL -->
   <div class="right-panel">
-
-    <!-- PREVIEW -->
     <div class="preview-card">
       <div class="preview-header">
         <span>Telegram Preview</span>
@@ -513,7 +488,6 @@ body.evening-mode .mode-btn.active-evening {
       </div>
     </div>
 
-    <!-- EXPORT -->
     <div class="export-card">
       <h3>📊 Export Report</h3>
       <div class="export-row">
@@ -530,61 +504,124 @@ body.evening-mode .mode-btn.active-evening {
         <button class="btn-export" onclick="exportReport()">Export CSV</button>
       </div>
     </div>
-
   </div>
 
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 
-/* ── No API keys here! All DB calls go through /.netlify/functions/db ── */
-
+const NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
 const ISSUE_KEYWORDS = ['issue','tyre','driver','mechanical','ac','pending','rental','na','n/a','breakdown','flat'];
 
-// Circled numbers for main routes
-const NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
+/* ── HUB DEFINITIONS ── */
+const HUBS = {
 
-/* ── MORNING ROUTES (display name : id key) ── */
-const MAIN_ROUTES = [
-  { id: 'T-LP',          morning: 'T-LP',          evening: 'LP - Thane' },
-  { id: 'Chembur-BKC',   morning: 'Chembur-BKC',   evening: 'BKC - Chembur' },
-  { id: 'T-BKC',         morning: 'T-BKC',          evening: 'BKC - Thane' },
-  { id: 'T-Sobo',        morning: 'T-Sobo',         evening: 'Sobo - Thane' },
-  { id: 'Chembur-Worli', morning: 'Chembur-Worli',  evening: 'Worli - Chembur' },
-  { id: 'Mulund-LP',     morning: 'Mulund-LP',      evening: 'LP - Mulund' },
-  { id: 'T-NM',          morning: 'T-NM',           evening: 'NM - Thane' },
-  { id: 'MULUND-BKC',    morning: 'MULUND - BKC',   evening: 'BKC - MULUND' },
-  { id: 'T-Santacruze',  morning: 'T-Santacruze',   evening: 'Santacruz - Thane' },
-  { id: 'BKC-Metro',     morning: 'BKC-Metro',      evening: 'Metro - BKC' },
-  { id: 'Worli-BKC',     morning: 'Worli-BKC',      evening: 'BKC - Worli' },
-  { id: 'Chembur-SOBO',  morning: 'Chembur-SOBO',   evening: 'SOBO - Chembur' },
-];
+  central: {
+    label: 'Central Hub',
+    main: [
+      { id: 'T-LP',          morning: 'T-LP',          evening: 'LP - Thane' },
+      { id: 'Chembur-BKC',   morning: 'Chembur-BKC',   evening: 'BKC - Chembur' },
+      { id: 'T-BKC',         morning: 'T-BKC',          evening: 'BKC - Thane' },
+      { id: 'T-Sobo',        morning: 'T-Sobo',         evening: 'Sobo - Thane' },
+      { id: 'Chembur-Worli', morning: 'Chembur-Worli',  evening: 'Worli - Chembur' },
+      { id: 'Mulund-LP',     morning: 'Mulund-LP',      evening: 'LP - Mulund' },
+      { id: 'T-NM',          morning: 'T-NM',           evening: 'NM - Thane' },
+      { id: 'MULUND-BKC',    morning: 'MULUND - BKC',   evening: 'BKC - MULUND' },
+      { id: 'T-Santacruze',  morning: 'T-Santacruze',   evening: 'Santacruz - Thane' },
+      { id: 'BKC-Metro',     morning: 'BKC-Metro',      evening: 'Metro - BKC' },
+      { id: 'Worli-BKC',     morning: 'Worli-BKC',      evening: 'BKC - Worli' },
+      { id: 'Chembur-SOBO',  morning: 'Chembur-SOBO',   evening: 'SOBO - Chembur' },
+    ],
+    secondary: [
+      { id: 'BKC-Ghatkopar', morning: 'BKC - Ghatkopar', evening: 'BKC - Ghatkopar' },
+      { id: 'Mulund-SOBO',   morning: 'Mulund-SOBO',     evening: 'SOBO - Mulund' },
+      { id: 'MJW-LP',        morning: 'MJW-LP',           evening: 'LP - MJW' },
+      { id: 'MJW-BKC',       morning: 'MJW-BKC',          evening: 'BKC - MJW' },
+    ]
+  },
 
-const SECONDARY_ROUTES = [
-  { id: 'BKC-Ghatkopar', morning: 'BKC - Ghatkopar', evening: 'BKC - Ghatkopar' },
-  { id: 'Mulund-SOBO',   morning: 'Mulund-SOBO',     evening: 'SOBO - Mulund' },
-  { id: 'MJW-LP',        morning: 'MJW-LP',           evening: 'LP - MJW' },
-  { id: 'MJW-BKC',       morning: 'MJW-BKC',          evening: 'BKC - MJW' },
-];
+  western: {
+    label: 'Western Hub',
+    main: [
+      { id: 'W-Kandivali-BKC',    morning: 'Kandivali - BKC',           evening: 'BKC - Kandivali' },
+      { id: 'W-Thane-Marol',      morning: 'Thane - Marol',             evening: 'Marol - Thane' },
+      { id: 'W-Borivali-BKC',     morning: 'Borivali - BKC',            evening: 'BKC - Borivali' },
+      { id: 'W-MB-Powai',         morning: 'Mira Bhayandar - Powai',    evening: 'Powai - Mira Bhayandar' },
+      { id: 'W-Thane-Powai',      morning: 'Thane - Powai',             evening: 'Powai - Thane' },
+      { id: 'W-MB-BKC',           morning: 'Mira Bhayandar - BKC',      evening: 'BKC - Mira Bhayandar' },
+      { id: 'W-MB-SakiNaka',      morning: 'Mira Bhayandar - Saki Naka',evening: 'Saki Naka - Mira Bhayandar' },
+      { id: 'W-Mulund-Andheri',   morning: 'Mulund - Andheri',          evening: 'Andheri - Mulund' },
+      { id: 'W-Thane-Andheri',    morning: 'Thane - Andheri',           evening: 'Andheri - Thane' },
+      { id: 'W-AndheriW-BKC',     morning: 'Andheri (W) - BKC',         evening: 'BKC - Andheri (W)' },
+      { id: 'W-Mulund-GG',        morning: 'Mulund - Goregaon (STH)',   evening: 'Goregaon (STH) - Mulund' },
+      { id: 'W-Thane-GG',         morning: 'Thane - Goregaon (NTH)',    evening: 'Goregaon (NTH) - Thane' },
+    ],
+    secondary: []
+  },
 
-let mode = 'morning';
+  harbour: {
+    label: 'Harbour Hub',
+    main: [
+      { id: 'H-NM-Andheri',       morning: 'Navi Mumbai - Andheri',             evening: 'Andheri - Navi Mumbai' },
+      { id: 'H-NM-BKC',           morning: 'Navi Mumbai - BKC',                 evening: 'BKC - Navi Mumbai' },
+      { id: 'H-NM-LP',            morning: 'Navi Mumbai - Lower Parel',         evening: 'Lower Parel - Navi Mumbai' },
+      { id: 'H-Panvel-BKC',       morning: 'Panvel - BKC',                      evening: 'BKC - Panvel' },
+      { id: 'H-Panvel-LP',        morning: 'Panvel - Lower Parel',              evening: 'Lower Parel - Panvel' },
+      { id: 'H-Panvel-SOBO',      morning: 'Panvel - South Mumbai',             evening: 'South Mumbai - Panvel' },
+      { id: 'H-Vashi-Andheri',    morning: 'Vashi - Andheri',                   evening: 'Andheri - Vashi' },
+      { id: 'H-Vashi-GG',         morning: 'Vashi - Goregaon',                  evening: 'Goregaon - Vashi' },
+      { id: 'H-Vashi-BKC',        morning: 'Vashi - BKC',                       evening: 'BKC - Vashi' },
+      { id: 'H-Vashi-Worli',      morning: 'Vashi - Worli',                     evening: 'Worli - Vashi' },
+      { id: 'H-NM-SOBO',          morning: 'Navi Mumbai - South Mumbai',        evening: 'South Mumbai - Navi Mumbai' },
+      { id: 'H-NM-SOBO-Atal',     morning: 'Navi Mumbai - South Mumbai (Atal Setu)', evening: 'South Mumbai - Navi Mumbai (Atal Setu)' },
+      { id: 'H-NM-Worli',         morning: 'Navi Mumbai - Worli',               evening: 'Worli - Navi Mumbai' },
+      { id: 'H-PBR-BKC',          morning: 'Palm Beach Road - BKC',             evening: 'BKC - Palm Beach Road' },
+      { id: 'H-PBR-LP',           morning: 'Palm Beach Road - Lower Parel',     evening: 'Lower Parel - Palm Beach Road' },
+      { id: 'H-PBR-SOBO',         morning: 'Palm Beach Road - South Mumbai',    evening: 'South Mumbai - Palm Beach Road' },
+    ],
+    secondary: []
+  }
+};
 
-/* ── INIT ── */
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('currentDate').textContent =
-    new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
-  setMode('morning');
-});
+/* Shortcut map for output text */
+const SHORTCUTS = {
+  'Navi Mumbai': 'NM',
+  'Lower Parel': 'LP',
+  'South Mumbai': 'SOBO',
+  'Palm Beach Road': 'PBR',
+  'Goregaon': 'GG',
+  'Mira Bhayandar': 'MB',
+};
 
-/* ── ROUTE ID ── */
-function rid(r) {
-  return 'r_' + r.id.replace(/[^a-zA-Z0-9]/g, '_');
+function applyShortcuts(name) {
+  let out = name;
+  for (const [full, short] of Object.entries(SHORTCUTS)) {
+    out = out.replace(new RegExp(full, 'gi'), short);
+  }
+  return out;
 }
 
-/* ── SET MODE ── */
+let currentHub = 'central';
+let mode = 'morning';
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  document.getElementById('currentDate').textContent =
+    new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+  setHub('central');
+});
+
+function setHub(hub) {
+  currentHub = hub;
+  ['central','harbour','western'].forEach(h => {
+    document.getElementById('hub' + h.charAt(0).toUpperCase() + h.slice(1)).classList.toggle('active', h === hub);
+  });
+  clearAll(true);
+  renderRoutes();
+}
+
 function setMode(m) {
   mode = m;
   document.body.className = m === 'evening' ? 'evening-mode' : '';
@@ -594,66 +631,58 @@ function setMode(m) {
   renderRoutes();
 }
 
-/* ── RENDER ROUTES ── */
+function rid(r) { return 'r_' + r.id.replace(/[^a-zA-Z0-9]/g, '_'); }
+
 function renderRoutes() {
-  // Save textarea values before re-render
+  const hub = HUBS[currentHub];
   const saved = {};
-  [...MAIN_ROUTES, ...SECONDARY_ROUTES].forEach(r => {
+  [...hub.main, ...hub.secondary].forEach(r => {
     const el = document.getElementById(rid(r));
     if (el) saved[r.id] = el.value;
   });
 
-  function makeCard(r, isSecondary) {
-    const id = rid(r);
-    const label = mode === 'evening' ? r.evening : r.morning;
-    return `
-      <div class="card">
-        <div class="card-header">
-          <span class="route-label">${isSecondary ? '▪️ ' : ''}<b>${label}</b></span>
-          ${isSecondary ? '<span class="secondary-tag">secondary</span>' : ''}
-        </div>
-        <textarea id="${id}" placeholder="Enter bus issues..."></textarea>
-      </div>`;
+  let html = '';
+
+  if (hub.main.length) {
+    if (hub.secondary.length) html += `<div class="section-title">Main Routes</div>`;
+    html += `<div class="routes-grid">`;
+    hub.main.forEach(r => { html += makeCard(r, false); });
+    html += `</div>`;
   }
 
-  document.getElementById('mainRoutes').innerHTML =
-    MAIN_ROUTES.map(r => makeCard(r, false)).join('');
-  document.getElementById('secondaryRoutes').innerHTML =
-    SECONDARY_ROUTES.map(r => makeCard(r, true)).join('');
+  if (hub.secondary.length) {
+    html += `<div class="section-title" style="margin-top:8px;">Secondary Routes ▪️</div>`;
+    html += `<div class="routes-grid">`;
+    hub.secondary.forEach(r => { html += makeCard(r, true); });
+    html += `</div>`;
+  }
 
-  // Restore values
-  [...MAIN_ROUTES, ...SECONDARY_ROUTES].forEach(r => {
+  document.getElementById('routeSections').innerHTML = html;
+
+  [...hub.main, ...hub.secondary].forEach(r => {
     const el = document.getElementById(rid(r));
     if (el && saved[r.id]) el.value = saved[r.id];
   });
 }
 
-/* ── FORMAT TEXT ── */
+function makeCard(r, isSecondary) {
+  const label = mode === 'evening' ? r.evening : r.morning;
+  return `
+    <div class="card">
+      <div class="card-header">
+        <span class="route-label">${isSecondary ? '▪️ ' : ''}<b>${label}</b></span>
+        ${isSecondary ? '<span class="secondary-tag">secondary</span>' : ''}
+      </div>
+      <textarea id="${rid(r)}" placeholder="Enter bus issues..."></textarea>
+    </div>`;
+}
+
 function formatText(line) {
   line = line.replace(/\bc(\d+)/gi, 'C$1');
   line = line.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
   return line.trim();
 }
 
-/* ── SORT ROUTES ── */
-// Order: Filled main → Filled secondary → Empty secondary → Empty main
-function getSorted() {
-  const filledMain = [], filledSec = [], emptySec = [], emptyMain = [];
-
-  MAIN_ROUTES.forEach(r => {
-    const val = (document.getElementById(rid(r)) || {}).value || '';
-    (val.trim() ? filledMain : emptyMain).push({ r, secondary: false });
-  });
-
-  SECONDARY_ROUTES.forEach(r => {
-    const val = (document.getElementById(rid(r)) || {}).value || '';
-    (val.trim() ? filledSec : emptySec).push({ r, secondary: true });
-  });
-
-  return [...filledMain, ...filledSec, ...emptySec, ...emptyMain];
-}
-
-/* ── PARSE BACKUP ── */
 function parseBackup(raw) {
   const available = [], issues = [];
   raw.split('\n').forEach(line => {
@@ -665,54 +694,52 @@ function parseBackup(raw) {
   return { available, issues };
 }
 
-/* ── GENERATE ── */
 function generate() {
-  const sorted  = getSorted();
-  const date    = new Date().toISOString().slice(0, 10);
+  const hub = HUBS[currentHub];
+  const allRoutes = [...hub.main, ...hub.secondary];
+  const date = new Date().toISOString().slice(0, 10);
   const records = [];
-  const emoji   = mode === 'morning' ? '🌅' : '🌙';
-  const label   = mode === 'morning' ? 'Morning' : 'Evening';
+  const hubLabel = hub.label;
 
-  let out = `✪ Central Hub Update\n\n`;
-
+  let out = `✪ ${hubLabel} Update\n\n`;
   let hasContent = false;
 
-  // First pass: assign numbers to ALL main routes in sorted order
-  // (filled first, then empty — numbering follows position)
-  let numIdx = 0;
-  const routeNums = {};
-  sorted.forEach(({ r, secondary }) => {
-    if (!secondary) routeNums[r.id] = NUMS[numIdx++];
-  });
+  // Central: sorted (filled first), others: fixed order with numbers
+  let routeList;
+  if (currentHub === 'central') {
+    routeList = getSortedCentral(hub);
+  } else {
+    routeList = allRoutes.map(r => ({ r, secondary: false }));
+  }
 
-  sorted.forEach(({ r, secondary }) => {
-    const el  = document.getElementById(rid(r));
+  let numIdx = 0;
+  routeList.forEach(({ r, secondary }) => {
+    const el = document.getElementById(rid(r));
     if (!el) return;
     const val = el.value.trim();
-
     const displayName = mode === 'evening' ? r.evening : r.morning;
-    const prefix      = secondary ? '▪️' : routeNums[r.id];
+    // For output, apply shortcuts for western/harbour
+    const outputName = (currentHub === 'central') ? displayName : applyShortcuts(displayName);
+    const prefix = secondary ? '▪️' : NUMS[numIdx++];
 
     if (val) {
       hasContent = true;
-      out += `${prefix} **${displayName}**\n`;
+      out += `${prefix} **${outputName}**\n`;
       val.split('\n').forEach(v => {
         v = formatText(v);
         if (!v) return;
         out += `– ${v}\n`;
         const parts = v.split(' ');
-        records.push({ date, mode, route: displayName, bus: parts[0], issue: parts.slice(1).join(' ').trim() });
+        records.push({ date, mode, hub: currentHub, route: displayName, bus: parts[0], issue: parts.slice(1).join(' ').trim() });
       });
       out += '\n';
     } else {
-      // Empty route — show name only, no issues
-      out += `${prefix} **${displayName}**\n\n`;
+      out += `${prefix} **${outputName}**\n\n`;
     }
   });
 
   if (!hasContent) { showToast('No route data entered', true); return; }
 
-  /* MORNING EXTRAS */
   if (mode === 'morning') {
     const backup = document.getElementById('backup').value.trim();
     if (backup) {
@@ -722,116 +749,104 @@ function generate() {
       if (issues.length)    { out += `⚠️ Issues:\n`;   issues.forEach(b => { out += `– ${b}\n`; }); }
       out += '\n';
     }
-
     const training = document.getElementById('training').value.trim();
     if (training) {
       out += `**📋 Training Requirements**\n`;
       training.split('\n').forEach(t => { t = formatText(t); if (t) out += `– ${t}\n`; });
       out += '\n';
     }
-
     const notes = document.getElementById('notes').value.trim() || 'Rest All Ready For Tomorrow';
     out += `— — — — — —\n• **${notes}**\n`;
   }
 
   document.getElementById('telegramPreview').innerText = out;
   document.getElementById('previewDot').className = 'preview-dot live';
-
   if (records.length) autoSave(records);
   showToast('Report generated ✓');
 }
 
-/* ── COPY ── */
+function getSortedCentral(hub) {
+  const filledMain = [], filledSec = [], emptySec = [], emptyMain = [];
+  hub.main.forEach(r => {
+    const val = (document.getElementById(rid(r)) || {}).value || '';
+    (val.trim() ? filledMain : emptyMain).push({ r, secondary: false });
+  });
+  hub.secondary.forEach(r => {
+    const val = (document.getElementById(rid(r)) || {}).value || '';
+    (val.trim() ? filledSec : emptySec).push({ r, secondary: true });
+  });
+  return [...filledMain, ...filledSec, ...emptySec, ...emptyMain];
+}
+
 function copyReport() {
   const txt = document.getElementById('telegramPreview').innerText;
   if (!txt || txt.includes('Generate a report')) { showToast('Generate report first', true); return; }
   navigator.clipboard.writeText(txt).then(() => showToast('Copied to clipboard ✓'));
 }
 
-/* ── CLEAR ── */
-function clearAll() {
-  [...MAIN_ROUTES, ...SECONDARY_ROUTES].forEach(r => {
+function clearAll(silent = false) {
+  const hub = HUBS[currentHub];
+  [...hub.main, ...hub.secondary].forEach(r => {
     const el = document.getElementById(rid(r));
     if (el) el.value = '';
   });
   ['notes','training','backup'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('telegramPreview').innerHTML = '<div class="empty-preview">Generate a report to see preview</div>';
   document.getElementById('previewDot').className = 'preview-dot';
-  showToast('Cleared');
+  if (!silent) showToast('Cleared');
 }
 
-/* ── TOAST ── */
 function showToast(msg, error = false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className   = 'toast show' + (error ? ' error' : '');
+  t.className = 'toast show' + (error ? ' error' : '');
   clearTimeout(t._t);
   t._t = setTimeout(() => { t.className = 'toast'; }, 2500);
 }
 
-/* ── CUSTOM DAYS ── */
 function toggleCustomDays() {
   document.getElementById('customDays').style.display =
     document.getElementById('reportType').value === 'custom' ? 'block' : 'none';
 }
 
-/* ── DB via Netlify Function (no keys exposed to browser) ── */
 async function autoSave(records) {
   try {
     const res = await fetch('/api/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        routes: records,
-        mode: "morning",
-        timestamp: new Date().toISOString()
-      })
+      body: JSON.stringify({ routes: records, mode, timestamp: new Date().toISOString() })
     });
-
-    const text = await res.text();   // ✅ change
-
-    let data;
-    try {
-      data = JSON.parse(text);       // safe parse
-    } catch {
-      data = { success: true };      // fallback
-    }
-
+    const text = await res.text();
+    try { JSON.parse(text); } catch { }
     showToast('Saved successfully ✓');
-
   } catch(e) {
     console.error('Save error:', e);
     showToast('Save failed: ' + e.message, true);
   }
 }
 
-/* ── FETCH DATA ── */
 async function fetchData() {
-  const res  = await fetch('/api/data');
+  const res = await fetch('/api/data');
   const data = await res.json();
   return data.reports || [];
 }
 
-/* ── CSV ── */
 function downloadCSV(records, name) {
-  let csv = 'date,mode,route,bus,issue\n';
-  records.forEach(r => { csv += `${r.date},${r.mode},"${r.route}","${r.bus}","${r.issue}"\n`; });
-  const a  = document.createElement('a');
-  a.href   = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  let csv = 'date,mode,hub,route,bus,issue\n';
+  records.forEach(r => { csv += `${r.date},${r.mode},${r.hub || ''},"${r.route}","${r.bus}","${r.issue}"\n`; });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
   a.download = name;
   a.click();
   showToast('CSV downloaded ✓');
 }
 
-/* ── EXPORT ── */
 async function exportReport() {
   const type = document.getElementById('reportType').value;
   let data;
   try { data = await fetchData(); } catch(e) { showToast('Failed to fetch data', true); return; }
-
   const now = new Date();
   let filtered, filename;
-
   if (type === 'month') {
     filtered = data.filter(r => { const d = new Date(r.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
     filename = `monthly_${now.toISOString().slice(0,7)}.csv`;
@@ -839,12 +854,11 @@ async function exportReport() {
     filtered = data.filter(r => new Date(r.date).getFullYear() === now.getFullYear());
     filename = `yearly_${now.getFullYear()}.csv`;
   } else {
-    const days  = type === 'custom' ? parseInt(document.getElementById('customDays').value) || 1 : parseInt(type);
+    const days = type === 'custom' ? parseInt(document.getElementById('customDays').value) || 1 : parseInt(type);
     const start = new Date(); start.setDate(now.getDate() - days);
     filtered = data.filter(r => new Date(r.date) >= start);
     filename = `report_${days}days.csv`;
   }
-
   if (!filtered.length) { showToast('No data for selected range', true); return; }
   downloadCSV(filtered, filename);
 }
