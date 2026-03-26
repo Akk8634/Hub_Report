@@ -6,432 +6,160 @@
 <title>Fleet Adjustment System</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{--bg:#0a0c10;--bg2:#111318;--bg3:#181c24;--bg4:#1e2330;--border:#252b38;--border2:#2e3648;--accent:#f59e0b;--accent2:#d97706;--green:#22c55e;--yellow:#eab308;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--morning:#f97316;--evening:#818cf8;--text:#e2e8f0;--text2:#94a3b8;--text3:#4b5563;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;--radius:10px;--radius-sm:6px;--shadow:0 4px 24px rgba(0,0,0,.4);--shadow-sm:0 2px 8px rgba(0,0,0,.3)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.header{background:linear-gradient(135deg,var(--bg2) 0%,#13161f 100%);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:14px;height:60px;position:sticky;top:0;z-index:200;backdrop-filter:blur(12px)}
+.header-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 16px rgba(245,158,11,.3)}
+.header-logo svg{width:18px;height:18px;fill:#000}
+.header-info{flex:1;min-width:0}
+.header-title{font-size:16px;font-weight:700;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-title span{color:var(--accent)}
+.header-sub{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;margin-top:1px}
+.tabs-wrap{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tabs{display:flex;gap:2px;min-width:max-content}
+.tab-btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:14px 18px;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab-btn:hover{color:var(--text2)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-badge{background:var(--accent);color:#000;font-size:10px;font-weight:700;border-radius:20px;min-width:18px;height:18px;padding:0 5px;display:inline-flex;align-items:center;justify-content:center}
+.tab-btn:not(.active) .tab-badge{background:var(--bg4);color:var(--text2)}
+.main{padding:20px;max-width:1400px;margin:0 auto}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.three-col{display:grid;grid-template-columns:280px 1fr;gap:16px}
+.shift-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.card:last-child{margin-bottom:0}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--bg3)}
+.card-title{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:6px}
+.card-body{padding:16px}
+.shift-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius) var(--radius) 0 0;border:1px solid;border-bottom:none;font-size:13px;font-weight:600;letter-spacing:.3px}
+.shift-header.morning{background:rgba(249,115,22,.08);border-color:rgba(249,115,22,.25);color:var(--morning)}
+.shift-header.evening{background:rgba(129,140,248,.08);border-color:rgba(129,140,248,.25);color:var(--evening)}
+.shift-body{border:1px solid;border-radius:0 0 var(--radius) var(--radius);overflow:hidden}
+.shift-body.morning{border-color:rgba(249,115,22,.25)}
+.shift-body.evening{border-color:rgba(129,140,248,.25)}
+.section-label{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--mono);font-size:12px;line-height:1.7;padding:12px;resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.1)}
+textarea::placeholder{color:var(--text3)}
+input[type="text"],select{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+input[type="text"]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.1)}
+input::placeholder{color:var(--text3)}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:9px 18px;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;letter-spacing:.2px}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{background:#fbbf24;transform:translateY(-1px);box-shadow:0 4px 12px rgba(245,158,11,.3)}
+.btn-secondary{background:var(--bg4);border:1px solid var(--border2);color:var(--text2)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);background:rgba(245,158,11,.06)}
+.btn-danger{background:transparent;border:1px solid rgba(239,68,68,.4);color:var(--red)}
+.btn-danger:hover{background:rgba(239,68,68,.1);border-color:var(--red)}
+.btn-success{background:var(--green);color:#000}
+.btn-success:hover{background:#4ade80;transform:translateY(-1px);box-shadow:0 4px 12px rgba(34,197,94,.3)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text3)}
+.btn-ghost:hover{color:var(--text2);border-color:var(--border2)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:4px 9px;font-size:11px}
+.btn-icon{padding:7px 10px}
+.btn-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg3)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg3)}
+tbody td{padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--text2)}
+td.bus-num{color:var(--accent);font-weight:600}
+td.route-cell{color:var(--blue)}
+td.time-cell{color:var(--green)}
+.row-input{background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:12px;width:100%;padding:3px 6px;border-radius:4px;outline:none;transition:background .1s}
+.row-input:focus{background:var(--bg)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;padding:3px 8px;border-radius:20px}
+.badge-green{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.badge-yellow{background:rgba(234,179,8,.12);color:var(--yellow);border:1px solid rgba(234,179,8,.25)}
+.badge-red{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.badge-blue{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.badge-gray{background:rgba(75,85,99,.15);color:var(--text3);border:1px solid var(--border)}
+.badge-morning{background:rgba(249,115,22,.12);color:var(--morning);border:1px solid rgba(249,115,22,.25)}
+.badge-evening{background:rgba(129,140,248,.12);color:var(--evening);border:1px solid rgba(129,140,248,.25)}
+.badge-purple{background:rgba(139,92,246,.12);color:var(--purple);border:1px solid rgba(139,92,246,.25)}
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;margin-bottom:20px}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;transition:border-color .2s}
+.stat-box:hover{border-color:var(--border2)}
+.stat-value{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;color:var(--accent)}
+.stat-label{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-top:5px}
+.log-entry{font-family:var(--mono);font-size:11px;padding:8px 12px;border-left:3px solid var(--border);margin-bottom:4px;background:var(--bg3);border-radius:0 var(--radius-sm) var(--radius-sm) 0;color:var(--text2);line-height:1.5}
+.log-entry.perfect{border-left-color:var(--green)}
+.log-entry.similar{border-left-color:var(--yellow)}
+.log-entry.fallback{border-left-color:var(--red)}
+.log-entry.info{border-left-color:var(--blue)}
+.nonop-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:20px;padding:4px 12px;font-family:var(--mono);font-size:12px;color:var(--red);margin:3px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:.3}
+.empty-text{font-size:12px;font-family:var(--mono)}
+.output-row-perfect td:first-child{border-left:3px solid var(--green);padding-left:11px}
+.output-row-similar td:first-child{border-left:3px solid var(--yellow);padding-left:11px}
+.output-row-fallback td:first-child{border-left:3px solid var(--purple);padding-left:11px}
+.output-row-unassigned td:first-child{border-left:3px solid var(--red);padding-left:11px}
+.output-row-manual td:first-child{border-left:3px solid var(--blue);padding-left:11px}
+.excl-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:20px;padding:4px 10px;font-family:var(--mono);font-size:12px;color:var(--red)}
+.excl-chip button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;line-height:1;padding:0;transition:color .15s}
+.excl-chip button:hover{color:var(--red)}
+.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.mini-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px}
+.mini-val{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1}
+.mini-lbl{font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-top:4px}
+.shift-tabs{display:none}
 
-:root {
-  --bg:       #0a0c10;
-  --bg2:      #111318;
-  --bg3:      #181c24;
-  --bg4:      #1e2330;
-  --border:   #252b38;
-  --border2:  #2e3648;
-  --accent:   #f59e0b;
-  --accent2:  #d97706;
-  --green:    #22c55e;
-  --yellow:   #eab308;
-  --red:      #ef4444;
-  --blue:     #3b82f6;
-  --purple:   #8b5cf6;
-  --morning:  #f97316;
-  --evening:  #818cf8;
-  --text:     #e2e8f0;
-  --text2:    #94a3b8;
-  --text3:    #4b5563;
-  --mono:     'JetBrains Mono', monospace;
-  --sans:     'Inter', sans-serif;
-  --radius:   10px;
-  --radius-sm:6px;
-  --shadow:   0 4px 24px rgba(0,0,0,.4);
-  --shadow-sm:0 2px 8px rgba(0,0,0,.3);
-}
+/* Bus dropdown in output table */
+.bus-select-wrap{position:relative;display:flex;align-items:center;gap:6px}
+.bus-dropdown{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--mono);font-size:11px;padding:5px 8px;outline:none;cursor:pointer;transition:border-color .2s;min-width:90px}
+.bus-dropdown:focus{border-color:var(--accent)}
+.bus-dropdown.unassigned{border-color:rgba(239,68,68,.4);color:var(--red)}
+.bus-dropdown option{background:var(--bg3);color:var(--text)}
+.bus-dropdown optgroup{background:var(--bg2);color:var(--text3);font-size:10px}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+#toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--border2);border-left:3px solid var(--accent);color:var(--text);font-family:var(--mono);font-size:12px;padding:12px 16px;border-radius:var(--radius);z-index:9999;transform:translateY(100px);opacity:0;transition:all .25s cubic-bezier(.34,1.56,.64,1);max-width:300px;box-shadow:var(--shadow)}
+#toast.show{transform:translateY(0);opacity:1}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 14px;
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ── HEADER ── */
-.header {
-  background: linear-gradient(135deg, var(--bg2) 0%, #13161f 100%);
-  border-bottom: 1px solid var(--border);
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  height: 60px;
-  position: sticky;
-  top: 0;
-  z-index: 200;
-  backdrop-filter: blur(12px);
-}
-.header-logo {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 0 16px rgba(245,158,11,.3);
-}
-.header-logo svg { width: 18px; height: 18px; fill: #000; }
-.header-info { flex: 1; min-width: 0; }
-.header-title {
-  font-size: 16px; font-weight: 700; letter-spacing: .5px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.header-title span { color: var(--accent); }
-.header-sub {
-  font-family: var(--mono); font-size: 10px;
-  color: var(--text3); letter-spacing: 1px; margin-top: 1px;
-}
-
-/* ── TABS ── */
-.tabs-wrap {
-  background: var(--bg2);
-  border-bottom: 1px solid var(--border);
-  padding: 0 20px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.tabs-wrap::-webkit-scrollbar { display: none; }
-.tabs { display: flex; gap: 2px; min-width: max-content; }
-.tab-btn {
-  font-family: var(--sans); font-size: 13px; font-weight: 500;
-  padding: 14px 18px; border: none; background: transparent;
-  color: var(--text3); cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all .2s; white-space: nowrap;
-  display: flex; align-items: center; gap: 7px;
-}
-.tab-btn:hover { color: var(--text2); }
-.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-.tab-badge {
-  background: var(--accent); color: #000;
-  font-size: 10px; font-weight: 700;
-  border-radius: 20px; min-width: 18px; height: 18px;
-  padding: 0 5px; display: inline-flex; align-items: center; justify-content: center;
-}
-.tab-btn:not(.active) .tab-badge { background: var(--bg4); color: var(--text2); }
-
-/* ── MAIN ── */
-.main { padding: 20px; max-width: 1400px; margin: 0 auto; }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; animation: fadeIn .2s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-
-/* ── GRID ── */
-.two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.three-col { display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
-.shift-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-
-/* ── CARD ── */
-.card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 16px;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-.card:last-child { margin-bottom: 0; }
-.card-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px;
-  background: var(--bg3);
-}
-.card-title {
-  font-size: 12px; font-weight: 600; letter-spacing: .5px;
-  text-transform: uppercase; color: var(--text2);
-  display: flex; align-items: center; gap: 6px;
-}
-.card-title-icon { font-size: 14px; }
-.card-body { padding: 16px; }
-
-/* ── SHIFT HEADERS ── */
-.shift-header {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px;
-  border-radius: var(--radius) var(--radius) 0 0;
-  border: 1px solid; border-bottom: none;
-  font-size: 13px; font-weight: 600; letter-spacing: .3px;
-}
-.shift-header.morning { background: rgba(249,115,22,.08); border-color: rgba(249,115,22,.25); color: var(--morning); }
-.shift-header.evening { background: rgba(129,140,248,.08); border-color: rgba(129,140,248,.25); color: var(--evening); }
-.shift-body { border: 1px solid; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
-.shift-body.morning { border-color: rgba(249,115,22,.25); }
-.shift-body.evening { border-color: rgba(129,140,248,.25); }
-
-/* ── SECTION LABEL ── */
-.section-label {
-  font-size: 11px; font-weight: 600; letter-spacing: .5px;
-  text-transform: uppercase; color: var(--text3); margin-bottom: 8px;
-}
-
-/* ── TEXTAREA ── */
-textarea {
-  width: 100%; background: var(--bg);
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  color: var(--text); font-family: var(--mono); font-size: 12px;
-  line-height: 1.7; padding: 12px; resize: vertical; outline: none;
-  transition: border-color .2s, box-shadow .2s;
-}
-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,158,11,.1); }
-textarea::placeholder { color: var(--text3); }
-
-/* ── INPUTS ── */
-input[type="text"], select {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); color: var(--text);
-  font-family: var(--sans); font-size: 13px;
-  padding: 9px 12px; outline: none;
-  transition: border-color .2s, box-shadow .2s; width: 100%;
-}
-input[type="text"]:focus, select:focus {
-  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,158,11,.1);
-}
-input::placeholder { color: var(--text3); }
-
-/* ── BUTTONS ── */
-.btn {
-  font-family: var(--sans); font-size: 13px; font-weight: 600;
-  padding: 9px 18px; border: none; border-radius: var(--radius-sm);
-  cursor: pointer; transition: all .15s;
-  display: inline-flex; align-items: center; gap: 7px;
-  white-space: nowrap; letter-spacing: .2px;
-}
-.btn-primary   { background: var(--accent); color: #000; }
-.btn-primary:hover   { background: #fbbf24; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,158,11,.3); }
-.btn-secondary { background: var(--bg4); border: 1px solid var(--border2); color: var(--text2); }
-.btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: rgba(245,158,11,.06); }
-.btn-danger    { background: transparent; border: 1px solid rgba(239,68,68,.4); color: var(--red); }
-.btn-danger:hover    { background: rgba(239,68,68,.1); border-color: var(--red); }
-.btn-success   { background: var(--green); color: #000; }
-.btn-success:hover   { background: #4ade80; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34,197,94,.3); }
-.btn-ghost     { background: transparent; border: 1px solid var(--border); color: var(--text3); }
-.btn-ghost:hover     { color: var(--text2); border-color: var(--border2); }
-.btn-sm  { padding: 6px 12px; font-size: 12px; }
-.btn-xs  { padding: 4px 9px; font-size: 11px; }
-.btn-icon{ padding: 7px 10px; }
-.btn-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-
-/* ── TABLES ── */
-.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead th {
-  font-size: 11px; font-weight: 600; letter-spacing: .5px;
-  text-transform: uppercase; color: var(--text3);
-  padding: 10px 14px; text-align: left;
-  border-bottom: 1px solid var(--border); white-space: nowrap;
-  background: var(--bg3);
-}
-tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: var(--bg3); }
-tbody td { padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--text2); }
-td.bus-num   { color: var(--accent); font-weight: 600; }
-td.route-cell{ color: var(--blue); }
-td.time-cell { color: var(--green); }
-.row-input {
-  background: transparent; border: none; color: var(--text);
-  font-family: var(--mono); font-size: 12px; width: 100%;
-  padding: 3px 6px; border-radius: 4px; outline: none;
-  transition: background .1s;
-}
-.row-input:focus { background: var(--bg); }
-
-/* ── BADGES ── */
-.badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 10px; font-weight: 600; letter-spacing: .3px;
-  text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
-}
-.badge-green   { background: rgba(34,197,94,.12);  color: var(--green);   border: 1px solid rgba(34,197,94,.25); }
-.badge-yellow  { background: rgba(234,179,8,.12);  color: var(--yellow);  border: 1px solid rgba(234,179,8,.25); }
-.badge-red     { background: rgba(239,68,68,.12);  color: var(--red);     border: 1px solid rgba(239,68,68,.25); }
-.badge-blue    { background: rgba(59,130,246,.12); color: var(--blue);    border: 1px solid rgba(59,130,246,.25); }
-.badge-gray    { background: rgba(75,85,99,.15);   color: var(--text3);   border: 1px solid var(--border); }
-.badge-morning { background: rgba(249,115,22,.12); color: var(--morning); border: 1px solid rgba(249,115,22,.25); }
-.badge-evening { background: rgba(129,140,248,.12);color: var(--evening); border: 1px solid rgba(129,140,248,.25); }
-.badge-manual  { background: rgba(59,130,246,.12); color: var(--blue);    border: 1px solid rgba(59,130,246,.25); }
-.badge-purple  { background: rgba(139,92,246,.12); color: var(--purple);  border: 1px solid rgba(139,92,246,.25); }
-
-/* ── STATS ── */
-.stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 20px; }
-.stat-box {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px 16px;
-  transition: border-color .2s;
-}
-.stat-box:hover { border-color: var(--border2); }
-.stat-value { font-family: var(--mono); font-size: 26px; font-weight: 700; line-height: 1; color: var(--accent); }
-.stat-label { font-size: 10px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: var(--text3); margin-top: 5px; }
-
-/* ── LOGS ── */
-.log-entry {
-  font-family: var(--mono); font-size: 11px;
-  padding: 8px 12px; border-left: 3px solid var(--border);
-  margin-bottom: 4px; background: var(--bg3);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text2);
-  line-height: 1.5;
-}
-.log-entry.perfect  { border-left-color: var(--green); }
-.log-entry.similar  { border-left-color: var(--yellow); }
-.log-entry.fallback { border-left-color: var(--red); }
-.log-entry.info     { border-left-color: var(--blue); }
-
-/* ── NON-OP CHIPS ── */
-.nonop-chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(239,68,68,.08);
-  border: 1px solid rgba(239,68,68,.2);
-  border-radius: 20px; padding: 4px 12px;
-  font-family: var(--mono); font-size: 12px; color: var(--red); margin: 3px;
-}
-
-/* ── EMPTY STATE ── */
-.empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
-.empty-icon  { font-size: 36px; margin-bottom: 10px; opacity: .3; }
-.empty-text  { font-size: 12px; font-family: var(--mono); }
-
-/* ── OUTPUT ROWS ── */
-.output-row-perfect   td:first-child { border-left: 3px solid var(--green);   padding-left: 11px; }
-.output-row-similar   td:first-child { border-left: 3px solid var(--yellow);  padding-left: 11px; }
-.output-row-fallback  td:first-child { border-left: 3px solid var(--purple);  padding-left: 11px; }
-.output-row-unassigned td:first-child { border-left: 3px solid var(--red);    padding-left: 11px; }
-.output-row-manual    td:first-child { border-left: 3px solid var(--blue);    padding-left: 11px; }
-
-/* ── MANUAL INPUT ── */
-.manual-wrap { display: flex; gap: 6px; align-items: center; }
-.manual-wrap input {
-  background: var(--bg3); border: 1px solid var(--border2);
-  border-radius: var(--radius-sm); color: var(--text);
-  font-family: var(--mono); font-size: 11px;
-  padding: 5px 8px; width: 85px; outline: none;
-  transition: border-color .2s;
-}
-.manual-wrap input:focus { border-color: var(--blue); }
-
-/* ── EXCL CHIPS ── */
-.excl-chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
-  border-radius: 20px; padding: 4px 10px;
-  font-family: var(--mono); font-size: 12px; color: var(--red);
-}
-.excl-chip button {
-  background: none; border: none; color: var(--text3);
-  cursor: pointer; font-size: 14px; line-height: 1; padding: 0;
-  transition: color .15s;
-}
-.excl-chip button:hover { color: var(--red); }
-
-/* ── SUMMARY MINI CARDS ── */
-.mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-.mini-card {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 10px 12px;
-}
-.mini-val  { font-family: var(--mono); font-size: 20px; font-weight: 700; line-height: 1; }
-.mini-lbl  { font-size: 9px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: var(--text3); margin-top: 4px; }
-
-/* ── MOBILE OUTPUT TABS ── */
-.shift-tabs { display: none; }
-
-/* ── DIVIDER ── */
-.divider { height: 1px; background: var(--border); margin: 16px 0; }
-
-/* ── TOAST ── */
-#toast {
-  position: fixed; bottom: 20px; right: 20px;
-  background: var(--bg3); border: 1px solid var(--border2);
-  border-left: 3px solid var(--accent);
-  color: var(--text); font-family: var(--mono); font-size: 12px;
-  padding: 12px 16px; border-radius: var(--radius);
-  z-index: 9999; transform: translateY(100px); opacity: 0;
-  transition: all .25s cubic-bezier(.34,1.56,.64,1);
-  max-width: 300px; box-shadow: var(--shadow);
-}
-#toast.show { transform: translateY(0); opacity: 1; }
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
-
-/* ══════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════ */
-@media (max-width: 900px) {
-  .three-col { grid-template-columns: 1fr; }
-  .shift-split { grid-template-columns: 1fr; }
-  .two-col { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 640px) {
-  .header { padding: 0 14px; height: 54px; }
-  .header-sub { display: none; }
-  .tabs-wrap { padding: 0 14px; }
-  .tab-btn { font-size: 12px; padding: 12px 14px; }
-  .main { padding: 12px; }
-  .card-body { padding: 12px; }
-  .btn { font-size: 12px; padding: 8px 14px; }
-  .btn-sm { padding: 6px 10px; font-size: 11px; }
-  .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .stat-value { font-size: 22px; }
-  .stat-box { padding: 10px 12px; }
-  table { min-width: 460px; }
-  thead th { padding: 8px 10px; font-size: 10px; }
-  tbody td { padding: 8px 10px; font-size: 11px; }
-  #toast { bottom: 12px; right: 12px; left: 12px; max-width: unset; }
-
-  /* Mobile output — show shift tabs instead of side by side */
-  .shift-tabs {
-    display: flex; gap: 0;
-    background: var(--bg3); border-radius: var(--radius);
-    overflow: hidden; margin-bottom: 14px;
-    border: 1px solid var(--border);
-  }
-  .shift-tab-btn {
-    flex: 1; padding: 10px; border: none; background: transparent;
-    color: var(--text3); font-family: var(--sans); font-size: 13px;
-    font-weight: 600; cursor: pointer; transition: all .15s;
-  }
-  .shift-tab-btn.active.morning { background: rgba(249,115,22,.15); color: var(--morning); }
-  .shift-tab-btn.active.evening { background: rgba(129,140,248,.15); color: var(--evening); }
-  .shift-panel { display: none; }
-  .shift-panel.active { display: block; }
-  .shift-split { display: block; }
+@media(max-width:900px){.three-col{grid-template-columns:1fr}.shift-split{grid-template-columns:1fr}.two-col{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .header{padding:0 14px;height:54px}.header-sub{display:none}
+  .tabs-wrap{padding:0 14px}.tab-btn{font-size:12px;padding:12px 14px}
+  .main{padding:12px}.card-body{padding:12px}
+  .btn{font-size:12px;padding:8px 14px}.btn-sm{padding:6px 10px;font-size:11px}
+  .stats-bar{grid-template-columns:repeat(2,1fr);gap:8px}.stat-value{font-size:22px}.stat-box{padding:10px 12px}
+  table{min-width:460px}thead th{padding:8px 10px;font-size:10px}tbody td{padding:8px 10px;font-size:11px}
+  #toast{bottom:12px;right:12px;left:12px;max-width:unset}
+  .shift-tabs{display:flex;gap:0;background:var(--bg3);border-radius:var(--radius);overflow:hidden;margin-bottom:14px;border:1px solid var(--border)}
+  .shift-tab-btn{flex:1;padding:10px;border:none;background:transparent;color:var(--text3);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+  .shift-tab-btn.active.morning{background:rgba(249,115,22,.15);color:var(--morning)}
+  .shift-tab-btn.active.evening{background:rgba(129,140,248,.15);color:var(--evening)}
+  .shift-panel{display:none}.shift-panel.active{display:block}.shift-split{display:block}
 }
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
 <div class="header">
-  <div class="header-logo">
-    <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
-  </div>
+  <div class="header-logo"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg></div>
   <div class="header-info">
     <div class="header-title">Fleet <span>Adjustment</span></div>
-    <div class="header-sub">v5.0 · DUAL-SHIFT</div>
+    <div class="header-sub">v5.1 · DUAL-SHIFT</div>
   </div>
 </div>
-
-<!-- TABS -->
 <div class="tabs-wrap">
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('rowdata')">
-      Row Data <span class="tab-badge" id="badge-rowdata">0</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('partial')">
-      Partial Fleet <span class="tab-badge" id="badge-partial">0</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('busmaster')">
-      Bus Master <span class="tab-badge" id="badge-busmaster">0</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('output')">
-      Output <span class="tab-badge" id="badge-output">0</span>
-    </button>
+    <button class="tab-btn active" onclick="switchTab('rowdata')">Row Data <span class="tab-badge" id="badge-rowdata">0</span></button>
+    <button class="tab-btn" onclick="switchTab('partial')">Partial Fleet <span class="tab-badge" id="badge-partial">0</span></button>
+    <button class="tab-btn" onclick="switchTab('busmaster')">Bus Master <span class="tab-badge" id="badge-busmaster">0</span></button>
+    <button class="tab-btn" onclick="switchTab('output')">Output <span class="tab-badge" id="badge-output">0</span></button>
   </div>
 </div>
-
 <div class="main">
 
   <!-- TAB 1: ROW DATA -->
@@ -439,12 +167,10 @@ td.time-cell { color: var(--green); }
     <div class="two-col">
       <div>
         <div class="card">
-          <div class="card-header">
-            <div class="card-title"><span class="card-title-icon">📋</span> Raw Input</div>
-          </div>
+          <div class="card-header"><div class="card-title"><span>📋</span> Raw Input</div></div>
           <div class="card-body">
             <div class="section-label">Paste raw row data — Morning + Evening</div>
-            <textarea id="rawInput" rows="16" placeholder="Thane SOBO&#10;C135&#10;ALL&#10;25/35&#10;6:15 AM&#10;&#10;SOBO Thane&#10;C135&#10;ALL&#10;7/35&#10;5:00 PM"></textarea>
+            <textarea id="rawInput" rows="16" placeholder="Thane SOBO&#10;C135&#10;ALL&#10;25/35&#10;6:15 AM"></textarea>
             <div class="btn-bar">
               <button class="btn btn-primary" onclick="cleanData()">⚡ Clean Data</button>
               <button class="btn btn-secondary" onclick="loadSampleData()">Load Sample</button>
@@ -453,7 +179,7 @@ td.time-cell { color: var(--green); }
           </div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="card-title"><span class="card-title-icon">📖</span> Parsing Rules</div></div>
+          <div class="card-header"><div class="card-title"><span>📖</span> Parsing Rules</div></div>
           <div class="card-body">
             <div style="font-family:var(--mono);font-size:11px;line-height:2;color:var(--text2)">
               <div><span style="color:var(--accent)">Multi-word phrase</span> → Main Route</div>
@@ -472,7 +198,7 @@ td.time-cell { color: var(--green); }
       <div>
         <div class="card" style="height:100%">
           <div class="card-header">
-            <div class="card-title"><span class="card-title-icon">✅</span> Cleaned Data</div>
+            <div class="card-title"><span>✅</span> Cleaned Data</div>
             <div style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
               <span class="badge badge-morning" id="rd-morning-count">🌅 0</span>
               <span class="badge badge-evening" id="rd-evening-count">🌆 0</span>
@@ -484,9 +210,7 @@ td.time-cell { color: var(--green); }
             <div class="table-wrap">
               <table>
                 <thead><tr><th>#</th><th>Shift</th><th>Main Route</th><th>Bus</th><th>Sub-Route</th><th>Slot</th><th></th></tr></thead>
-                <tbody id="cleanTable">
-                  <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🚌</div><div class="empty-text">Paste data and click Clean</div></div></td></tr>
-                </tbody>
+                <tbody id="cleanTable"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🚌</div><div class="empty-text">Paste data and click Clean</div></div></td></tr></tbody>
               </table>
             </div>
           </div>
@@ -500,9 +224,9 @@ td.time-cell { color: var(--green); }
     <div class="two-col">
       <div>
         <div class="card">
-          <div class="card-header"><div class="card-title"><span class="card-title-icon">📋</span> Raw Partial Fleet</div></div>
+          <div class="card-header"><div class="card-title"><span>📋</span> Raw Partial Fleet</div></div>
           <div class="card-body">
-            <div class="section-label">Morning + Evening dono paste karo</div>
+            <div class="section-label">Paste Morning &amp; Evening data together</div>
             <textarea id="partialRawInput" rows="16" placeholder="Thane SOBO&#10;C135&#10;ALL&#10;25/35&#10;6:15 AM"></textarea>
             <div class="btn-bar">
               <button class="btn btn-primary" onclick="parsePartialData()">⚡ Parse Fleet</button>
@@ -515,7 +239,7 @@ td.time-cell { color: var(--green); }
       <div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="card-title-icon">✅</span> Parsed Fleet</div>
+            <div class="card-title"><span>✅</span> Parsed Fleet</div>
             <div style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
               <span class="badge badge-morning" id="pf-morning-count">🌅 0</span>
               <span class="badge badge-evening" id="pf-evening-count">🌆 0</span>
@@ -527,9 +251,7 @@ td.time-cell { color: var(--green); }
             <div class="table-wrap">
               <table>
                 <thead><tr><th>#</th><th>Shift</th><th>Slot</th><th>Sub-Route</th><th>Bus</th><th>Main Route</th><th>Notes</th><th></th></tr></thead>
-                <tbody id="partialTable">
-                  <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏱</div><div class="empty-text">Paste data and click Parse</div></div></td></tr>
-                </tbody>
+                <tbody id="partialTable"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏱</div><div class="empty-text">Paste data and click Parse</div></div></td></tr></tbody>
               </table>
             </div>
           </div>
@@ -543,56 +265,39 @@ td.time-cell { color: var(--green); }
     <div class="three-col">
       <div>
         <div class="card">
-          <div class="card-header"><div class="card-title"><span class="card-title-icon">➕</span> Add / Edit Bus</div></div>
+          <div class="card-header"><div class="card-title"><span>➕</span> Add / Edit Bus</div></div>
           <div class="card-body">
             <div style="display:grid;gap:12px;margin-bottom:14px">
-              <div>
-                <div class="section-label">Bus Number *</div>
-                <input type="text" id="bm-bus" placeholder="e.g. C223" />
-              </div>
-              <div>
-                <div class="section-label">Main Route *</div>
-                <select id="bm-mainroute"><option value="">Select...</option></select>
-                <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px">From Row Data</div>
-              </div>
-              <div>
-                <div class="section-label">Known Sub-Routes</div>
-                <input type="text" id="bm-routes" placeholder="HNMN, ALL, NTH" />
-              </div>
-              <div>
-                <div class="section-label">Depot / Base</div>
-                <input type="text" id="bm-base" placeholder="e.g. Thane" />
-              </div>
+              <div><div class="section-label">Bus Number *</div><input type="text" id="bm-bus" placeholder="e.g. C223"/></div>
+              <div><div class="section-label">Main Route *</div><select id="bm-mainroute"><option value="">Select...</option></select><div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px">From Row Data</div></div>
+              <div><div class="section-label">Known Sub-Routes</div><input type="text" id="bm-routes" placeholder="HNMN, ALL, NTH"/></div>
+              <div><div class="section-label">Depot / Base</div><input type="text" id="bm-base" placeholder="e.g. Thane"/></div>
             </div>
-            <input type="hidden" id="bm-edit-index" value="-1" />
+            <input type="hidden" id="bm-edit-index" value="-1"/>
             <div class="btn-bar">
               <button class="btn btn-primary" onclick="saveBusMaster()">💾 Save</button>
               <button class="btn btn-secondary" onclick="cancelBMEdit()">Cancel</button>
             </div>
           </div>
         </div>
-
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="card-title-icon">🚫</span> Excluded Buses</div>
+            <div class="card-title"><span>🚫</span> Excluded Buses</div>
             <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text3)" id="excl-count">0</span>
           </div>
           <div class="card-body">
             <p style="font-size:12px;color:var(--text3);margin-bottom:10px">Completely ignored — no assignment, no Non-Ops.</p>
             <div style="display:flex;gap:8px;margin-bottom:10px">
-              <input type="text" id="excl-input" placeholder="C999, C888..." style="flex:1" onkeydown="if(event.key==='Enter')addExcluded()" />
+              <input type="text" id="excl-input" placeholder="C999, C888..." style="flex:1" onkeydown="if(event.key==='Enter')addExcluded()"/>
               <button class="btn btn-primary btn-sm" onclick="addExcluded()">Add</button>
             </div>
-            <div id="excl-chips" style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px">
-              <span style="font-size:11px;color:var(--text3)">None</span>
-            </div>
+            <div id="excl-chips" style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px"><span style="font-size:11px;color:var(--text3)">None</span></div>
             <div class="btn-bar"><button class="btn btn-danger btn-sm" onclick="clearExcluded()">Clear All</button></div>
           </div>
         </div>
-
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="card-title-icon">📊</span> Last Adjustment</div>
+            <div class="card-title"><span>📊</span> Last Adjustment</div>
             <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text3)" id="summary-time">—</span>
           </div>
           <div class="card-body" id="summary-body">
@@ -600,11 +305,10 @@ td.time-cell { color: var(--green); }
           </div>
         </div>
       </div>
-
       <div>
         <div class="card" style="height:100%">
           <div class="card-header">
-            <div class="card-title"><span class="card-title-icon">🚌</span> Bus Registry</div>
+            <div class="card-title"><span>🚌</span> Bus Registry</div>
             <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
               <span style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="bm-count">0 buses</span>
               <button class="btn btn-danger btn-sm" onclick="clearBusMaster()">Clear All</button>
@@ -614,9 +318,7 @@ td.time-cell { color: var(--green); }
             <div class="table-wrap">
               <table>
                 <thead><tr><th>Bus</th><th>Main Route</th><th>Known Sub-Routes</th><th>Depot</th><th>Actions</th></tr></thead>
-                <tbody id="bmTable">
-                  <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No buses registered</div></div></td></tr>
-                </tbody>
+                <tbody id="bmTable"><tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No buses registered</div></div></td></tr></tbody>
               </table>
             </div>
           </div>
@@ -627,16 +329,12 @@ td.time-cell { color: var(--green); }
 
   <!-- TAB 4: OUTPUT -->
   <div class="tab-panel" id="tab-output">
-
-    <!-- Action Bar -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center">
       <button class="btn btn-success" onclick="adjustFleet()">▶ Run Adjustment</button>
       <button class="btn btn-primary" onclick="copyOutput()">📋 Copy Output</button>
       <button class="btn btn-secondary" onclick="exportOutput()">⬇ Export CSV</button>
       <button class="btn btn-danger btn-sm" onclick="clearOutput()" style="margin-left:auto">Clear</button>
     </div>
-
-    <!-- Stats -->
     <div class="stats-bar" id="statsBar" style="display:none">
       <div class="stat-box"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total</div></div>
       <div class="stat-box"><div class="stat-value" id="stat-retained" style="color:var(--green)">0</div><div class="stat-label">Retained</div></div>
@@ -647,82 +345,52 @@ td.time-cell { color: var(--green); }
       <div class="stat-box" style="border-color:rgba(249,115,22,.25)"><div class="stat-value" id="stat-morning" style="color:var(--morning)">0</div><div class="stat-label">🌅 Morning</div></div>
       <div class="stat-box" style="border-color:rgba(129,140,248,.25)"><div class="stat-value" id="stat-evening" style="color:var(--evening)">0</div><div class="stat-label">🌆 Evening</div></div>
     </div>
-
-    <!-- Mobile shift tabs -->
     <div class="shift-tabs" id="shiftTabs" style="display:none">
       <button class="shift-tab-btn active morning" onclick="switchShiftTab('morning')">🌅 Morning</button>
       <button class="shift-tab-btn evening" onclick="switchShiftTab('evening')">🌆 Evening</button>
     </div>
-
-    <!-- Shift Split -->
     <div id="shiftSplit" style="display:none">
       <div class="shift-split">
-        <!-- MORNING -->
         <div class="shift-panel active" id="shift-panel-morning">
           <div class="shift-section">
-            <div class="shift-header morning">
-              🌅 Morning
-              <span id="out-morning-stats" style="margin-left:auto;font-size:11px;font-weight:400;opacity:.8"></span>
-            </div>
+            <div class="shift-header morning">🌅 Morning <span id="out-morning-stats" style="margin-left:auto;font-size:11px;font-weight:400;opacity:.8"></span></div>
             <div class="shift-body morning">
               <div class="table-wrap">
-                <table>
-                  <thead><tr><th>Slot</th><th>Sub-Route</th><th>Main Route</th><th>Orig</th><th>Assigned</th><th>Match</th></tr></thead>
-                  <tbody id="outputTableMorning"></tbody>
-                </table>
+                <table><thead><tr><th>Slot</th><th>Sub-Route</th><th>Main Route</th><th>Orig</th><th>Assigned Bus</th><th>Match</th></tr></thead><tbody id="outputTableMorning"></tbody></table>
               </div>
             </div>
           </div>
           <div class="card">
-            <div class="card-header" style="border-color:rgba(249,115,22,.2)">
-              <div class="card-title" style="color:var(--morning)">⚠️ Unassigned — Morning</div>
-            </div>
-            <div class="card-body" id="unassignedMorning">
-              <div class="empty-state" style="padding:12px"><div class="empty-text">✓ None</div></div>
-            </div>
+            <div class="card-header" style="border-color:rgba(249,115,22,.2)"><div class="card-title" style="color:var(--morning)">⚠️ Unassigned — Morning</div></div>
+            <div class="card-body" id="unassignedMorning"><div class="empty-state" style="padding:12px"><div class="empty-text">✓ None</div></div></div>
           </div>
         </div>
-        <!-- EVENING -->
         <div class="shift-panel" id="shift-panel-evening">
           <div class="shift-section">
-            <div class="shift-header evening">
-              🌆 Evening
-              <span id="out-evening-stats" style="margin-left:auto;font-size:11px;font-weight:400;opacity:.8"></span>
-            </div>
+            <div class="shift-header evening">🌆 Evening <span id="out-evening-stats" style="margin-left:auto;font-size:11px;font-weight:400;opacity:.8"></span></div>
             <div class="shift-body evening">
               <div class="table-wrap">
-                <table>
-                  <thead><tr><th>Slot</th><th>Sub-Route</th><th>Main Route</th><th>Orig</th><th>Assigned</th><th>Match</th></tr></thead>
-                  <tbody id="outputTableEvening"></tbody>
-                </table>
+                <table><thead><tr><th>Slot</th><th>Sub-Route</th><th>Main Route</th><th>Orig</th><th>Assigned Bus</th><th>Match</th></tr></thead><tbody id="outputTableEvening"></tbody></table>
               </div>
             </div>
           </div>
           <div class="card">
-            <div class="card-header" style="border-color:rgba(129,140,248,.2)">
-              <div class="card-title" style="color:var(--evening)">⚠️ Unassigned — Evening</div>
-            </div>
-            <div class="card-body" id="unassignedEvening">
-              <div class="empty-state" style="padding:12px"><div class="empty-text">✓ None</div></div>
-            </div>
+            <div class="card-header" style="border-color:rgba(129,140,248,.2)"><div class="card-title" style="color:var(--evening)">⚠️ Unassigned — Evening</div></div>
+            <div class="card-body" id="unassignedEvening"><div class="empty-state" style="padding:12px"><div class="empty-text">✓ None</div></div></div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Non-Ops -->
     <div class="card" id="nonOpsCard" style="display:none">
       <div class="card-header">
-        <div class="card-title"><span class="card-title-icon">🚫</span> Non-Ops</div>
+        <div class="card-title"><span>🚫</span> Non-Ops</div>
         <span style="margin-left:auto;font-size:11px;color:var(--text3)" id="nonops-count"></span>
       </div>
       <div class="card-body"><div id="nonOpsContainer"></div></div>
     </div>
-
-    <!-- Logs -->
     <div class="card" id="logsCard" style="display:none">
       <div class="card-header">
-        <div class="card-title"><span class="card-title-icon">📝</span> Logs</div>
+        <div class="card-title"><span>📝</span> Logs</div>
         <div style="margin-left:auto;display:flex;gap:10px">
           <span style="font-family:var(--mono);font-size:10px;color:var(--green)">■ Retained</span>
           <span style="font-family:var(--mono);font-size:10px;color:var(--yellow)">■ Replaced</span>
@@ -732,48 +400,35 @@ td.time-cell { color: var(--green); }
       </div>
       <div class="card-body"><div id="logsContainer"></div></div>
     </div>
-
     <div id="outputEmpty">
-      <div class="empty-state" style="padding:80px 20px">
-        <div class="empty-icon">⚙️</div>
-        <div class="empty-text">Click "Run Adjustment" to generate output</div>
-      </div>
+      <div class="empty-state" style="padding:80px 20px"><div class="empty-icon">⚙️</div><div class="empty-text">Click "Run Adjustment" to generate output</div></div>
     </div>
   </div>
 </div>
-
 <div id="toast"></div>
 
 <script>
-/* ═══════════════════════
-   DATA
-═══════════════════════ */
-let rowData=[], partialFleet=[], busMaster=[], outputResult=null;
+let rowData=[],partialFleet=[],busMaster=[],outputResult=null;
 let excludedBuses=new Set();
-let manualOverrides={morning:{},evening:{}};
 
-/* ═══════════════════════
-   SHIFT DETECT
-═══════════════════════ */
+/* ── SHIFT DETECT ── */
 function detectShift(t){
-  if(!t) return 'unknown';
-  const m=t.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i); if(!m) return 'unknown';
-  let h=parseInt(m[1]),min=parseInt(m[2]); const ap=m[3]?m[3].toUpperCase():'';
-  if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0;
+  if(!t)return'unknown';
+  const m=t.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);if(!m)return'unknown';
+  let h=parseInt(m[1]),min=parseInt(m[2]);const ap=m[3]?m[3].toUpperCase():'';
+  if(ap==='PM'&&h!==12)h+=12;if(ap==='AM'&&h===12)h=0;
   const tot=h*60+min;
-  if(tot>=360&&tot<=659) return 'morning';
-  if(tot>=900&&tot<=1320) return 'evening';
-  return 'unknown';
+  if(tot>=360&&tot<=659)return'morning';
+  if(tot>=900&&tot<=1320)return'evening';
+  return'unknown';
 }
 function shiftBadge(s){
-  if(s==='morning') return '<span class="badge badge-morning">🌅 Morning</span>';
-  if(s==='evening') return '<span class="badge badge-evening">🌆 Evening</span>';
-  return '<span class="badge badge-gray">—</span>';
+  if(s==='morning')return'<span class="badge badge-morning">🌅 Morning</span>';
+  if(s==='evening')return'<span class="badge badge-evening">🌆 Evening</span>';
+  return'<span class="badge badge-gray">—</span>';
 }
 
-/* ═══════════════════════
-   MAIN ROUTE NORMALISE
-═══════════════════════ */
+/* ── MAIN ROUTE NORMALISE ── */
 const MAIN_ROUTE_MAP=[
   ['THANE SOBO',['thanesobo','sobothane','thanesouthmumbai','southmumbaithane','thane south mumbai','sobo thane']],
   ['CHEMBUR BKC',['chemburbkc','bkcchembur','bkc chembur','bkc-chembur','chembur-bkc','chembur bkc']],
@@ -824,22 +479,18 @@ const MAIN_ROUTE_MAP=[
   ['WORLI VASHI',['worlivashi','worli vashi','worli-vashi']],
 ];
 function normaliseMainRoute(raw){
-  if(!raw) return raw;
+  if(!raw)return raw;
   const kc=raw.toLowerCase().replace(/[\s\-–—()\[\]]/g,'').trim();
   const ks=raw.toLowerCase().replace(/\s+/g,' ').trim();
-  for(const [can,aliases] of MAIN_ROUTE_MAP){
+  for(const[can,aliases]of MAIN_ROUTE_MAP){
     for(const a of aliases){
-      if(a.replace(/[\s\-–—()\[\]]/g,'').trim()===kc||a===ks) return can;
+      if(a.replace(/[\s\-–—()\[\]]/g,'').trim()===kc||a===ks)return can;
     }
   }
   return raw.toUpperCase().trim();
 }
-
-/* ═══════════════════════
-   SUB-ROUTE NORMALISE
-═══════════════════════ */
 function normaliseSubRoute(r){
-  if(!r) return 'ALL';
+  if(!r)return'ALL';
   r=r.trim().toUpperCase();
   r=r.replace(/\bHN\s*MN\b/g,'HNMN');
   r=r.replace(/\bNTH\s*(EXP(RESS)?)?\b/g,'NTH').trim();
@@ -849,35 +500,30 @@ function normaliseSubRoute(r){
   return r||'ALL';
 }
 
-/* ═══════════════════════
-   PARSE
-═══════════════════════ */
-const PLACE_WORDS=['MUMBAI','THANE','CHEMBUR','MULUND','SOUTH','NORTH','EAST','WEST','CENTRAL','SOBO','KURLA','DADAR','BANDRA','WORLI','ANDHERI','BORIVALI','GHATKOPAR','VIKHROLI','WADALA','SION','PAREL','MAHIM','COLABA','CHURCHGATE','FORT','KALYAN','DOMBIVLI','PANVEL','NAVI','VASHI','BELAPUR','AIROLI','KHARGHAR','ULHASNAGAR','JOGESHWARI','MALAD','KANDIVALI','GOREGAON','SANTACRUZ','POWAI','MAROL','LOWER','BKC','SAKI','VIKHROLI','MIRA','BHAYANDER','PALM','BEACH','NERUL','ATAL','SETU','WORLI'];
-function isTimeStr(s){return /^\d{1,2}:\d{2}(\s*(AM|PM))?$/i.test(s.trim());}
-function isLoadStr(s){return /^\d+\/\d+$/.test(s.trim());}
-function isBusNum(s) {return /^[A-Z]{1,3}\d+$/i.test(s.trim());}
-function isSubCode(s){
-  const u=s.trim().toUpperCase();
-  return['HN MN','HNMN','NTH EXP','NTH EXPRESS','NTH','KLS EXP','KLS EXPRESS','KLS','VV EXP','VV EXPRESS','VV','LBS EXP','LBS','ALL','MJW','HW'].includes(u);
-}
+/* ── PARSE ── */
+const PLACE_WORDS=['MUMBAI','THANE','CHEMBUR','MULUND','SOUTH','NORTH','EAST','WEST','CENTRAL','SOBO','KURLA','DADAR','BANDRA','WORLI','ANDHERI','BORIVALI','GHATKOPAR','VIKHROLI','WADALA','SION','PAREL','MAHIM','COLABA','CHURCHGATE','FORT','KALYAN','DOMBIVLI','PANVEL','NAVI','VASHI','BELAPUR','AIROLI','KHARGHAR','ULHASNAGAR','JOGESHWARI','MALAD','KANDIVALI','GOREGAON','SANTACRUZ','POWAI','MAROL','LOWER','BKC','SAKI','MIRA','BHAYANDER','PALM','BEACH','NERUL','ATAL','SETU'];
+function isTimeStr(s){return/^\d{1,2}:\d{2}(\s*(AM|PM))?$/i.test(s.trim());}
+function isLoadStr(s){return/^\d+\/\d+$/.test(s.trim());}
+function isBusNum(s){return/^[A-Z]{1,3}\d+$/i.test(s.trim());}
+function isSubCode(s){const u=s.trim().toUpperCase();return['HN MN','HNMN','NTH EXP','NTH EXPRESS','NTH','KLS EXP','KLS EXPRESS','KLS','VV EXP','VV EXPRESS','VV','LBS EXP','LBS','ALL','MJW','HW'].includes(u);}
 function isMainHeader(line){
   const s=line.trim();
-  if(!s||isTimeStr(s)||isLoadStr(s)||isBusNum(s)||isSubCode(s)) return false;
+  if(!s||isTimeStr(s)||isLoadStr(s)||isBusNum(s)||isSubCode(s))return false;
   const u=s.toUpperCase();
-  if(/[-–—]/.test(s)) return true;
-  if(s.includes(' ')&&PLACE_WORDS.some(p=>new RegExp('\\b'+p+'\\b').test(u))) return true;
+  if(/[-–—]/.test(s))return true;
+  if(s.includes(' ')&&PLACE_WORDS.some(p=>new RegExp('\\b'+p+'\\b').test(u)))return true;
   return false;
 }
 function normaliseTime(t){
-  if(!t) return '';
+  if(!t)return'';
   const m=t.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-  if(m) return `${m[1]}:${m[2]}${m[3]?' '+m[3].toUpperCase():''}`;
+  if(m)return`${m[1]}:${m[2]}${m[3]?' '+m[3].toUpperCase():''}`;
   return t.trim();
 }
 function parseRawData(rawText){
   const raw=rawText.replace(/[\u201c\u201d\u2018\u2019\u2032\u2033"""'']/g,'').replace(/[\u200b\u200c\u200d\ufeff]/g,'').replace(/\u00a0/g,' ').trim();
   const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
-  const results=[]; let curMain='UNKNOWN',i=0;
+  const results=[];let curMain='UNKNOWN',i=0;
   while(i<lines.length){
     const line=lines[i];
     if(isMainHeader(line)){curMain=normaliseMainRoute(line);i++;continue;}
@@ -886,7 +532,7 @@ function parseRawData(rawText){
       let sub='ALL',slot='';
       while(i<lines.length){
         const tok=lines[i].trim();
-        if(isBusNum(tok)||isMainHeader(tok)) break;
+        if(isBusNum(tok)||isMainHeader(tok))break;
         if(isLoadStr(tok)){i++;continue;}
         if(isTimeStr(tok)){slot=tok;i++;break;}
         sub=tok;i++;
@@ -900,14 +546,12 @@ function parseRawData(rawText){
   return results;
 }
 
-/* ═══════════════════════
-   TAB 1 — ROW DATA
-═══════════════════════ */
+/* ── TAB 1 ── */
 function cleanData(){
   const raw=document.getElementById('rawInput').value;
   if(!raw.trim()){showToast('Paste raw data first');return;}
   rowData=parseRawData(raw);
-  renderCleanTable(); updateBadge('rowdata',rowData.length); refreshMainRouteDropdown();
+  renderCleanTable();updateBadge('rowdata',rowData.length);refreshMainRouteDropdown();
   const mC=rowData.filter(r=>r.shift==='morning').length,eC=rowData.filter(r=>r.shift==='evening').length;
   showToast(`Parsed ${rowData.length} entries — 🌅 ${mC} · 🌆 ${eC}`);
 }
@@ -935,23 +579,18 @@ function exportClean(){
   downloadFile(['Shift,Main Route,Bus,Sub-Route,Slot',...rowData.map(r=>`"${r.shift}","${r.mainRoute}","${r.bus}","${r.subRoute}","${r.slot}"`)].join('\n'),'row-data.csv','text/csv');
 }
 
-/* ═══════════════════════
-   TAB 2 — PARTIAL FLEET
-═══════════════════════ */
+/* ── TAB 2 ── */
 function parsePartialData(){
   const raw=document.getElementById('partialRawInput').value;
   if(!raw.trim()){showToast('Paste partial fleet data first');return;}
   const parsed=parseRawData(raw);
   if(!parsed.length){showToast('No valid entries found');return;}
   const newE=parsed.map(p=>({slot:p.slot,subRoute:p.subRoute,bus:p.bus,mainRoute:p.mainRoute,notes:'',shift:p.shift}));
-  partialFleet.push(...newE); renderPartialTable(); updateBadge('partial',partialFleet.length);
+  partialFleet.push(...newE);renderPartialTable();updateBadge('partial',partialFleet.length);
   const mC=newE.filter(e=>e.shift==='morning').length,eC=newE.filter(e=>e.shift==='evening').length;
   showToast(`✓ ${newE.length} slots — 🌅 ${mC} · 🌆 ${eC}`);
 }
-function addPartialRow(){
-  partialFleet.push({slot:'',subRoute:'ALL',bus:'',mainRoute:'',notes:'',shift:'unknown'});
-  renderPartialTable();updateBadge('partial',partialFleet.length);
-}
+function addPartialRow(){partialFleet.push({slot:'',subRoute:'ALL',bus:'',mainRoute:'',notes:'',shift:'unknown'});renderPartialTable();updateBadge('partial',partialFleet.length);}
 function renderPartialTable(){
   const tbody=document.getElementById('partialTable');
   const mC=partialFleet.filter(r=>r.shift==='morning').length,eC=partialFleet.filter(r=>r.shift==='evening').length;
@@ -977,9 +616,7 @@ function exportPartial(){
   downloadFile(['Shift,Slot,Sub-Route,Bus,Main Route,Notes',...partialFleet.map(r=>`"${r.shift}","${r.slot}","${r.subRoute}","${r.bus}","${r.mainRoute}","${r.notes}"`)].join('\n'),'partial-fleet.csv','text/csv');
 }
 
-/* ═══════════════════════
-   TAB 3 — BUS MASTER
-═══════════════════════ */
+/* ── TAB 3 ── */
 function saveBusMaster(){
   const bus=document.getElementById('bm-bus').value.trim().toUpperCase();
   const mainRoute=document.getElementById('bm-mainroute').value;
@@ -990,8 +627,7 @@ function saveBusMaster(){
   const entry={bus,mainRoute,knownRoutes:routes.split(',').map(r=>normaliseSubRoute(r.trim())).filter(Boolean),driverBase:base};
   if(editIdx>=0){busMaster[editIdx]=entry;document.getElementById('bm-edit-index').value=-1;}
   else{if(busMaster.find(b=>b.bus===bus)){showToast(`${bus} already exists`);return;}busMaster.push(entry);}
-  saveToLocal();renderBMTable();resetBMForm();updateBadge('busmaster',busMaster.length);
-  showToast(`✓ ${bus} saved`);
+  saveToLocal();renderBMTable();resetBMForm();updateBadge('busmaster',busMaster.length);showToast(`✓ ${bus} saved`);
 }
 function editBus(i){
   const b=busMaster[i];refreshMainRouteDropdown();
@@ -1005,10 +641,8 @@ function editBus(i){
 function deleteBus(i){const n=busMaster[i].bus;busMaster.splice(i,1);saveToLocal();renderBMTable();updateBadge('busmaster',busMaster.length);showToast(`✓ ${n} deleted`);}
 function cancelBMEdit(){resetBMForm();}
 function resetBMForm(){
-  document.getElementById('bm-bus').value='';
-  document.getElementById('bm-mainroute').value='';
-  document.getElementById('bm-routes').value='';
-  document.getElementById('bm-base').value='';
+  document.getElementById('bm-bus').value='';document.getElementById('bm-mainroute').value='';
+  document.getElementById('bm-routes').value='';document.getElementById('bm-base').value='';
   document.getElementById('bm-edit-index').value=-1;
 }
 function renderBMTable(){
@@ -1017,7 +651,7 @@ function renderBMTable(){
   if(!busMaster.length){tbody.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No buses registered</div></div></td></tr>';return;}
   tbody.innerHTML=busMaster.map((b,i)=>{
     const isExcl=excludedBuses.has(b.bus);
-    return `<tr ${isExcl?'style="opacity:.4"':''}>
+    return`<tr ${isExcl?'style="opacity:.4"':''}>
       <td class="bus-num">${b.bus}${isExcl?' <span class="badge badge-red" style="font-size:9px;padding:2px 6px">EXCL</span>':''}</td>
       <td style="color:var(--text2);font-size:12px">${b.mainRoute||'—'}</td>
       <td class="route-cell" style="font-size:11px">${b.knownRoutes.join(', ')||'—'}</td>
@@ -1038,9 +672,7 @@ function refreshMainRouteDropdown(){
   routes.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;if(r===cur)o.selected=true;sel.appendChild(o);});
 }
 
-/* ═══════════════════════
-   EXCLUDED
-═══════════════════════ */
+/* ── EXCLUDED ── */
 function addExcluded(){
   const raw=document.getElementById('excl-input').value.trim();if(!raw)return;
   raw.split(/[,\s]+/).map(s=>s.trim().toUpperCase()).filter(Boolean).forEach(n=>excludedBuses.add(n));
@@ -1054,26 +686,18 @@ function renderExcluded(){
   const c=document.getElementById('excl-chips');
   document.getElementById('excl-count').textContent=`${excludedBuses.size}`;
   if(!excludedBuses.size){c.innerHTML='<span style="font-size:11px;color:var(--text3)">None</span>';return;}
-  c.innerHTML=[...excludedBuses].sort().map(b=>`
-    <div class="excl-chip">🚫 ${b}<button onclick="removeExcluded('${b}')">×</button></div>`).join('');
+  c.innerHTML=[...excludedBuses].sort().map(b=>`<div class="excl-chip">🚫 ${b}<button onclick="removeExcluded('${b}')">×</button></div>`).join('');
 }
 
-/* ═══════════════════════
-   PERSIST
-═══════════════════════ */
+/* ── PERSIST ── */
 function saveToLocal(){
-  try{localStorage.setItem('fas_busMaster',JSON.stringify(busMaster));localStorage.setItem('fas_excluded',JSON.stringify([...excludedBuses]));}
-  catch(e){console.warn(e);}
+  try{localStorage.setItem('fas_busMaster',JSON.stringify(busMaster));localStorage.setItem('fas_excluded',JSON.stringify([...excludedBuses]));}catch(e){console.warn(e);}
 }
 function loadFromLocal(){
-  try{const bm=localStorage.getItem('fas_busMaster'),ex=localStorage.getItem('fas_excluded');
-    if(bm)busMaster=JSON.parse(bm);if(ex)excludedBuses=new Set(JSON.parse(ex));}
-  catch(e){console.warn(e);}
+  try{const bm=localStorage.getItem('fas_busMaster'),ex=localStorage.getItem('fas_excluded');if(bm)busMaster=JSON.parse(bm);if(ex)excludedBuses=new Set(JSON.parse(ex));}catch(e){console.warn(e);}
 }
 
-/* ═══════════════════════
-   ALGORITHM
-═══════════════════════ */
+/* ── ALGORITHM ── */
 function timeToMins(t){
   if(!t)return 0;
   const m=t.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);if(!m)return 0;
@@ -1107,33 +731,26 @@ function runShiftAdjustment(shiftSlots,shiftRowData,shiftName){
         continue;
       }
     }
-
-    // P2 — Bus in row data same main route
+    // P2 — Same bus, same main route, same sub-route
     if(origBus&&!excludedBuses.has(origBus)&&!usedBuses.has(origBus)){
-      const inRow=shiftRowData.find(r=>r.bus===origBus&&r.mainRoute===slotMain);
+      const inRow=shiftRowData.find(r=>r.bus===origBus&&r.mainRoute===slotMain&&r.subRoute===slotSub);
       if(inRow){
         usedBuses.add(origBus);
-        results.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus,assignedBus:origBus,matchType:'retained',reason:`Retained — in row data`});
+        results.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus,assignedBus:origBus,matchType:'retained',reason:'Retained — same bus & sub-route'});
         logs.push({type:'perfect',msg:`[${shiftName}][${slotTime}] ${origBus} RETAINED`});
         continue;
       }
     }
-
-    // P3 — Replace from row data pool
+    // P3 — Replace from pool, exact sub-route only
     const pool=shiftRowData.filter(r=>r.mainRoute===slotMain&&!usedBuses.has(r.bus)&&!excludedBuses.has(r.bus));
     const exactPool=pool.filter(r=>r.subRoute===slotSub);
-    let best=null,matchType='',reason='';
     if(exactPool.length){
-      best=closestTime(exactPool,slotTime);matchType='replaced';
-      reason=`Replaced — same route (${slotSub})`;
-      logs.push({type:'similar',msg:`[${shiftName}][${slotTime}] ${best.bus} replaces ${origBus||'?'} — ${reason}`});
-    } else if(pool.length){
-      best=closestTime(pool,slotTime);matchType='replaced';
-      reason=`Replaced — same main route, diff sub-route (${best.subRoute})`;
-      logs.push({type:'similar',msg:`[${shiftName}][${slotTime}] ${best.bus} replaces ${origBus||'?'} — ${reason}`});
+      const best=closestTime(exactPool,slotTime);
+      usedBuses.add(best.bus);
+      results.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus,assignedBus:best.bus,matchType:'replaced',reason:`Replaced — same route (${slotSub})`});
+      logs.push({type:'similar',msg:`[${shiftName}][${slotTime}] ${best.bus} replaces ${origBus||'?'}`});
+      continue;
     }
-    if(best){usedBuses.add(best.bus);results.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus,assignedBus:best.bus,matchType,reason});continue;}
-
     // P4 — Bus Master fallback
     const bmPool=busMaster.filter(bm=>!excludedBuses.has(bm.bus)&&!usedBuses.has(bm.bus)&&bm.mainRoute===slotMain&&bm.knownRoutes.includes(slotSub));
     if(bmPool.length){
@@ -1142,7 +759,6 @@ function runShiftAdjustment(shiftSlots,shiftRowData,shiftName){
       logs.push({type:'info',msg:`[${shiftName}][${slotTime}] ${bmBest.bus} BM fallback`});
       continue;
     }
-
     // P5 — Unassigned
     results.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus,assignedBus:null,matchType:'unassigned',reason:`No match — ${slotMain}/${slotSub}`});
     unassigned.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus});
@@ -1156,8 +772,6 @@ function computeNonOps(mr,er){
   const assigned=new Set([
     ...mr.results.map(r=>r.assignedBus).filter(Boolean),
     ...er.results.map(r=>r.assignedBus).filter(Boolean),
-    ...Object.values(manualOverrides.morning).filter(Boolean),
-    ...Object.values(manualOverrides.evening).filter(Boolean)
   ]);
   return[...allRow].filter(b=>!assigned.has(b)&&!excludedBuses.has(b)).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
 }
@@ -1165,50 +779,125 @@ function computeNonOps(mr,er){
 function adjustFleet(){
   if(!partialFleet.length){showToast('No partial fleet data');return;}
   if(!rowData.length){showToast('No row data — clean first');return;}
-  manualOverrides={morning:{},evening:{}};
   const ms=partialFleet.filter(s=>s.shift==='morning');
   const es=partialFleet.filter(s=>s.shift==='evening');
   const mr=runShiftAdjustment(ms,rowData.filter(r=>r.shift==='morning'),'Morning');
   const er=runShiftAdjustment(es,rowData.filter(r=>r.shift==='evening'),'Evening');
   const nonOps=computeNonOps(mr,er);
   outputResult={morningResult:mr,eveningResult:er,nonOps};
-  renderOutput(); renderAdjustmentSummary(); switchTab('output');
+  renderOutput();renderAdjustmentSummary();switchTab('output');
   updateBadge('output',ms.length+es.length);
   showToast(`Done — 🌅 ${ms.length} · 🌆 ${es.length} · 🚫 ${nonOps.length} Non-Ops`);
 }
 
-/* ═══════════════════════
-   MANUAL OVERRIDE
-═══════════════════════ */
-function saveManualBus(shift,idx,value){
-  const bus=value.trim().toUpperCase();
-  manualOverrides[shift][idx]=bus||null;
+/* ── DROPDOWN BUS LIST ── */
+function getAvailableBusesForSlot(shift,slotIdx){
   const results=shift==='morning'?outputResult.morningResult.results:outputResult.eveningResult.results;
-  if(bus){
-    results[idx].assignedBus=bus;results[idx].matchType='manual';results[idx].reason=`Manual: ${bus}`;
-    const ua=shift==='morning'?outputResult.morningResult.unassigned:outputResult.eveningResult.unassigned;
-    const ui=ua.findIndex(u=>u.slot===results[idx].slot&&u.subRoute===results[idx].subRoute);
-    if(ui>-1)ua.splice(ui,1);
-  } else{results[idx].assignedBus=null;results[idx].matchType='unassigned';}
-  outputResult.nonOps=computeNonOps(outputResult.morningResult,outputResult.eveningResult);
-  renderOutput();renderAdjustmentSummary();
-  if(bus)showToast(`✓ ${bus} assigned`);
+  const slot=results[slotIdx];
+  const mainRoute=slot.mainRoute;
+
+  // All assigned buses in this shift (excluding current slot)
+  const assignedElsewhere=new Set(
+    results.filter((_,i)=>i!==slotIdx&&results[i].assignedBus).map(r=>r.assignedBus)
+  );
+
+  // From row data — same main route, not excluded, not assigned elsewhere
+  const fromRowData=[...new Set(
+    rowData.filter(r=>r.mainRoute===mainRoute&&!excludedBuses.has(r.bus)&&!assignedElsewhere.has(r.bus))
+    .map(r=>r.bus)
+  )].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+
+  // From Bus Master — same main route, knownRoutes includes slotSub, not excluded, not assigned elsewhere
+  const fromBM=[...new Set(
+    busMaster.filter(b=>b.mainRoute===mainRoute&&b.knownRoutes.includes(slot.subRoute)&&!excludedBuses.has(b.bus)&&!assignedElsewhere.has(b.bus))
+    .map(b=>b.bus)
+  )].filter(b=>!fromRowData.includes(b)).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+
+  return{fromRowData,fromBM};
 }
 
-/* ═══════════════════════
-   RENDER OUTPUT
-═══════════════════════ */
+function buildBusDropdown(shift,idx,currentBus){
+  const{fromRowData,fromBM}=getAvailableBusesForSlot(shift,idx);
+  const allBuses=[...fromRowData,...fromBM];
+  // Always include current bus even if assigned elsewhere
+  if(currentBus&&!allBuses.includes(currentBus))allBuses.unshift(currentBus);
+
+  let opts='<option value="">— Unassign —</option>';
+  if(fromRowData.length){
+    opts+=`<optgroup label="── Available Buses ──">`;
+    fromRowData.forEach(b=>{opts+=`<option value="${b}"${b===currentBus?' selected':''}>${b}</option>`;});
+    opts+=`</optgroup>`;
+  }
+  if(fromBM.length){
+    opts+=`<optgroup label="── Bus Master ──">`;
+    fromBM.forEach(b=>{opts+=`<option value="${b}"${b===currentBus?' selected':''}>${b}</option>`;});
+    opts+=`</optgroup>`;
+  }
+  if(!fromRowData.length&&!fromBM.length&&currentBus){
+    opts+=`<option value="${currentBus}" selected>${currentBus}</option>`;
+  }
+  const cls=currentBus?'bus-dropdown':'bus-dropdown unassigned';
+  return`<select class="${cls}" onchange="swapBus('${shift}',${idx},this.value)">${opts}</select>`;
+}
+
+/* ── SWAP BUS ── */
+function swapBus(shift,idx,newBus){
+  const results=shift==='morning'?outputResult.morningResult.results:outputResult.eveningResult.results;
+  const oldBus=results[idx].assignedBus;
+
+  // If newBus is already assigned somewhere else in this shift → unassign that slot
+  if(newBus){
+    const conflictIdx=results.findIndex((r,i)=>i!==idx&&r.assignedBus===newBus);
+    if(conflictIdx>-1){
+      results[conflictIdx].assignedBus=null;
+      results[conflictIdx].matchType='unassigned';
+      results[conflictIdx].reason='Unassigned — bus moved to another slot';
+      const ua=shift==='morning'?outputResult.morningResult.unassigned:outputResult.eveningResult.unassigned;
+      const r=results[conflictIdx];
+      if(!ua.find(u=>u.slot===r.slot&&u.subRoute===r.subRoute))
+        ua.push({slot:r.slot,subRoute:r.subRoute,mainRoute:r.mainRoute,originalBus:r.originalBus});
+    }
+  }
+
+  // Assign new bus to current slot
+  results[idx].assignedBus=newBus||null;
+  results[idx].matchType=newBus?'manual':'unassigned';
+  results[idx].reason=newBus?`Manual: ${newBus}`:'Unassigned';
+
+  // Update unassigned list
+  const ua=shift==='morning'?outputResult.morningResult.unassigned:outputResult.eveningResult.unassigned;
+  if(!newBus){
+    const r=results[idx];
+    if(!ua.find(u=>u.slot===r.slot&&u.subRoute===r.subRoute))
+      ua.push({slot:r.slot,subRoute:r.subRoute,mainRoute:r.mainRoute,originalBus:r.originalBus});
+  } else {
+    const rmIdx=ua.findIndex(u=>u.slot===results[idx].slot&&u.subRoute===results[idx].subRoute);
+    if(rmIdx>-1)ua.splice(rmIdx,1);
+  }
+
+  outputResult.nonOps=computeNonOps(outputResult.morningResult,outputResult.eveningResult);
+  renderOutput();renderAdjustmentSummary();
+  if(newBus)showToast(`✓ ${newBus} assigned`);
+  else showToast(`Slot unassigned`);
+}
+
+/* ── RENDER OUTPUT ── */
 function renderShiftTable(tbodyId,results,shift){
   const tbody=document.getElementById(tbodyId);
   if(!results.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty-state" style="padding:20px"><div class="empty-text">No slots</div></div></td></tr>';return;}
   tbody.innerHTML=results.map((r,i)=>{
     const cls=r.matchType==='retained'?'output-row-perfect':r.matchType==='replaced'?'output-row-similar':r.matchType==='fallback'?'output-row-fallback':r.matchType==='manual'?'output-row-manual':'output-row-unassigned';
-    const badge=r.matchType==='retained'?'<span class="badge badge-green">✓</span>':r.matchType==='replaced'?'<span class="badge badge-yellow">↔</span>':r.matchType==='fallback'?'<span class="badge badge-purple">⚡</span>':r.matchType==='manual'?'<span class="badge badge-blue">✏</span>':'';
-    const aCell=r.matchType==='unassigned'
-      ?`<div class="manual-wrap"><input type="text" placeholder="Bus no..." maxlength="8" value="${esc(manualOverrides[shift][i]||'')}" onkeydown="if(event.key==='Enter')saveManualBus('${shift}',${i},this.value)" oninput="this.value=this.value.toUpperCase()"/><button class="btn btn-primary btn-xs" onclick="saveManualBus('${shift}',${i},this.previousElementSibling.value)">✓</button></div>`
-      :`<span style="color:var(--accent);font-family:var(--mono)">${r.assignedBus||'—'}</span>`;
+    const badge=r.matchType==='retained'?'<span class="badge badge-green">✓</span>':r.matchType==='replaced'?'<span class="badge badge-yellow">↔</span>':r.matchType==='fallback'?'<span class="badge badge-purple">⚡</span>':r.matchType==='manual'?'<span class="badge badge-blue">✏</span>':'<span class="badge badge-red">⚠</span>';
     const oCell=r.originalBus?`<span style="color:var(--text2);font-family:var(--mono);${r.assignedBus&&r.assignedBus!==r.originalBus?'text-decoration:line-through;opacity:.4':''}">${r.originalBus}</span>`:'<span style="color:var(--text3)">—</span>';
-    return`<tr class="${cls}" title="${esc(r.reason)}"><td class="time-cell">${r.slot||'—'}</td><td class="route-cell">${r.subRoute}</td><td style="color:var(--text2);font-size:11px">${r.mainRoute}</td><td>${oCell}</td><td>${aCell}</td><td>${badge}</td></tr>`;
+    const dropdown=buildBusDropdown(shift,i,r.assignedBus);
+    return`<tr class="${cls}" title="${esc(r.reason)}">
+      <td class="time-cell">${r.slot||'—'}</td>
+      <td class="route-cell">${r.subRoute}</td>
+      <td style="color:var(--text2);font-size:11px">${r.mainRoute}</td>
+      <td>${oCell}</td>
+      <td><div class="bus-select-wrap">${dropdown}</div></td>
+      <td>${badge}</td>
+    </tr>`;
   }).join('');
 }
 
@@ -1231,11 +920,8 @@ function renderOutput(){
   document.getElementById('shiftSplit').style.display='block';
   document.getElementById('logsCard').style.display='block';
   document.getElementById('nonOpsCard').style.display='block';
-
-  // Show mobile tabs on small screens
   const isMobile=window.innerWidth<=640;
   document.getElementById('shiftTabs').style.display=isMobile?'flex':'none';
-
   const all=[...mr.results,...er.results];
   const ms=shiftStats(mr.results),es=shiftStats(er.results);
   document.getElementById('stat-total').textContent=all.length;
@@ -1276,14 +962,13 @@ function renderAdjustmentSummary(){
       <div class="mini-card"><div class="mini-val" style="color:var(--red)">${es.unassig}</div><div class="mini-lbl">Unassigned</div></div>
     </div>
     <div class="mini-card" style="margin-bottom:12px">
-      <div class="mini-val" style="color:var(--red)">${nonOps.length}</div>
-      <div class="mini-lbl">Non-Ops</div>
+      <div class="mini-val" style="color:var(--red)">${nonOps.length}</div><div class="mini-lbl">Non-Ops</div>
     </div>
     <button class="btn btn-secondary btn-sm" style="width:100%" onclick="switchTab('output')">View Output →</button>`;
 }
 
 function clearOutput(){
-  outputResult=null;manualOverrides={morning:{},evening:{}};
+  outputResult=null;
   document.getElementById('outputEmpty').style.display='block';
   document.getElementById('statsBar').style.display='none';
   document.getElementById('shiftSplit').style.display='none';
@@ -1293,9 +978,6 @@ function clearOutput(){
   updateBadge('output',0);
 }
 
-/* ═══════════════════════
-   MOBILE SHIFT TABS
-═══════════════════════ */
 function switchShiftTab(shift){
   document.querySelectorAll('.shift-tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.shift-panel').forEach(p=>p.classList.remove('active'));
@@ -1303,103 +985,41 @@ function switchShiftTab(shift){
   document.getElementById(`shift-panel-${shift}`).classList.add('active');
 }
 
-/* ═══════════════════════
-   COPY OUTPUT
-═══════════════════════ */
+/* ── COPY OUTPUT ── */
 function copyOutput(){
   if(!outputResult){showToast('Run adjustment first');return;}
   const{morningResult:mr,eveningResult:er,nonOps}=outputResult;
-
   function buildShiftText(label,shiftResult){
-    if(!shiftResult.results.length) return '';
+    if(!shiftResult.results.length)return'';
     const groups={};
-    shiftResult.results.forEach(r=>{
-      const g=r.mainRoute||'OTHER';
-      if(!groups[g])groups[g]=[];
-      groups[g].push(r);
-    });
+    shiftResult.results.forEach(r=>{const g=r.mainRoute||'OTHER';if(!groups[g])groups[g]=[];groups[g].push(r);});
     const lines=[];
     lines.push(`**${label.toUpperCase()}**`);
     lines.push('─'.repeat(19));
     for(const grp of Object.keys(groups)){
-      lines.push('');
-      lines.push(`**${grp}**`);
-      for(const r of groups[grp]){
-        if(!r.assignedBus) continue;
-        lines.push(`${r.assignedBus} ${r.slot||'—'} ${r.subRoute}`);
-      }
-    }
-    // Replacement buses section
-    const replacements=shiftResult.results.filter(r=>
-      (r.matchType==='replaced'||r.matchType==='fallback'||r.matchType==='manual')&&
-      r.originalBus&&r.assignedBus&&r.originalBus!==r.assignedBus
-    );
-    if(replacements.length){
-      lines.push('');
-      lines.push('**REPLACEMENT BUSES**');
-      replacements.forEach(r=>lines.push(`${r.originalBus} → ${r.assignedBus}`));
-    }
-    lines.push('');
-    return lines.join('\n');
-  }
-
-  function buildShiftText(label,shiftResult){
-    if(!shiftResult.results.length) return '';
-    const groups={};
-    shiftResult.results.forEach(r=>{
-      const g=r.mainRoute||'OTHER';
-      if(!groups[g])groups[g]=[];
-      groups[g].push(r);
-    });
-    const lines=[];
-    lines.push(`**${label.toUpperCase()}**`);
-    lines.push('─'.repeat(19));
-    for(const grp of Object.keys(groups)){
-      // Only non-retained rows
       const changed=groups[grp].filter(r=>r.matchType!=='retained'&&r.assignedBus);
-      if(!changed.length) continue;
-      lines.push('');
-      lines.push(`**${grp}**`);
+      if(!changed.length)continue;
+      lines.push('');lines.push(`**${grp}**`);
       changed.forEach(r=>lines.push(`${r.assignedBus} ${r.slot||'—'} ${r.subRoute}`));
     }
-    // Replacement buses
-    const replacements=shiftResult.results.filter(r=>
-      (r.matchType==='replaced'||r.matchType==='fallback'||r.matchType==='manual')&&
-      r.originalBus&&r.assignedBus&&r.originalBus!==r.assignedBus
-    );
-    if(replacements.length){
-      lines.push('');
-      lines.push('**REPLACEMENT BUSES**');
-      replacements.forEach(r=>lines.push(`${r.originalBus} → ${r.assignedBus}`));
-    }
-    lines.push('');
-    lines.push('');
+    const replacements=shiftResult.results.filter(r=>(r.matchType==='replaced'||r.matchType==='fallback'||r.matchType==='manual')&&r.originalBus&&r.assignedBus&&r.originalBus!==r.assignedBus);
+    if(replacements.length){lines.push('');lines.push('**REPLACEMENT BUSES**');replacements.forEach(r=>lines.push(`${r.originalBus} → ${r.assignedBus}`));}
+    lines.push('');lines.push('');
     return lines.join('\n');
   }
-
-  const parts=[];
-  parts.push('**Partial Fleet Readiness**');
-  parts.push('');
+  const parts=['**Partial Fleet Readiness**',''];
   const morning=buildShiftText('Morning',mr);
   const evening=buildShiftText('Evening',er);
-  if(morning) parts.push(morning);
-  if(evening) parts.push(evening);
-
-  // Non-Ops = row data non-ops + excluded buses, combined sorted
-  const combinedNonOps=[...new Set([
-    ...nonOps,
-    ...[...excludedBuses]
-  ])].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-
+  if(morning)parts.push(morning);
+  if(evening)parts.push(evening);
+  const combinedNonOps=[...new Set([...nonOps,...[...excludedBuses]])].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   if(combinedNonOps.length){
-    parts.push('**NON OPS**');
-    parts.push('─'.repeat(21));
+    parts.push('**NON OPS**');parts.push('─'.repeat(21));
     const chunk=6;
-    for(let i=0;i<combinedNonOps.length;i+=chunk) parts.push(combinedNonOps.slice(i,i+chunk).join(', '));
+    for(let i=0;i<combinedNonOps.length;i+=chunk)parts.push(combinedNonOps.slice(i,i+chunk).join(', '));
   }
   copyToClipboard(parts.join('\n'));
 }
-
 function copyToClipboard(text){
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>showToast('✓ Copied')).catch(()=>fallbackCopy(text));return;}
   fallbackCopy(text);
@@ -1410,7 +1030,6 @@ function fallbackCopy(text){
   try{document.execCommand('copy');showToast('✓ Copied');}catch{showToast('✗ Copy failed');}
   document.body.removeChild(ta);
 }
-
 function exportOutput(){
   if(!outputResult){showToast('Run adjustment first');return;}
   const{morningResult:mr,eveningResult:er}=outputResult;
@@ -1418,17 +1037,12 @@ function exportOutput(){
   downloadFile(['Shift,Slot,Sub-Route,Main Route,Original Bus,Assigned Bus,Match Type',...all.map(r=>`"${r.shift}","${r.slot}","${r.subRoute}","${r.mainRoute}","${r.originalBus||''}","${r.assignedBus||''}","${r.matchType}"`)].join('\n'),'fleet-output.csv','text/csv');
 }
 
-/* ═══════════════════════
-   SAMPLE
-═══════════════════════ */
 function loadSampleData(){
   document.getElementById('rawInput').value=`Chembur BKC\nC317\nALL\n16/27\n8:30 AM\nC11\nALL\n14/35\n8:45 AM\nC40\nALL\n9/35\n8:55 AM\nThane SOBO\nC135\nALL\n25/35\n6:15 AM\nC133\nHN MN\n35/35\n6:55 AM\nC227\nNTH EXP\n13/35\n7:00 AM\nBKC Chembur\nC11\nALL\n12/35\n5:00 PM\nC317\nALL\n21/27\n6:30 PM\nSOBO Thane\nC262\nALL\n14/35\n3:30 PM\nC527\nKLS\n2/35\n4:40 PM`;
   cleanData();
 }
 
-/* ═══════════════════════
-   UTILS
-═══════════════════════ */
+/* ── UTILS ── */
 function switchTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -1437,27 +1051,17 @@ function switchTab(name){
   if(name==='busmaster')refreshMainRouteDropdown();
 }
 function updateBadge(tab,count){const el=document.getElementById('badge-'+tab);if(el)el.textContent=count;}
-function showToast(msg){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2800);
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function downloadFile(content,filename,type){
   const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=filename;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 window.addEventListener('resize',()=>{
-  if(outputResult){
-    const isMobile=window.innerWidth<=640;
-    document.getElementById('shiftTabs').style.display=isMobile?'flex':'none';
-  }
+  if(outputResult){const isMobile=window.innerWidth<=640;document.getElementById('shiftTabs').style.display=isMobile?'flex':'none';}
 });
-
-document.addEventListener('DOMContentLoaded',()=>{
-  loadFromLocal();renderBMTable();renderExcluded();updateBadge('busmaster',busMaster.length);
-});
+document.addEventListener('DOMContentLoaded',()=>{loadFromLocal();renderBMTable();renderExcluded();updateBadge('busmaster',busMaster.length);});
 </script>
 </body>
 </html>
