@@ -112,21 +112,17 @@ td.time-cell{color:var(--green)}
 .mini-val{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1}
 .mini-lbl{font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-top:4px}
 .shift-tabs{display:none}
-
-/* Bus dropdown in output table */
-.bus-select-wrap{position:relative;display:flex;align-items:center;gap:6px}
+.bus-select-wrap{display:flex;align-items:center;gap:6px}
 .bus-dropdown{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--mono);font-size:11px;padding:5px 8px;outline:none;cursor:pointer;transition:border-color .2s;min-width:90px}
 .bus-dropdown:focus{border-color:var(--accent)}
 .bus-dropdown.unassigned{border-color:rgba(239,68,68,.4);color:var(--red)}
 .bus-dropdown option{background:var(--bg3);color:var(--text)}
 .bus-dropdown optgroup{background:var(--bg2);color:var(--text3);font-size:10px}
-
 #toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--border2);border-left:3px solid var(--accent);color:var(--text);font-family:var(--mono);font-size:12px;padding:12px 16px;border-radius:var(--radius);z-index:9999;transform:translateY(100px);opacity:0;transition:all .25s cubic-bezier(.34,1.56,.64,1);max-width:300px;box-shadow:var(--shadow)}
 #toast.show{transform:translateY(0);opacity:1}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
-
 @media(max-width:900px){.three-col{grid-template-columns:1fr}.shift-split{grid-template-columns:1fr}.two-col{grid-template-columns:1fr}}
 @media(max-width:640px){
   .header{padding:0 14px;height:54px}.header-sub{display:none}
@@ -483,9 +479,7 @@ function normaliseMainRoute(raw){
   const kc=raw.toLowerCase().replace(/[\s\-–—()\[\]]/g,'').trim();
   const ks=raw.toLowerCase().replace(/\s+/g,' ').trim();
   for(const[can,aliases]of MAIN_ROUTE_MAP){
-    for(const a of aliases){
-      if(a.replace(/[\s\-–—()\[\]]/g,'').trim()===kc||a===ks)return can;
-    }
+    for(const a of aliases){if(a.replace(/[\s\-–—()\[\]]/g,'').trim()===kc||a===ks)return can;}
   }
   return raw.toUpperCase().trim();
 }
@@ -616,7 +610,7 @@ function exportPartial(){
   downloadFile(['Shift,Slot,Sub-Route,Bus,Main Route,Notes',...partialFleet.map(r=>`"${r.shift}","${r.slot}","${r.subRoute}","${r.bus}","${r.mainRoute}","${r.notes}"`)].join('\n'),'partial-fleet.csv','text/csv');
 }
 
-/* ── TAB 3 ── */
+/* ── TAB 3: BUS MASTER ── */
 function saveBusMaster(){
   const bus=document.getElementById('bm-bus').value.trim().toUpperCase();
   const mainRoute=document.getElementById('bm-mainroute').value;
@@ -715,26 +709,15 @@ function closestTime(cands,target){
 function runShiftAdjustment(shiftSlots,shiftRowData,shiftName){
   const logs=[],results=[],unassigned=[];
   const usedBuses=new Set();
-
   for(const slot of shiftSlots){
     const origBus=slot.bus?slot.bus.toUpperCase().trim():'';
     const slotTime=normaliseTime(slot.slot);
+    const slotSub=normaliseSubRoute(slot.subRoute||'ALL');
     const slotMain=slot.mainRoute||'';
-    // Use partial fleet sub-route only for display — get actual sub-route from row data
-    const partialSub=normaliseSubRoute(slot.subRoute||'ALL');
 
-    // Look up this bus in row data to get its actual sub-route
-    const rowEntry=shiftRowData.find(r=>r.bus===origBus&&r.mainRoute===slotMain);
-    const slotSub=rowEntry?rowEntry.subRoute:partialSub;
-
-    // P1 — Perfect match (bus + main route + sub-route + time all match)
+    // P1 — Perfect match: bus + main route + sub-route + time all match
     if(origBus&&!excludedBuses.has(origBus)&&!usedBuses.has(origBus)){
-      const perfect=shiftRowData.find(r=>
-        r.bus===origBus&&
-        r.mainRoute===slotMain&&
-        r.subRoute===slotSub&&
-        normaliseTime(r.slot)===slotTime
-      );
+      const perfect=shiftRowData.find(r=>r.bus===origBus&&r.mainRoute===slotMain&&r.subRoute===slotSub&&normaliseTime(r.slot)===slotTime);
       if(perfect){
         usedBuses.add(origBus);
         results.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus,assignedBus:origBus,matchType:'retained',reason:'Perfect match'});
@@ -742,36 +725,27 @@ function runShiftAdjustment(shiftSlots,shiftRowData,shiftName){
         continue;
       }
     }
-
-    // P2 — Same bus, same main route (use row data sub-route)
-    if(origBus&&!excludedBuses.has(origBus)&&!usedBuses.has(origBus)&&rowEntry){
-      usedBuses.add(origBus);
-      results.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus,assignedBus:origBus,matchType:'retained',reason:`Retained — row data sub-route (${slotSub})`});
-      logs.push({type:'perfect',msg:`[${shiftName}][${slotTime}] ${origBus} RETAINED (${slotSub})`});
-      continue;
+    // P2 — Same bus, same main route, same sub-route (time may differ)
+    if(origBus&&!excludedBuses.has(origBus)&&!usedBuses.has(origBus)){
+      const inRow=shiftRowData.find(r=>r.bus===origBus&&r.mainRoute===slotMain&&r.subRoute===slotSub);
+      if(inRow){
+        usedBuses.add(origBus);
+        results.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus,assignedBus:origBus,matchType:'retained',reason:'Retained — same bus & sub-route'});
+        logs.push({type:'perfect',msg:`[${shiftName}][${slotTime}] ${origBus} RETAINED`});
+        continue;
+      }
     }
-
-    // P3 — Bus not in row data for this main route → try replace from pool using row data sub-route
-    if(origBus&&!excludedBuses.has(origBus)&&!rowEntry){
-      // Bus not in row data — could be another hub's bus, skip to unassigned
-      results.push({slot:slotTime,subRoute:partialSub,mainRoute:slotMain,originalBus:origBus,assignedBus:null,matchType:'unassigned',reason:`Bus ${origBus} not in row data`});
-      unassigned.push({slot:slotTime,subRoute:partialSub,mainRoute:slotMain,originalBus:origBus});
-      logs.push({type:'fallback',msg:`[${shiftName}][${slotTime}] ${origBus} not in row data — UNASSIGNED`});
-      continue;
-    }
-
-    // P4 — No original bus — find best available from pool using sub-route
+    // P3 — Replace from pool, exact sub-route only
     const pool=shiftRowData.filter(r=>r.mainRoute===slotMain&&!usedBuses.has(r.bus)&&!excludedBuses.has(r.bus));
     const exactPool=pool.filter(r=>r.subRoute===slotSub);
     if(exactPool.length){
       const best=closestTime(exactPool,slotTime);
       usedBuses.add(best.bus);
-      results.push({slot:slotTime,subRoute:best.subRoute,mainRoute:slotMain,originalBus:origBus,assignedBus:best.bus,matchType:'replaced',reason:`Replaced — ${best.bus} (${best.subRoute})`});
+      results.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus,assignedBus:best.bus,matchType:'replaced',reason:`Replaced — same route (${slotSub})`});
       logs.push({type:'similar',msg:`[${shiftName}][${slotTime}] ${best.bus} replaces ${origBus||'?'}`});
       continue;
     }
-
-    // P5 — Bus Master fallback
+    // P4 — Bus Master fallback
     const bmPool=busMaster.filter(bm=>!excludedBuses.has(bm.bus)&&!usedBuses.has(bm.bus)&&bm.mainRoute===slotMain&&bm.knownRoutes.includes(slotSub));
     if(bmPool.length){
       const bmBest=bmPool[0];usedBuses.add(bmBest.bus);
@@ -779,8 +753,7 @@ function runShiftAdjustment(shiftSlots,shiftRowData,shiftName){
       logs.push({type:'info',msg:`[${shiftName}][${slotTime}] ${bmBest.bus} BM fallback`});
       continue;
     }
-
-    // P6 — Unassigned
+    // P5 — Unassigned
     results.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus,assignedBus:null,matchType:'unassigned',reason:`No match — ${slotMain}/${slotSub}`});
     unassigned.push({slot:slotTime,subRoute:slotSub,mainRoute:slotMain,originalBus:origBus});
     logs.push({type:'fallback',msg:`[${shiftName}][${slotTime}] ⚠ UNASSIGNED`});
@@ -790,17 +763,12 @@ function runShiftAdjustment(shiftSlots,shiftRowData,shiftName){
 
 function computeNonOps(mr,er){
   const allRowBuses=new Set(rowData.map(r=>r.bus));
-
-  // All buses assigned across both shifts
+  // Non-op = in row data but not assigned in any shift, not excluded
   const assignedAnywhere=new Set([
     ...mr.results.map(r=>r.assignedBus).filter(Boolean),
     ...er.results.map(r=>r.assignedBus).filter(Boolean),
   ]);
-
-  // Non-op = in row data, not assigned in any shift, not excluded
-  return[...allRowBuses]
-    .filter(b=>!assignedAnywhere.has(b)&&!excludedBuses.has(b))
-    .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  return[...allRowBuses].filter(b=>!assignedAnywhere.has(b)&&!excludedBuses.has(b)).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
 }
 
 function adjustFleet(){
@@ -809,20 +777,16 @@ function adjustFleet(){
   const ms=partialFleet.filter(s=>s.shift==='morning');
   const es=partialFleet.filter(s=>s.shift==='evening');
 
-  // Run morning adjustment first
+  // Run morning first
   const mr=runShiftAdjustment(ms,rowData.filter(r=>r.shift==='morning'),'Morning');
 
-  // Buses that are in row data for both morning and evening
+  // Evening pool: buses in morning row data must have been assigned in morning
+  // Buses only in evening row data are always available (depot direct)
   const morningRowBuses=new Set(rowData.filter(r=>r.shift==='morning').map(r=>r.bus));
-  // Buses actually assigned in morning
   const morningAssigned=new Set(mr.results.map(r=>r.assignedBus).filter(Boolean));
-
-  // Filter evening row data:
-  // - If bus exists in morning row data → only allow if it was assigned in morning
-  // - If bus is evening-only in row data → always allow (comes directly from depot)
   const eveningRowData=rowData.filter(r=>{
-    if(r.shift!=='evening') return false;
-    if(morningRowBuses.has(r.bus)) return morningAssigned.has(r.bus);
+    if(r.shift!=='evening')return false;
+    if(morningRowBuses.has(r.bus))return morningAssigned.has(r.bus);
     return true;
   });
 
@@ -834,148 +798,83 @@ function adjustFleet(){
   showToast(`Done — 🌅 ${ms.length} · 🌆 ${es.length} · 🚫 ${nonOps.length} Non-Ops`);
 }
 
-/* ── DROPDOWN BUS LIST ── */
+/* ── DROPDOWN ── */
 function getAvailableBusesForSlot(shift,slotIdx){
   const results=shift==='morning'?outputResult.morningResult.results:outputResult.eveningResult.results;
-  const otherResults=shift==='morning'?outputResult.eveningResult.results:outputResult.morningResult.results;
   const slot=results[slotIdx];
   const mainRoute=slot.mainRoute;
-
-  // Buses assigned in current shift (excluding current slot)
-  const assignedThisShift=new Set(
-    results.filter((_,i)=>i!==slotIdx&&results[i].assignedBus).map(r=>r.assignedBus)
-  );
-
-  // Buses assigned in other shift
-  const assignedOtherShift=new Set(
-    otherResults.filter(r=>r.assignedBus).map(r=>r.assignedBus)
-  );
-
-  // All row data buses for this main route, not excluded, not assigned in current shift
+  const assignedThisShift=new Set(results.filter((_,i)=>i!==slotIdx&&results[i].assignedBus).map(r=>r.assignedBus));
+  const morningAssigned=new Set(outputResult.morningResult.results.filter(r=>r.assignedBus).map(r=>r.assignedBus));
   const routeBuses=[...new Set(
-    rowData.filter(r=>r.mainRoute===mainRoute&&!excludedBuses.has(r.bus)&&!assignedThisShift.has(r.bus))
-    .map(r=>r.bus)
+    rowData.filter(r=>r.mainRoute===mainRoute&&!excludedBuses.has(r.bus)&&!assignedThisShift.has(r.bus)).map(r=>r.bus)
   )].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-
-  // Split into: available (not used anywhere) vs used in other shift
-  const available=routeBuses.filter(b=>!assignedOtherShift.has(b));
-  const usedOtherShift=routeBuses.filter(b=>assignedOtherShift.has(b));
-
-  // Bus Master — same main route, knownRoutes match, not excluded, not assigned in current shift
+  const available=routeBuses.filter(b=>!morningAssigned.has(b));
+  const usedInMorning=routeBuses.filter(b=>morningAssigned.has(b));
   const fromBM=[...new Set(
-    busMaster.filter(b=>
-      b.mainRoute===mainRoute&&
-      b.knownRoutes.includes(slot.subRoute)&&
-      !excludedBuses.has(b.bus)&&
-      !assignedThisShift.has(b.bus)
-    ).map(b=>b.bus)
-  )].filter(b=>!routeBuses.includes(b))
-    .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-
-  return{available,usedOtherShift,fromBM};
+    busMaster.filter(b=>b.mainRoute===mainRoute&&b.knownRoutes.includes(slot.subRoute)&&!excludedBuses.has(b.bus)&&!assignedThisShift.has(b.bus)).map(b=>b.bus)
+  )].filter(b=>!routeBuses.includes(b)).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  return{available,usedInMorning,fromBM};
 }
 
 function buildBusDropdown(shift,idx,currentBus){
-  const{available,usedOtherShift,fromBM}=getAvailableBusesForSlot(shift,idx);
-
+  const{available,usedInMorning,fromBM}=getAvailableBusesForSlot(shift,idx);
   let opts='<option value="">— Unassign —</option>';
-
-  // Current assigned bus always shown first
   if(currentBus){
-    opts+=`<optgroup label="── Current ──">`;
-    opts+=`<option value="${currentBus}" selected>${currentBus}</option>`;
-    opts+=`</optgroup>`;
+    opts+=`<optgroup label="── Current ──"><option value="${currentBus}" selected>${currentBus}</option></optgroup>`;
   }
-
-  // Available — not used in any shift
   const availFiltered=available.filter(b=>b!==currentBus);
   if(availFiltered.length){
     opts+=`<optgroup label="── Available ──">`;
     availFiltered.forEach(b=>{opts+=`<option value="${b}">${b}</option>`;});
     opts+=`</optgroup>`;
   }
-
-  // "Used in Other Shift" only shown in evening dropdown
-  // Morning buses are physically at destination — can return in evening
-  // Evening buses haven't left yet — can't show in morning dropdown
   if(shift==='evening'){
     const morningResults=outputResult.morningResult.results;
-    const otherFiltered=usedOtherShift.filter(b=>b!==currentBus);
-    if(otherFiltered.length){
+    const morningFiltered=usedInMorning.filter(b=>b!==currentBus);
+    if(morningFiltered.length){
       opts+=`<optgroup label="── Used in Morning ──">`;
-      otherFiltered.forEach(b=>{
-        const morningSlot=morningResults.find(r=>r.assignedBus===b);
-        const tip=morningSlot?`${morningSlot.slot} · ${morningSlot.mainRoute} · ${morningSlot.subRoute}`:'';
+      morningFiltered.forEach(b=>{
+        const mSlot=morningResults.find(r=>r.assignedBus===b);
+        const tip=mSlot?`${mSlot.slot} · ${mSlot.mainRoute} · ${mSlot.subRoute}`:'';
         opts+=`<option value="${b}" title="${tip}">${b}</option>`;
       });
       opts+=`</optgroup>`;
     }
   }
-
-  // Bus Master recommendations
   const bmFiltered=fromBM.filter(b=>b!==currentBus);
   if(bmFiltered.length){
     opts+=`<optgroup label="── Bus Master ──">`;
     bmFiltered.forEach(b=>{opts+=`<option value="${b}">${b}</option>`;});
     opts+=`</optgroup>`;
   }
-
   const cls=currentBus?'bus-dropdown':'bus-dropdown unassigned';
-  return`<div class="bus-select-wrap">
-    <select class="${cls}" onchange="swapBus('${shift}',${idx},this.value)">${opts}</select>
-  </div>`;
+  return`<div class="bus-select-wrap"><select class="${cls}" onchange="swapBus('${shift}',${idx},this.value)">${opts}</select></div>`;
 }
 
-/* ── MANUAL ASSIGN ── */
-function manualAssign(shift,idx,value){
-  const bus=value.trim().toUpperCase();
-  if(!bus){showToast('Enter a bus number');return;}
-  swapBus(shift,idx,bus);
-  // Clear the manual input after assign
-  const rows=document.querySelectorAll(`#outputTable${shift.charAt(0).toUpperCase()+shift.slice(1)} tr`);
-  if(rows[idx]){
-    const inp=rows[idx].querySelector('.manual-bus-input');
-    if(inp)inp.value='';
-  }
-}
+/* ── SWAP BUS ── */
 function swapBus(shift,idx,newBus){
   const results=shift==='morning'?outputResult.morningResult.results:outputResult.eveningResult.results;
-  const oldBus=results[idx].assignedBus;
-
-  // If newBus is already assigned somewhere else in this shift → unassign that slot
   if(newBus){
     const conflictIdx=results.findIndex((r,i)=>i!==idx&&r.assignedBus===newBus);
     if(conflictIdx>-1){
-      results[conflictIdx].assignedBus=null;
-      results[conflictIdx].matchType='unassigned';
-      results[conflictIdx].reason='Unassigned — bus moved to another slot';
+      results[conflictIdx].assignedBus=null;results[conflictIdx].matchType='unassigned';results[conflictIdx].reason='Unassigned — bus moved to another slot';
       const ua=shift==='morning'?outputResult.morningResult.unassigned:outputResult.eveningResult.unassigned;
       const r=results[conflictIdx];
-      if(!ua.find(u=>u.slot===r.slot&&u.subRoute===r.subRoute))
-        ua.push({slot:r.slot,subRoute:r.subRoute,mainRoute:r.mainRoute,originalBus:r.originalBus});
+      if(!ua.find(u=>u.slot===r.slot&&u.subRoute===r.subRoute))ua.push({slot:r.slot,subRoute:r.subRoute,mainRoute:r.mainRoute,originalBus:r.originalBus});
     }
   }
-
-  // Assign new bus to current slot
-  results[idx].assignedBus=newBus||null;
-  results[idx].matchType=newBus?'manual':'unassigned';
-  results[idx].reason=newBus?`Manual: ${newBus}`:'Unassigned';
-
-  // Update unassigned list
+  results[idx].assignedBus=newBus||null;results[idx].matchType=newBus?'manual':'unassigned';results[idx].reason=newBus?`Manual: ${newBus}`:'Unassigned';
   const ua=shift==='morning'?outputResult.morningResult.unassigned:outputResult.eveningResult.unassigned;
   if(!newBus){
     const r=results[idx];
-    if(!ua.find(u=>u.slot===r.slot&&u.subRoute===r.subRoute))
-      ua.push({slot:r.slot,subRoute:r.subRoute,mainRoute:r.mainRoute,originalBus:r.originalBus});
+    if(!ua.find(u=>u.slot===r.slot&&u.subRoute===r.subRoute))ua.push({slot:r.slot,subRoute:r.subRoute,mainRoute:r.mainRoute,originalBus:r.originalBus});
   } else {
     const rmIdx=ua.findIndex(u=>u.slot===results[idx].slot&&u.subRoute===results[idx].subRoute);
     if(rmIdx>-1)ua.splice(rmIdx,1);
   }
-
   outputResult.nonOps=computeNonOps(outputResult.morningResult,outputResult.eveningResult);
   renderOutput();renderAdjustmentSummary();
-  if(newBus)showToast(`✓ ${newBus} assigned`);
-  else showToast(`Slot unassigned`);
+  if(newBus)showToast(`✓ ${newBus} assigned`);else showToast('Slot unassigned');
 }
 
 /* ── RENDER OUTPUT ── */
@@ -986,29 +885,25 @@ function renderShiftTable(tbodyId,results,shift){
     const cls=r.matchType==='retained'?'output-row-perfect':r.matchType==='replaced'?'output-row-similar':r.matchType==='fallback'?'output-row-fallback':r.matchType==='manual'?'output-row-manual':'output-row-unassigned';
     const badge=r.matchType==='retained'?'<span class="badge badge-green">✓</span>':r.matchType==='replaced'?'<span class="badge badge-yellow">↔</span>':r.matchType==='fallback'?'<span class="badge badge-purple">⚡</span>':r.matchType==='manual'?'<span class="badge badge-blue">✏</span>':'<span class="badge badge-red">⚠</span>';
     const oCell=r.originalBus?`<span style="color:var(--text2);font-family:var(--mono);${r.assignedBus&&r.assignedBus!==r.originalBus?'text-decoration:line-through;opacity:.4':''}">${r.originalBus}</span>`:'<span style="color:var(--text3)">—</span>';
-    const dropdown=buildBusDropdown(shift,i,r.assignedBus);
     return`<tr class="${cls}" title="${esc(r.reason)}">
       <td class="time-cell">${r.slot||'—'}</td>
       <td class="route-cell">${r.subRoute}</td>
       <td style="color:var(--text2);font-size:11px">${r.mainRoute}</td>
       <td>${oCell}</td>
-      <td><div class="bus-select-wrap">${dropdown}</div></td>
+      <td>${buildBusDropdown(shift,i,r.assignedBus)}</td>
       <td>${badge}</td>
     </tr>`;
   }).join('');
 }
-
 function renderUnassigned(cId,unassigned){
   const div=document.getElementById(cId);
   div.innerHTML=unassigned.length
     ?unassigned.map(u=>`<div class="log-entry fallback">⚠ ${u.slot||'—'} · ${u.mainRoute} · ${u.subRoute}${u.originalBus?' · '+u.originalBus:''}</div>`).join('')
     :'<div class="empty-state" style="padding:12px"><div class="empty-text">✓ None</div></div>';
 }
-
 function shiftStats(r){
   return{total:r.length,retained:r.filter(x=>x.matchType==='retained').length,replaced:r.filter(x=>x.matchType==='replaced').length,fallback:r.filter(x=>x.matchType==='fallback').length,manual:r.filter(x=>x.matchType==='manual').length,unassig:r.filter(x=>x.matchType==='unassigned').length};
 }
-
 function renderOutput(){
   if(!outputResult)return;
   const{morningResult:mr,eveningResult:er,nonOps}=outputResult;
@@ -1037,11 +932,10 @@ function renderOutput(){
   renderUnassigned('unassignedEvening',er.unassigned);
   const nDiv=document.getElementById('nonOpsContainer');
   document.getElementById('nonops-count').textContent=`${nonOps.length} buses`;
-  nDiv.innerHTML=nonOps.length?nonOps.map(b=>`<div class="nonop-chip">🚫 ${b}</div>`).join(''):'<div class="empty-state" style="padding:12px"><div class="empty-text">✓ All buses running</div></div>';
+  nDiv.innerHTML=nonOps.length?nonOps.map(b=>`<div class="nonop-chip">🚫 ${b}</div>`).join(''):'<div class="empty-state" style="padding:12px"><div class="empty-text">✓ All buses assigned</div></div>';
   const allLogs=[...mr.logs,...er.logs];
   document.getElementById('logsContainer').innerHTML=allLogs.length?allLogs.map(l=>`<div class="log-entry ${l.type}">${l.msg}</div>`).join(''):'<div class="empty-state"><div class="empty-text">No logs</div></div>';
 }
-
 function renderAdjustmentSummary(){
   if(!outputResult)return;
   const{morningResult:mr,eveningResult:er,nonOps}=outputResult;
@@ -1058,12 +952,9 @@ function renderAdjustmentSummary(){
       <div class="mini-card"><div class="mini-val" style="color:var(--evening)">${es.total}</div><div class="mini-lbl">Slots</div></div>
       <div class="mini-card"><div class="mini-val" style="color:var(--red)">${es.unassig}</div><div class="mini-lbl">Unassigned</div></div>
     </div>
-    <div class="mini-card" style="margin-bottom:12px">
-      <div class="mini-val" style="color:var(--red)">${nonOps.length}</div><div class="mini-lbl">Non-Ops</div>
-    </div>
+    <div class="mini-card" style="margin-bottom:12px"><div class="mini-val" style="color:var(--red)">${nonOps.length}</div><div class="mini-lbl">Non-Ops</div></div>
     <button class="btn btn-secondary btn-sm" style="width:100%" onclick="switchTab('output')">View Output →</button>`;
 }
-
 function clearOutput(){
   outputResult=null;
   document.getElementById('outputEmpty').style.display='block';
@@ -1074,7 +965,6 @@ function clearOutput(){
   document.getElementById('shiftTabs').style.display='none';
   updateBadge('output',0);
 }
-
 function switchShiftTab(shift){
   document.querySelectorAll('.shift-tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.shift-panel').forEach(p=>p.classList.remove('active'));
@@ -1083,20 +973,36 @@ function switchShiftTab(shift){
 }
 
 /* ── COPY OUTPUT ── */
+// Reverse main route name for evening output — e.g. THANE SOBO → SOBO THANE
+function reverseRoute(name){
+  if(!name)return name;
+  // Handle known 2-word place names to avoid wrong splits
+  const twoWordPlaces=['NAVI MUMBAI','PALM BEACH','MIRA BHAYANDER','ATAL SETU'];
+  for(const tw of twoWordPlaces){
+    if(name.startsWith(tw+' '))return name.slice(tw.length+1)+' '+tw;
+    if(name.endsWith(' '+tw))return tw+' '+name.slice(0,name.length-tw.length-1);
+  }
+  // Default — split on first space
+  const idx=name.indexOf(' ');
+  if(idx===-1)return name;
+  return name.slice(idx+1)+' '+name.slice(0,idx);
+}
+
 function copyOutput(){
   if(!outputResult){showToast('Run adjustment first');return;}
   const{morningResult:mr,eveningResult:er,nonOps}=outputResult;
-  function buildShiftText(label,shiftResult){
+
+  function buildShiftText(label,shiftResult,isEvening=false){
     if(!shiftResult.results.length)return'';
     const groups={};
     shiftResult.results.forEach(r=>{const g=r.mainRoute||'OTHER';if(!groups[g])groups[g]=[];groups[g].push(r);});
-    const lines=[];
-    lines.push(`**${label.toUpperCase()}**`);
-    lines.push('─'.repeat(19));
+    const lines=[`**${label.toUpperCase()}**`,'─'.repeat(19)];
     for(const grp of Object.keys(groups)){
       const changed=groups[grp].filter(r=>r.matchType!=='retained'&&r.assignedBus);
       if(!changed.length)continue;
-      lines.push('');lines.push(`**${grp}**`);
+      // Reverse route name for evening
+      const displayGrp=isEvening?reverseRoute(grp):grp;
+      lines.push('');lines.push(`**${displayGrp}**`);
       changed.forEach(r=>lines.push(`${r.assignedBus} ${r.slot||'—'} ${r.subRoute}`));
     }
     const replacements=shiftResult.results.filter(r=>(r.matchType==='replaced'||r.matchType==='fallback'||r.matchType==='manual')&&r.originalBus&&r.assignedBus&&r.originalBus!==r.assignedBus);
@@ -1104,9 +1010,10 @@ function copyOutput(){
     lines.push('');lines.push('');
     return lines.join('\n');
   }
+
   const parts=['**Partial Fleet Readiness**',''];
-  const morning=buildShiftText('Morning',mr);
-  const evening=buildShiftText('Evening',er);
+  const morning=buildShiftText('Morning',mr,false);
+  const evening=buildShiftText('Evening',er,true);
   if(morning)parts.push(morning);
   if(evening)parts.push(evening);
   const combinedNonOps=[...new Set([...nonOps,...[...excludedBuses]])].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
