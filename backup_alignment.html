@@ -255,7 +255,9 @@ let captains=[];   // registry: [{name, number, cat}]
 /* ── HELPERS ── */
 function val(id){return document.getElementById(id).value;}
 function setVal(id,v){document.getElementById(id).value=v;}
-function markDirty(){dirty=true;setStatus('● Unsaved changes — click Save to Cloud','warn');}
+let saveTimer=null;
+function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(function(){saveToCloud(true);},2000);}
+function markDirty(){dirty=true;setStatus('● Unsaved — auto-saving…','warn');scheduleSave();}
 
 /* ── CAPTAIN REGISTRY ── */
 function saveCaptain(){
@@ -403,18 +405,19 @@ async function loadFromCloud(manual){
     if(manual)showToast('✗ Load failed');
   }
 }
-async function saveToCloud(){
+async function saveToCloud(silent){
+  clearTimeout(saveTimer);
   const d=getData();d.savedAt=Date.now();
-  setStatus('Saving to cloud…','muted');
+  setStatus(silent?'Auto-saving…':'Saving to cloud…','muted');
   try{
     const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
     if(!r.ok)throw new Error('http');
     dirty=false;
-    setStatus('☁ Saved to cloud · '+fmtTime(d.savedAt),'ok');
-    showToast('✓ Saved to cloud');
+    setStatus('☁ '+(silent?'Auto-saved':'Saved to cloud')+' · '+fmtTime(d.savedAt),'ok');
+    if(!silent)showToast('✓ Saved to cloud');
   }catch(e){
-    setStatus('✗ Cloud save failed','warn');
-    showToast('✗ Save failed');
+    setStatus('✗ Cloud save failed — will retry on next change','warn');
+    if(!silent)showToast('✗ Save failed');
   }
 }
 
