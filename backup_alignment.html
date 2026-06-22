@@ -6,7 +6,7 @@
 <title>Backup Alignment</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-:root{--bg:#0a0c10;--bg2:#111318;--bg3:#181c24;--bg4:#1e2330;--border:#252b38;--border2:#2e3648;--accent:#f59e0b;--accent2:#d97706;--green:#22c55e;--blue:#3b82f6;--purple:#8b5cf6;--text:#e2e8f0;--text2:#94a3b8;--text3:#4b5563;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;--radius:10px;--radius-sm:6px;--shadow-sm:0 2px 8px rgba(0,0,0,.3)}
+:root{--bg:#0a0c10;--bg2:#111318;--bg3:#181c24;--bg4:#1e2330;--border:#252b38;--border2:#2e3648;--accent:#f59e0b;--accent2:#d97706;--green:#22c55e;--blue:#3b82f6;--purple:#8b5cf6;--cyan:#06b6d4;--yellow:#eab308;--text:#e2e8f0;--text2:#94a3b8;--text3:#4b5563;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;--radius:10px;--radius-sm:6px;--shadow-sm:0 2px 8px rgba(0,0,0,.3)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 .header{background:linear-gradient(135deg,var(--bg2) 0%,#13161f 100%);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:14px;height:60px;position:sticky;top:0;z-index:200;backdrop-filter:blur(12px)}
@@ -28,14 +28,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .dot.central{background:var(--accent);box-shadow:0 0 8px var(--accent)}
 .dot.harbour{background:var(--blue);box-shadow:0 0 8px var(--blue)}
 .dot.western{background:var(--purple);box-shadow:0 0 8px var(--purple)}
+.dot.parking{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.dot.note{background:var(--yellow);box-shadow:0 0 8px var(--yellow)}
 .char-count{font-family:var(--mono);font-size:10px;color:var(--text3)}
 .card-body{padding:14px}
 textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--mono);font-size:12px;line-height:1.7;padding:12px;resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s;min-height:130px}
 textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.1)}
 textarea::placeholder{color:var(--text3)}
-.tx-central:focus{border-color:var(--accent)}
 .tx-harbour:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
 .tx-western:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,.12)}
+.tx-parking:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(6,182,212,.12)}
+.tx-note:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(234,179,8,.12)}
+.tx-note{min-height:90px}
 .btn-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 .btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:10px 20px;border:none;border-radius:50px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;letter-spacing:.2px}
 .btn-primary{background:var(--accent);color:#000}
@@ -63,13 +67,13 @@ textarea::placeholder{color:var(--text3)}
   <div class="header-logo">🔄</div>
   <div class="header-info">
     <div class="header-title">Backup <span>Alignment</span></div>
-    <div class="header-sub">CENTRAL · HARBOUR · WESTERN</div>
+    <div class="header-sub">CENTRAL · HARBOUR · WESTERN · PARKING · NOTE</div>
   </div>
   <a href="/" class="back-link">← Hub Report</a>
 </div>
 
 <div class="main">
-  <div class="hint">Teeno line ka data niche paste karo → right side Telegram preview me merge hoke dikhega → Copy karke Telegram pe paste karo.</div>
+  <div class="hint">Paste data into the sections below. The Telegram preview on the right merges everything live. Click Copy and paste it into Telegram.</div>
 
   <div class="btn-bar">
     <button class="btn btn-success" onclick="copyOutput()">📋 Copy Preview</button>
@@ -85,7 +89,7 @@ textarea::placeholder{color:var(--text3)}
           <span class="char-count" id="cc-central">0 lines</span>
         </div>
         <div class="card-body">
-          <textarea class="tx-central" id="central" placeholder="Central ka backup alignment data yaha paste karo..." oninput="onInput()"></textarea>
+          <textarea class="tx-central" id="central" placeholder="Paste Central backup alignment data here..." oninput="onInput()"></textarea>
         </div>
       </div>
 
@@ -95,7 +99,7 @@ textarea::placeholder{color:var(--text3)}
           <span class="char-count" id="cc-harbour">0 lines</span>
         </div>
         <div class="card-body">
-          <textarea class="tx-harbour" id="harbour" placeholder="Harbour ka backup alignment data yaha paste karo..." oninput="onInput()"></textarea>
+          <textarea class="tx-harbour" id="harbour" placeholder="Paste Harbour backup alignment data here..." oninput="onInput()"></textarea>
         </div>
       </div>
 
@@ -105,7 +109,27 @@ textarea::placeholder{color:var(--text3)}
           <span class="char-count" id="cc-western">0 lines</span>
         </div>
         <div class="card-body">
-          <textarea class="tx-western" id="western" placeholder="Western ka backup alignment data yaha paste karo..." oninput="onInput()"></textarea>
+          <textarea class="tx-western" id="western" placeholder="Paste Western backup alignment data here..." oninput="onInput()"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="dot parking"></span> Available in Parking</div>
+          <span class="char-count" id="cc-parking">0 lines</span>
+        </div>
+        <div class="card-body">
+          <textarea class="tx-parking" id="parking" placeholder="Paste buses available in parking here..." oninput="onInput()"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="dot note"></span> Note</div>
+          <span class="char-count" id="cc-note">0 lines</span>
+        </div>
+        <div class="card-body">
+          <textarea class="tx-note" id="note" placeholder="Add any note here..." oninput="onInput()"></textarea>
         </div>
       </div>
     </div>
@@ -118,7 +142,7 @@ textarea::placeholder{color:var(--text3)}
           <span class="live-dot"></span>
         </div>
         <div class="tg">
-          <div id="tgContent"><div class="tg-empty">Data paste karte hi preview yaha banega</div></div>
+          <div id="tgContent"><div class="tg-empty">Paste data to see the preview here</div></div>
         </div>
       </div>
     </div>
@@ -131,7 +155,9 @@ textarea::placeholder{color:var(--text3)}
 const SECTIONS=[
   {id:'central',label:'CENTRAL'},
   {id:'harbour',label:'HARBOUR'},
-  {id:'western',label:'WESTERN'}
+  {id:'western',label:'WESTERN'},
+  {id:'parking',label:'AVAILABLE IN PARKING'},
+  {id:'note',label:'NOTE'}
 ];
 const SEP='─'.repeat(19);
 const STORE='backupAlignmentData';
@@ -150,7 +176,6 @@ function buildText(){
     parts.push('');
   });
   if(!any)return '';
-  // remove trailing blank line
   while(parts.length && parts[parts.length-1]==='')parts.pop();
   return parts.join('\n');
 }
@@ -159,7 +184,7 @@ function buildText(){
 function renderPreview(){
   const txt=buildText();
   const el=document.getElementById('tgContent');
-  if(!txt){el.innerHTML='<div class="tg-empty">Data paste karte hi preview yaha banega</div>';return;}
+  if(!txt){el.innerHTML='<div class="tg-empty">Paste data to see the preview here</div>';return;}
   const html=esc(txt).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
   el.innerHTML='<div class="tg-bubble">'+html+'</div>';
 }
@@ -176,12 +201,12 @@ function onInput(){
 
 function copyOutput(){
   const txt=buildText();
-  if(!txt){showToast('Pehle data paste karo');return;}
+  if(!txt){showToast('Paste data first');return;}
   copyToClipboard(txt);
 }
 function copyToClipboard(text){
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(()=>showToast('✓ Copied — Telegram pe paste karo')).catch(()=>fallbackCopy(text));
+    navigator.clipboard.writeText(text).then(()=>showToast('✓ Copied — paste into Telegram')).catch(()=>fallbackCopy(text));
     return;
   }
   fallbackCopy(text);
@@ -190,12 +215,12 @@ function fallbackCopy(text){
   const ta=document.createElement('textarea');ta.value=text;
   ta.style.cssText='position:fixed;top:0;left:0;width:2em;height:2em;opacity:0';
   document.body.appendChild(ta);ta.focus();ta.select();
-  try{document.execCommand('copy');showToast('✓ Copied — Telegram pe paste karo');}catch{showToast('✗ Copy failed');}
+  try{document.execCommand('copy');showToast('✓ Copied — paste into Telegram');}catch{showToast('✗ Copy failed');}
   document.body.removeChild(ta);
 }
 
 function clearAll(){
-  if(!confirm('Saara data clear kar du?'))return;
+  if(!confirm('Clear all data?'))return;
   SECTIONS.forEach(s=>document.getElementById(s.id).value='');
   onInput();
   showToast('Cleared');
