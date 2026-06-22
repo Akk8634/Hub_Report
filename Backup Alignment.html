@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Backup Alignment</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{--bg:#0a0c10;--bg2:#111318;--bg3:#181c24;--bg4:#1e2330;--border:#252b38;--border2:#2e3648;--accent:#f59e0b;--accent2:#d97706;--green:#22c55e;--blue:#3b82f6;--purple:#8b5cf6;--text:#e2e8f0;--text2:#94a3b8;--text3:#4b5563;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;--radius:10px;--radius-sm:6px;--shadow-sm:0 2px 8px rgba(0,0,0,.3)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.header{background:linear-gradient(135deg,var(--bg2) 0%,#13161f 100%);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:14px;height:60px;position:sticky;top:0;z-index:200;backdrop-filter:blur(12px)}
+.header-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 16px rgba(245,158,11,.3);font-size:18px}
+.header-info{flex:1;min-width:0}
+.header-title{font-size:16px;font-weight:700;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-title span{color:var(--accent)}
+.header-sub{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;margin-top:1px}
+.back-link{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--text2);text-decoration:none;padding:7px 14px;border:1px solid var(--border2);border-radius:50px;transition:all .15s;white-space:nowrap}
+.back-link:hover{color:var(--accent);border-color:var(--accent)}
+.main{padding:20px;max-width:1400px;margin:0 auto}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.card:last-child{margin-bottom:0}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg3)}
+.card-title{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:7px}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dot.central{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.dot.harbour{background:var(--blue);box-shadow:0 0 8px var(--blue)}
+.dot.western{background:var(--purple);box-shadow:0 0 8px var(--purple)}
+.char-count{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.card-body{padding:14px}
+textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--mono);font-size:12px;line-height:1.7;padding:12px;resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s;min-height:130px}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.1)}
+textarea::placeholder{color:var(--text3)}
+.tx-central:focus{border-color:var(--accent)}
+.tx-harbour:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.tx-western:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,.12)}
+.btn-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:10px 20px;border:none;border-radius:50px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;letter-spacing:.2px}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{background:#fbbf24;transform:translateY(-1px);box-shadow:0 4px 12px rgba(245,158,11,.3)}
+.btn-success{background:var(--green);color:#000}
+.btn-success:hover{background:#4ade80;transform:translateY(-1px);box-shadow:0 4px 12px rgba(34,197,94,.3)}
+.btn-ghost{background:var(--bg4);border:1px solid var(--border2);color:var(--text2)}
+.btn-ghost:hover{color:var(--accent);border-color:var(--accent);background:rgba(245,158,11,.06)}
+.preview-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
+.preview-title{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2)}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tg{background:#0e1621;padding:16px;min-height:320px;max-height:70vh;overflow-y:auto}
+.tg-bubble{background:#182533;border-radius:12px 12px 12px 4px;padding:12px 14px;max-width:100%;white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#e9edf2}
+.tg-bubble b{color:#6ab7ff;font-weight:700}
+.tg-empty{color:var(--text3);font-family:var(--mono);font-size:12px;text-align:center;padding:60px 20px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:11px 22px;border-radius:50px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:0;transition:all .3s;z-index:500}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.hint{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">🔄</div>
+  <div class="header-info">
+    <div class="header-title">Backup <span>Alignment</span></div>
+    <div class="header-sub">CENTRAL · HARBOUR · WESTERN</div>
+  </div>
+  <a href="/" class="back-link">← Hub Report</a>
+</div>
+
+<div class="main">
+  <div class="hint">Teeno line ka data niche paste karo → right side Telegram preview me merge hoke dikhega → Copy karke Telegram pe paste karo.</div>
+
+  <div class="btn-bar">
+    <button class="btn btn-success" onclick="copyOutput()">📋 Copy Preview</button>
+    <button class="btn btn-ghost" onclick="clearAll()">🗑 Clear All</button>
+  </div>
+
+  <div class="layout">
+    <!-- LEFT: inputs -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="dot central"></span> Central Backup Alignment</div>
+          <span class="char-count" id="cc-central">0 lines</span>
+        </div>
+        <div class="card-body">
+          <textarea class="tx-central" id="central" placeholder="Central ka backup alignment data yaha paste karo..." oninput="onInput()"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="dot harbour"></span> Harbour Backup Alignment</div>
+          <span class="char-count" id="cc-harbour">0 lines</span>
+        </div>
+        <div class="card-body">
+          <textarea class="tx-harbour" id="harbour" placeholder="Harbour ka backup alignment data yaha paste karo..." oninput="onInput()"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="dot western"></span> Western Backup Alignment</div>
+          <span class="char-count" id="cc-western">0 lines</span>
+        </div>
+        <div class="card-body">
+          <textarea class="tx-western" id="western" placeholder="Western ka backup alignment data yaha paste karo..." oninput="onInput()"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: preview -->
+    <div>
+      <div class="card" style="position:sticky;top:80px">
+        <div class="preview-header">
+          <span class="preview-title">Telegram Preview</span>
+          <span class="live-dot"></span>
+        </div>
+        <div class="tg">
+          <div id="tgContent"><div class="tg-empty">Data paste karte hi preview yaha banega</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SECTIONS=[
+  {id:'central',label:'CENTRAL'},
+  {id:'harbour',label:'HARBOUR'},
+  {id:'western',label:'WESTERN'}
+];
+const SEP='─'.repeat(19);
+const STORE='backupAlignmentData';
+
+/* Build the merged plain text (what gets copied to Telegram) */
+function buildText(){
+  const parts=['**BACKUP ALIGNMENT**',''];
+  let any=false;
+  SECTIONS.forEach(s=>{
+    const val=(document.getElementById(s.id).value||'').trim();
+    if(!val)return;
+    any=true;
+    parts.push('**'+s.label+'**');
+    parts.push(SEP);
+    parts.push(val);
+    parts.push('');
+  });
+  if(!any)return '';
+  // remove trailing blank line
+  while(parts.length && parts[parts.length-1]==='')parts.pop();
+  return parts.join('\n');
+}
+
+/* Render preview with bold (**..**) shown as bold, like Telegram */
+function renderPreview(){
+  const txt=buildText();
+  const el=document.getElementById('tgContent');
+  if(!txt){el.innerHTML='<div class="tg-empty">Data paste karte hi preview yaha banega</div>';return;}
+  const html=esc(txt).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  el.innerHTML='<div class="tg-bubble">'+html+'</div>';
+}
+
+function onInput(){
+  SECTIONS.forEach(s=>{
+    const v=document.getElementById(s.id).value;
+    const lines=v.trim()?v.trim().split(/\n/).filter(l=>l.trim()).length:0;
+    document.getElementById('cc-'+s.id).textContent=lines+' lines';
+  });
+  renderPreview();
+  saveLocal();
+}
+
+function copyOutput(){
+  const txt=buildText();
+  if(!txt){showToast('Pehle data paste karo');return;}
+  copyToClipboard(txt);
+}
+function copyToClipboard(text){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>showToast('✓ Copied — Telegram pe paste karo')).catch(()=>fallbackCopy(text));
+    return;
+  }
+  fallbackCopy(text);
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');ta.value=text;
+  ta.style.cssText='position:fixed;top:0;left:0;width:2em;height:2em;opacity:0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');showToast('✓ Copied — Telegram pe paste karo');}catch{showToast('✗ Copy failed');}
+  document.body.removeChild(ta);
+}
+
+function clearAll(){
+  if(!confirm('Saara data clear kar du?'))return;
+  SECTIONS.forEach(s=>document.getElementById(s.id).value='');
+  onInput();
+  showToast('Cleared');
+}
+
+function saveLocal(){
+  const d={};SECTIONS.forEach(s=>d[s.id]=document.getElementById(s.id).value);
+  try{localStorage.setItem(STORE,JSON.stringify(d));}catch(e){}
+}
+function loadLocal(){
+  try{
+    const raw=localStorage.getItem(STORE);if(!raw)return;
+    const d=JSON.parse(raw);
+    SECTIONS.forEach(s=>{if(d[s.id])document.getElementById(s.id).value=d[s.id];});
+  }catch(e){}
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+document.addEventListener('DOMContentLoaded',()=>{loadLocal();onInput();});
+</script>
+</body>
+</html>
