@@ -1,80 +1,24 @@
+// POST /api/save — append one report entry into Cloudflare KV (binding: BACKUP_KV)
+const HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Content-Type': 'application/json'
+};
 export async function onRequestPost(context) {
+  const { request, env } = context;
+  if (!env.BACKUP_KV) {
+    return new Response(JSON.stringify({ error: 'KV not bound — add binding BACKUP_KV' }), { status: 500, headers: HEADERS });
+  }
   try {
-    const API_KEY = context.env.JSONBIN_API_KEY;
-    const BIN_ID = context.env.JSONBIN_BIN_ID;
-
-    const newEntry = await context.request.json();
-
-    // 1. Existing data fetch
-    const oldRes = await fetch(
-      `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,
-      {
-        method: "GET",
-        headers: {
-          "X-Master-Key": API_KEY,
-          "X-Bin-Meta": "false"
-        }
-      }
-    );
-
-    if (!oldRes.ok) {
-      const errText = await oldRes.text();
-      return new Response(
-        JSON.stringify({ error: "Fetch failed", details: errText }),
-        { status: 500 }
-      );
-    }
-
-    const oldData = await oldRes.json();
-
-    // 2. Ensure array
-    const existing = Array.isArray(oldData) ? oldData : [];
-
-    // 3. Append new entry
-    const updated = [...existing, newEntry];
-
-    // 4. Save to JSONBin
-    const saveRes = await fetch(
-      `https://api.jsonbin.io/v3/b/${BIN_ID}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Master-Key": API_KEY
-        },
-        body: JSON.stringify(updated)
-      }
-    );
-
-    const saveText = await saveRes.text();
-
-    if (!saveRes.ok) {
-      return new Response(
-        JSON.stringify({
-          error: "Save failed",
-          details: saveText
-        }),
-        { status: 500 }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        saved: 1
-      }),
-      {
-        headers: { "Content-Type": "application/json" }
-      }
-    );
-
+    const newEntry = await request.json();
+    const raw = await env.BACKUP_KV.get('reports');
+    const existing = raw ? JSON.parse(raw) : [];
+    const updated = Array.isArray(existing) ? existing : [];
+    updated.push(newEntry);
+    await env.BACKUP_KV.put('reports', JSON.stringify(updated));
+    return new Response(JSON.stringify({ success: true, saved: 1 }), { status: 200, headers: HEADERS });
   } catch (err) {
-    return new Response(
-      JSON.stringify({
-        error: "Server error",
-        message: err.message
-      }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: 'Save failed', message: err.message }), { status: 500, headers: HEADERS });
   }
 }
+export async function onRequestOptions() { return new Response('', { headers: { ...HEADERS, 'Access-Control-Allow-Methods': 'POST, OPTIONS' } }); }
