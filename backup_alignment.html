@@ -108,6 +108,15 @@ td.cap-name-cell{color:var(--pink);font-weight:600}
 .cap-ac-name .mt{color:var(--accent);text-decoration:underline}
 .cap-ac-meta{font-family:var(--mono);font-size:11px;color:var(--text2)}
 .cap-ac-empty{padding:10px 12px;font-family:var(--mono);font-size:11px;color:var(--text3)}
+.reg-search{background:var(--bg);border:1px solid var(--border);border-radius:50px;color:var(--text);font-size:12px;padding:6px 12px;outline:none;width:150px;font-family:var(--sans)}
+.reg-search:focus{border-color:var(--pink)}
+.bulk-ta{width:100%;min-height:70px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--mono);font-size:12px;padding:10px;outline:none;margin-top:5px;line-height:1.6}
+.bulk-ta:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(236,72,153,.12)}
+.report-flags{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;border-top:1px solid var(--border);background:rgba(234,179,8,.05)}
+.flag{font-family:var(--mono);font-size:11px;color:var(--yellow);background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.25);border-radius:50px;padding:3px 10px}
+.cap-ac-add{color:var(--pink);font-weight:600}
+.ac-tag{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--cyan);background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);border-radius:4px;padding:1px 5px;vertical-align:middle}
+.cap-ac-add .plus{display:inline-block;margin-right:5px}
 </style>
 </head>
 <body>
@@ -193,6 +202,7 @@ td.cap-name-cell{color:var(--pink);font-weight:600}
         <div class="tg">
           <div id="tgContent"><div class="tg-empty">Fill data to see the preview here</div></div>
         </div>
+        <div class="report-flags" id="reportFlags" style="display:none"></div>
         <div class="preview-footer">
           <button class="btn btn-primary" onclick="generateReport()">⚡ Generate Report</button>
           <button class="btn btn-success" onclick="copyOutput()">📋 Copy Preview</button>
@@ -220,15 +230,21 @@ td.cap-name-cell{color:var(--pink);font-weight:600}
               <button class="btn btn-pink btn-sm" onclick="saveCaptain()">💾 Save Captain</button>
               <button class="btn btn-ghost btn-sm" onclick="cancelCaptainEdit()">Cancel</button>
             </div>
+            <div class="fld-label" style="margin-top:16px">Bulk add — one per line: Name, Number[, Badli]</div>
+            <textarea id="bulkText" class="bulk-ta" placeholder="Ramesh Kumar, 9876543210&#10;Suresh, 9123456780, Badli"></textarea>
+            <button class="btn btn-pink btn-sm" style="margin-top:8px" onclick="bulkAddCaptains()">➕ Add All</button>
           </div>
         </div>
       </div>
       <div>
         <div class="card">
-          <div class="card-header">
+          <div class="card-header" style="flex-wrap:wrap;gap:8px">
             <div class="card-title"><span class="dot captains"></span> Captain Registry</div>
-            <div style="display:flex;gap:8px;align-items:center">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input id="capSearch" class="reg-search" type="text" placeholder="Search name / number" oninput="renderCaptainTable()">
               <span class="char-count" id="cap-count">0 captains</span>
+              <button class="act-btn" onclick="exportCSV()">⬇ CSV</button>
+              <label class="act-btn" style="cursor:pointer">⬆ CSV<input type="file" accept=".csv,text/csv" onchange="importCSV(this)" style="display:none"></label>
               <button class="act-btn del" onclick="clearCaptains()">Clear All</button>
             </div>
           </div>
@@ -262,10 +278,32 @@ const API='/api/backup';
 let loading=false;
 let dirty=false;
 let captains=[];   // registry: [{name, number, cat}]
+const ROUTES=['THANE SOBO','CHEMBUR BKC','CHEMBUR SOBO','MULUND SOBO','BKC ANDHERI W','BKC GHATKOPAR','BKC KANDIVALI','BKC METRO LOOP','BKC MIRA BHAYANDER','BKC MULUND','BKC NAVI MUMBAI','BKC PALM BEACH','BKC PANVEL','BKC THANE','BKC VASHI','ANDHERI MULUND','ANDHERI NAVI MUMBAI','ANDHERI THANE','ANDHERI VASHI','GG MULUND STH','GG VASHI','GG THANE NTH','GG THANE STH','LP MULUND','LP NAVI MUMBAI','LP PALM BEACH','LP PANVEL','LP THANE','MAROL THANE','NAVI MUMBAI THANE','POWAI CHEMBUR','POWAI KALYAN','POWAI MIRA BHAYANDER','POWAI NAVI MUMBAI','POWAI THANE','POWAI VIKHROLI','SAKI NAKA MIRA BHAYANDER','SANTACRUZ THANE','SOBO NAVI MUMBAI','SOBO NAVI MUMBAI ATAL SETU','SOBO PALM BEACH','SOBO PANVEL','SOBO VASHI','VIKHROLI POWAI','WORLI CHEMBUR','WORLI NAVI MUMBAI','WORLI VASHI'];
+function matchRoutes(query){
+  const q=(query||'').trim().toLowerCase();if(q.length<2)return[];
+  const qd=q.replace(/[\s\-]/g,'');
+  const starts=[],incl=[];
+  ROUTES.forEach(r=>{
+    const n=r.toLowerCase(),nc=n.replace(/[\s\-]/g,'');
+    if(n.startsWith(q)||nc.startsWith(qd))starts.push(r);
+    else if(n.includes(q)||nc.includes(qd))incl.push(r);
+  });
+  return starts.concat(incl).slice(0,6);
+}
+function matchAll(query){
+  const caps=matchCaptains(query).map(c=>({type:'captain',name:c.name,number:c.number,cat:c.cat}));
+  const rts=matchRoutes(query).map(n=>({type:'route',name:n}));
+  return caps.concat(rts).slice(0,8);
+}
 
 /* ── HELPERS ── */
 function val(id){return document.getElementById(id).value;}
 function setVal(id,v){document.getElementById(id).value=v;}
+function digits(s){return String(s||'').replace(/\D/g,'');}
+function fmtNumber(s){const d=digits(s);return d.length===10?d.slice(0,5)+' '+d.slice(5):String(s||'').trim();}
+function validNumber(s){return digits(s).length===10;}
+function titleCase(s){return String(s||'').replace(/\b\w/g,c=>c.toUpperCase());}
+function lev(a,b){a=a||'';b=b||'';const m=a.length,n=b.length;if(!m)return n;if(!n)return m;const dp=Array.from({length:m+1},(_,i)=>[i].concat(new Array(n).fill(0)));for(let j=1;j<=n;j++)dp[0][j]=j;for(let i=1;i<=m;i++){for(let j=1;j<=n;j++){const c=a[i-1]===b[j-1]?0:1;dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+c);}}return dp[m][n];}
 let saveTimer=null;
 function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(function(){saveToCloud(true);},2000);}
 function markDirty(){dirty=true;setStatus('● Unsaved — auto-saving…','warn');scheduleSave();}
@@ -273,7 +311,7 @@ function markDirty(){dirty=true;setStatus('● Unsaved — auto-saving…','warn
 /* ── CAPTAIN REGISTRY ── */
 function saveCaptain(){
   const name=val('cap-name').trim();
-  const number=val('cap-number').trim();
+  const number=fmtNumber(val('cap-number'));
   const cat=val('cap-cat');
   if(!name){showToast('Enter captain name');return;}
   if(!number){showToast('Enter number');return;}
@@ -299,6 +337,70 @@ function cancelCaptainEdit(){
   setVal('cap-name','');setVal('cap-number','');setVal('cap-cat','Backup Captain');
   document.getElementById('cap-edit-index').value='-1';
 }
+function bulkAddCaptains(){
+  const t=val('bulkText').trim();
+  if(!t){showToast('Paste some lines first');return;}
+  let added=0;
+  t.split(/\n/).forEach(line=>{
+    line=line.trim();if(!line)return;
+    let name='',number='',cat='Backup Captain';
+    let parts=line.split(/[,\t]/).map(x=>x.trim()).filter(Boolean);
+    if(parts.length>=2){name=parts[0];number=parts[1];if(parts[2]&&/badli/i.test(parts[2]))cat='Badli Captain';}
+    else{
+      const m=line.match(/^(.*?)[\s\-]+(\d[\d\s]{6,})$/);
+      if(m){name=m[1].trim();number=m[2].trim();}else{name=line;}
+    }
+    if(!name)return;
+    number=fmtNumber(number);
+    const ex=captains.findIndex(c=>(c.name||'').trim().toLowerCase()===name.toLowerCase());
+    const entry={name,number,cat};
+    if(ex>=0)captains[ex]=entry; else captains.push(entry);
+    added++;
+  });
+  setVal('bulkText','');
+  afterCaptainChange();
+  showToast('\u2713 Added '+added+' captains');
+}
+function parseCsvLine(line){
+  const out=[];let cur='';let q=false;
+  for(let i=0;i<line.length;i++){const ch=line[i];
+    if(q){if(ch==='"'){if(line[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
+    else{if(ch==='"')q=true;else if(ch===','){out.push(cur);cur='';}else cur+=ch;}
+  }
+  out.push(cur);return out.map(x=>x.trim());
+}
+function exportCSV(){
+  if(!captains.length){showToast('No captains to export');return;}
+  const rows=[['Name','Number','Category']].concat(captains.map(c=>[c.name,c.number,c.cat]));
+  const csv=rows.map(r=>r.map(x=>'"'+String(x||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='captains.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  showToast('\u2713 Exported '+captains.length+' captains');
+}
+function importCSV(input){
+  const f=input.files&&input.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const lines=String(rd.result).split(/\r?\n/).filter(l=>l.trim());
+    let added=0;
+    lines.forEach((l,idx)=>{
+      const cols=parseCsvLine(l);if(!cols.length)return;
+      if(idx===0){const h=cols.join(',').toLowerCase();if(h.includes('name')||h.includes('number'))return;}
+      const name=(cols[0]||'').trim();if(!name)return;
+      const number=fmtNumber(cols[1]||'');
+      const cat=/badli/i.test(cols[2]||'')?'Badli Captain':'Backup Captain';
+      const ex=captains.findIndex(c=>(c.name||'').trim().toLowerCase()===name.toLowerCase());
+      const entry={name,number,cat};
+      if(ex>=0)captains[ex]=entry; else captains.push(entry);
+      added++;
+    });
+    afterCaptainChange();
+    showToast('\u2713 Imported '+added+' captains');
+  };
+  rd.readAsText(f);input.value='';
+}
 function clearCaptains(){
   if(!captains.length){showToast('No captains');return;}
   if(!confirm('Remove all captains from the registry?'))return;
@@ -308,18 +410,27 @@ function renderCaptainTable(){
   const tb=document.getElementById('capTable');
   document.getElementById('cap-count').textContent=captains.length+' captains';
   var _b=document.getElementById('cap-badge');if(_b)_b.textContent=captains.length;
+  const qEl=document.getElementById('capSearch');
+  const q=qEl?qEl.value.trim().toLowerCase():'';
+  const qd=q.replace(/\D/g,'');
+  let rows=captains.map((c,i)=>({c,i}));
+  if(q)rows=rows.filter(({c})=>(c.name||'').toLowerCase().includes(q)||(qd && digits(c.number).includes(qd)));
   if(!captains.length){tb.innerHTML='<tr><td colspan="5"><div class="empty-cap">No captains added yet</div></td></tr>';return;}
-  tb.innerHTML=captains.map((c,i)=>
-    `<tr><td>${i+1}</td>`+
+  if(!rows.length){tb.innerHTML='<tr><td colspan="5"><div class="empty-cap">No match</div></td></tr>';return;}
+  tb.innerHTML=rows.map((o,n)=>{
+    const c=o.c,i=o.i;
+    const numCell=validNumber(c.number)?esc(c.number):'<span style="color:#ef4444">\u26a0 '+esc(c.number||'—')+'</span>';
+    return `<tr><td>${n+1}</td>`+
     `<td class="cap-name-cell">${esc(c.name)}</td>`+
-    `<td>${esc(c.number)}</td>`+
+    `<td>${numCell}</td>`+
     `<td>${esc(c.cat)}</td>`+
-    `<td><button class="act-btn" onclick="editCaptain(${i})">Edit</button><button class="act-btn del" onclick="deleteCaptain(${i})">✕</button></td></tr>`
-  ).join('');
+    `<td><button class="act-btn" onclick="editCaptain(${i})">Edit</button><button class="act-btn del" onclick="deleteCaptain(${i})">\u2715</button></td></tr>`;
+  }).join('');
 }
 function afterCaptainChange(){
   renderCaptainTable();
   renderPreview();
+  renderFlags();
   saveLocal();
   if(!loading)markDirty();
 }
@@ -346,8 +457,38 @@ function addTextareaBlock(parts,id,label){
   parts.push('**'+label+'**');parts.push(SEP);parts.push(v);parts.push('');
   return true;
 }
+function countCaptainLines(text){
+  let total=0,backup=0,badli=0;const names=[];
+  (text||'').split(/\n/).forEach(l=>{
+    const low=l.toLowerCase();
+    const isBadli=/badli captain/.test(low);
+    const isBackup=/backup captain/.test(low);
+    if(isBadli||isBackup){
+      total++; if(isBadli)badli++; else backup++;
+      const parts=l.split(/\s*\u2014\s*/);
+      let nm='';
+      if(parts.length>=2){
+        const last2=parts[parts.length-2]||'';
+        if(digits(last2).length>=8 && parts.length>=3)nm=parts[parts.length-3];
+        else nm=parts[parts.length-2];
+      }
+      nm=(nm||'').trim();
+      if(nm)names.push(nm.toLowerCase());
+    }
+  });
+  return {total,backup,badli,names};
+}
+function buildSummary(){
+  const ids=[['central','Central'],['harbour','Harbour'],['western','Western'],['parking','Parking']];
+  let segs=[],tot=0,bk=0,bd=0;const allNames=[];
+  ids.forEach(a=>{const c=countCaptainLines(val(a[0]));if(c.total>0)segs.push(a[1]+': '+c.total);tot+=c.total;bk+=c.backup;bd+=c.badli;allNames.push.apply(allNames,c.names);});
+  if(tot===0)return null;
+  return {line:segs.join(' \u00b7 ')+' \u2014 Total '+tot+' captains ('+bk+' Backup, '+bd+' Badli)',total:tot,backup:bk,badli:bd,names:allNames};
+}
 function buildText(){
   const parts=['**BACKUP ALIGNMENT**',''];
+  const sm=buildSummary();
+  if(sm){parts.push(sm.line);parts.push('');}
   let any=false;
   any=addTextareaBlock(parts,'central','CENTRAL')||any;
   any=addTextareaBlock(parts,'harbour','HARBOUR')||any;
@@ -357,6 +498,20 @@ function buildText(){
   if(!any)return '';
   while(parts.length && parts[parts.length-1]==='')parts.pop();
   return parts.join('\n');
+}
+function renderFlags(){
+  const el=document.getElementById('reportFlags');if(!el)return;
+  const msgs=[];
+  const sm=buildSummary();
+  if(sm){
+    const seen={};sm.names.forEach(n=>{seen[n]=(seen[n]||0)+1;});
+    const dups=Object.keys(seen).filter(n=>seen[n]>1);
+    if(dups.length)msgs.push('\u26a0 Duplicate: '+dups.slice(0,4).map(n=>titleCase(n)+' ('+seen[n]+'\u00d7)').join(', '));
+  }
+  const bad=captains.filter(c=>c.name&&!validNumber(c.number)).length;
+  if(bad)msgs.push('\u26a0 '+bad+' captain'+(bad>1?'s':'')+' me number missing/galat');
+  el.innerHTML=msgs.map(m=>'<span class="flag">'+esc(m)+'</span>').join('');
+  el.style.display=msgs.length?'flex':'none';
 }
 function renderPreview(){
   const txt=buildText();
@@ -374,6 +529,7 @@ function onInput(fromLoad){
     document.getElementById('cc-'+s.id).textContent=lines+' lines';
   });
   renderPreview();
+  renderFlags();
   saveLocal();
   if(!loading && !fromLoad)markDirty();
 }
@@ -457,13 +613,12 @@ function fallbackCopy(text){
   document.body.removeChild(ta);
 }
 function clearAll(){
-  if(!confirm('Clear all sections + captain registry on this screen? (Cloud stays until you Save)'))return;
+  if(!confirm('Clear the hub sections (Central/Harbour/Western/Parking/Note)? Captain registry stays safe.'))return;
   loading=true;
   SECTIONS.forEach(s=>document.getElementById(s.id).value='');
-  captains=[];renderCaptainTable();cancelCaptainEdit();
   loading=false;
   onInput();
-  showToast('Cleared');
+  showToast('Hub sections cleared — captains kept');
 }
 
 /* ── LOCAL DRAFT ── */
@@ -473,7 +628,7 @@ function loadLocal(){
 }
 
 /* ── CAPTAIN AUTOCOMPLETE (hub sections) ── */
-const AC_FIELDS=['central','harbour','western'];
+const AC_FIELDS=['central','harbour','western','parking'];
 let acEl=null;
 let acState={id:null,ctx:null,matches:[],active:0};
 
@@ -519,12 +674,13 @@ function getCtx(ta){
   let field=lineUpTo.slice(fieldStart);
 
   // 2) strip leading marker / number / spaces (e.g. "1. ", "5 ", "- ")
-  const lead=field.match(/^[\s\d.)\]\-*:]+/);
+  const lead=field.match(/^[\s]*(?:[-*\u2022\u00b7]\s*)?(?:\d{1,3}[.)\]:]\s*)?/);
   const leadLen=lead?lead[0].length:0;
   const base=field.slice(leadLen);
   const baseStart=fieldStart+leadLen; // index within lineUpTo where the name part may begin
 
-  if(!base.trim())return {pos,ls,le,query:'',nameStart:pos,matches:[]};
+  const rawStart=baseStart+ls; const rawQuery=base.trim();
+  if(!rawQuery)return {pos,ls,le,query:'',nameStart:pos,matches:[],rawQuery:'',rawStart};
 
   // 3) tokenise the base on spaces, keeping start offsets
   const words=[];
@@ -534,31 +690,39 @@ function getCtx(ta){
     if(/^\s+$/.test(seg)){c+=seg.length;}
     else{words.push({start:c});c+=seg.length;}
   });
-  if(!words.length)return {pos,ls,le,query:'',nameStart:pos,matches:[]};
+  if(!words.length)return {pos,ls,le,query:'',nameStart:pos,matches:[],rawQuery,rawStart};
 
   // 4) longest trailing word-suffix that matches wins (so "Virat Kohli" beats "Kohli")
   for(let n=Math.min(4,words.length);n>=1;n--){
     const startInBase=words[words.length-n].start;
     const cand=base.slice(startInBase);
-    const matches=matchCaptains(cand);
+    const matches=matchAll(cand);
     if(matches.length){
-      return {pos,ls,le,query:cand,nameStart:baseStart+startInBase+ls,matches};
+      return {pos,ls,le,query:cand,nameStart:baseStart+startInBase+ls,matches,rawQuery,rawStart};
     }
   }
-  return {pos,ls,le,query:'',nameStart:pos,matches:[]};
+  return {pos,ls,le,query:'',nameStart:pos,matches:[],rawQuery,rawStart};
 }
 
 function matchCaptains(query){
   const q=(query||'').trim().toLowerCase();
   if(q.length<1)return [];
-  const starts=[],incl=[];
+  const qd=q.replace(/\D/g,'');
+  const starts=[],incl=[],numm=[],fuzzy=[];
   captains.forEach(c=>{
     if(!c||!c.name)return;
     const n=c.name.toLowerCase();
     if(n.startsWith(q))starts.push(c);
     else if(n.includes(q))incl.push(c);
+    else if(qd.length>=3 && digits(c.number).includes(qd))numm.push(c);
+    else if(q.length>=3 && !/\d/.test(q)){
+      const words=n.split(/\s+/).concat([n]);
+      const d=Math.min.apply(null,words.map(w=>lev(w,q)));
+      const thr=q.length>=6?2:1;
+      if(d<=thr)fuzzy.push(c);
+    }
   });
-  return starts.concat(incl).slice(0,8);
+  return starts.concat(incl,numm,fuzzy).slice(0,8);
 }
 
 function formatCaptainLine(c){
@@ -579,20 +743,34 @@ function updateAc(id){
   const ta=document.getElementById(id);
   const ctx=getCtx(ta);
   const matches=ctx.matches||[];
-  if(!matches.length){hideAc();return;}
-  acState={id,ctx,matches,active:0};
+  const rq=(ctx.rawQuery||'').trim();
+  const exact=matches.some(c=>(c.name||'').trim().toLowerCase()===rq.toLowerCase());
+  if(!matches.length && rq.length<2){hideAc();return;}
+  acState={id,ctx,matches,active:0,addName:(matches.length===0 && rq.length>=2)?rq:''};
   renderAc();
   positionAc(ta);
 }
 
 function renderAc(){
   const q=acState.ctx?acState.ctx.query.trim():'';
-  acEl.innerHTML=acState.matches.map((c,i)=>
-    '<div class="cap-ac-item'+(i===acState.active?' active':'')+'" onmousedown="capAcPick(event,'+i+')">'+
+  let html=acState.matches.map((c,i)=>{
+    const act=(i===acState.active?' active':'');
+    if(c.type==='route'){
+      return '<div class="cap-ac-item'+act+'" onmousedown="capAcPick(event,'+i+')">'+
+        '<span class="cap-ac-name">'+hl(c.name,q)+' <span class="ac-tag">route</span></span>'+
+        '<span class="cap-ac-meta">Main route</span></div>';
+    }
+    return '<div class="cap-ac-item'+act+'" onmousedown="capAcPick(event,'+i+')">'+
       '<span class="cap-ac-name">'+hl(c.name,q)+'</span>'+
       '<span class="cap-ac-meta">'+esc(c.number||'')+(c.cat?' · '+esc(c.cat):'')+'</span>'+
-    '</div>'
-  ).join('');
+    '</div>';
+  }).join('');
+  if(acState.addName){
+    html+='<div class="cap-ac-item" onmousedown="addUnmatched(event)">'+
+      '<span class="cap-ac-name cap-ac-add"><span class="plus">\u2795</span>Add \u201C'+esc(acState.addName)+'\u201D to registry</span>'+
+      '<span class="cap-ac-meta">Saves a new captain</span></div>';
+  }
+  acEl.innerHTML=html;
   acEl.classList.add('show');
 }
 
@@ -622,7 +800,7 @@ function pickCaptain(i){
   const id=acState.id,ctx=acState.ctx,c=acState.matches[i];
   if(!id||!ctx||!c)return;
   const ta=document.getElementById(id);
-  const formatted=formatCaptainLine(c);
+  const formatted=(c.type==='route')?c.name:formatCaptainLine(c);
   // replace only the typed name part (nameStart → caret); keep route/bus no before it
   ta.value=ta.value.slice(0,ctx.nameStart)+formatted+ta.value.slice(ctx.pos);
   const caret=ctx.nameStart+formatted.length;
@@ -632,6 +810,28 @@ function pickCaptain(i){
   onInput();
 }
 
+function addUnmatched(e){
+  if(e)e.preventDefault();
+  const name=(acState.addName||'').trim();
+  const ctx=acState.ctx,id=acState.id;
+  if(!name||!ctx||!id){hideAc();return;}
+  let number=prompt('Number for "'+name+'" (10 digits):','');
+  if(number===null){hideAc();return;}
+  number=fmtNumber(number);
+  const ex=captains.findIndex(c=>(c.name||'').trim().toLowerCase()===name.toLowerCase());
+  const entry={name,number,cat:'Backup Captain'};
+  if(ex>=0)captains[ex]=entry; else captains.push(entry);
+  renderCaptainTable();saveLocal();markDirty();
+  // insert into the textarea, replacing the typed name
+  const ta=document.getElementById(id);
+  const formatted=formatCaptainLine(entry);
+  const start=(ctx.rawStart!=null?ctx.rawStart:ctx.nameStart);
+  ta.value=ta.value.slice(0,start)+formatted+ta.value.slice(ctx.pos);
+  const caret=start+formatted.length;
+  ta.focus();ta.setSelectionRange(caret,caret);
+  hideAc();onInput();
+  showToast('\u2713 Added '+name+' to registry');
+}
 function hideAc(){
   if(!acEl)return;
   acEl.classList.remove('show');
