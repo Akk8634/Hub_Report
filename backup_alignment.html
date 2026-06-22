@@ -98,6 +98,16 @@ td.cap-name-cell{color:var(--pink);font-weight:600}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .cap-layout{display:grid;grid-template-columns:340px 1fr;gap:16px}
 @media(max-width:900px){.cap-layout{grid-template-columns:1fr}}
+/* captain autocomplete dropdown (shared, positioned over textareas) */
+.cap-ac-list{position:fixed;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);box-shadow:0 10px 30px rgba(0,0,0,.6);z-index:600;max-height:260px;overflow-y:auto;display:none;-webkit-overflow-scrolling:touch}
+.cap-ac-list.show{display:block}
+.cap-ac-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
+.cap-ac-item:last-child{border-bottom:none}
+.cap-ac-item:hover,.cap-ac-item.active{background:rgba(236,72,153,.14)}
+.cap-ac-name{color:var(--pink);font-weight:600;font-size:13px}
+.cap-ac-name .mt{color:var(--accent);text-decoration:underline}
+.cap-ac-meta{font-family:var(--mono);font-size:11px;color:var(--text2)}
+.cap-ac-empty{padding:10px 12px;font-family:var(--mono);font-size:11px;color:var(--text3)}
 </style>
 </head>
 <body>
@@ -118,7 +128,7 @@ td.cap-name-cell{color:var(--pink);font-weight:600}
 
 <div class="main">
   <div class="tab-panel active" id="tab-report">
-  <div class="hint">Fill the sections below. Telegram preview merges everything live. Use the buttons below the preview to Save to Cloud and Copy.</div>
+  <div class="hint">Fill the sections below. In Central / Harbour / Western, start typing a captain name (e.g. "Virat") on a line — saved captains appear as suggestions; pick one to insert <b>Name — Number — Category</b>. Telegram preview merges everything live. Use the buttons below the preview to Save to Cloud and Copy.</div>
 
   <div class="layout">
     <div>
@@ -184,8 +194,9 @@ td.cap-name-cell{color:var(--pink);font-weight:600}
           <div id="tgContent"><div class="tg-empty">Fill data to see the preview here</div></div>
         </div>
         <div class="preview-footer">
+          <button class="btn btn-primary" onclick="generateReport()">⚡ Generate Report</button>
           <button class="btn btn-success" onclick="copyOutput()">📋 Copy Preview</button>
-          <button class="btn btn-primary" onclick="saveToCloud()">☁ Save to Cloud</button>
+          <button class="btn btn-ghost" onclick="saveToCloud()">☁ Save to Cloud</button>
           <button class="btn btn-ghost" onclick="loadFromCloud(false)">⟳ Load from Cloud</button>
           <button class="btn btn-ghost" onclick="clearAll()">🗑 Clear All</button>
           <div class="status muted" id="status" style="width:100%">Local draft</div>
@@ -335,19 +346,6 @@ function addTextareaBlock(parts,id,label){
   parts.push('**'+label+'**');parts.push(SEP);parts.push(v);parts.push('');
   return true;
 }
-function addCaptainsBlock(parts){
-  const caps=captains.filter(c=>c.name);
-  if(!caps.length)return false;
-  parts.push('**BACKUP CAPTAINS**');parts.push(SEP);
-  caps.forEach(c=>{
-    const bits=[c.name];
-    if(c.number)bits.push(c.number);
-    bits.push(c.cat);
-    parts.push(bits.join(' — '));
-  });
-  parts.push('');
-  return true;
-}
 function buildText(){
   const parts=['**BACKUP ALIGNMENT**',''];
   let any=false;
@@ -355,7 +353,6 @@ function buildText(){
   any=addTextareaBlock(parts,'harbour','HARBOUR')||any;
   any=addTextareaBlock(parts,'western','WESTERN')||any;
   any=addTextareaBlock(parts,'parking','AVAILABLE IN PARKING')||any;
-  any=addCaptainsBlock(parts)||any;
   any=addTextareaBlock(parts,'note','NOTE')||any;
   if(!any)return '';
   while(parts.length && parts[parts.length-1]==='')parts.pop();
@@ -421,7 +418,25 @@ async function saveToCloud(silent){
   }
 }
 
-/* ── COPY / CLEAR ── */
+/* ── GENERATE / COPY / CLEAR ── */
+function generateReport(){
+  hideAc();
+  renderPreview();
+  const txt=buildText();
+  const tg=document.querySelector('.tg');
+  if(!txt){
+    showToast('Fill at least one section first');
+    if(tg)tg.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
+  if(tg){
+    tg.scrollTop=0;
+    tg.scrollIntoView({behavior:'smooth',block:'nearest'});
+    const b=tg.querySelector('.tg-bubble');
+    if(b){b.style.transition='box-shadow .25s';b.style.boxShadow='0 0 0 2px var(--green)';setTimeout(()=>{b.style.boxShadow='none';},700);}
+  }
+  showToast('✓ Report generated — ready to copy');
+}
 function copyOutput(){
   const txt=buildText();
   if(!txt){showToast('Fill data first');return;}
@@ -457,6 +472,135 @@ function loadLocal(){
   try{const raw=localStorage.getItem(STORE);if(raw)setData(JSON.parse(raw));}catch(e){}
 }
 
+/* ── CAPTAIN AUTOCOMPLETE (hub sections) ── */
+const AC_FIELDS=['central','harbour','western'];
+let acEl=null;
+let acState={id:null,ctx:null,matches:[],active:0};
+
+function initCaptainAutocomplete(){
+  acEl=document.createElement('div');
+  acEl.className='cap-ac-list';
+  acEl.id='capAc';
+  document.body.appendChild(acEl);
+  AC_FIELDS.forEach(id=>{
+    const ta=document.getElementById(id);
+    if(!ta)return;
+    ta.addEventListener('input',()=>updateAc(id));
+    ta.addEventListener('click',()=>updateAc(id));
+    ta.addEventListener('keyup',e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key))updateAc(id);});
+    ta.addEventListener('keydown',e=>acKeydown(e,id));
+    ta.addEventListener('blur',()=>setTimeout(hideAc,160));
+  });
+  window.addEventListener('scroll',()=>{if(acState.id)positionAc(document.getElementById(acState.id));},true);
+  window.addEventListener('resize',()=>{if(acState.id)positionAc(document.getElementById(acState.id));});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hideAc();});
+}
+
+/* current line context up to the caret, ignoring leading list markers */
+function getCtx(ta){
+  const pos=ta.selectionStart;
+  const text=ta.value;
+  const ls=text.slice(0,pos).lastIndexOf('\n')+1;
+  const rest=text.slice(pos);
+  const nl=rest.indexOf('\n');
+  const le=nl===-1?text.length:pos+nl;
+  const lineUpTo=text.slice(ls,pos);
+  const m=lineUpTo.match(/^([\s\d.)\]\-•*:]*)(.*)$/);
+  const prefix=m?m[1]:'';
+  const query=m?m[2]:lineUpTo;
+  return {pos,ls,le,prefix,query,nameStart:ls+prefix.length};
+}
+
+function matchCaptains(query){
+  const q=(query||'').trim().toLowerCase();
+  if(q.length<1)return [];
+  const starts=[],incl=[];
+  captains.forEach(c=>{
+    if(!c||!c.name)return;
+    const n=c.name.toLowerCase();
+    if(n.startsWith(q))starts.push(c);
+    else if(n.includes(q))incl.push(c);
+  });
+  return starts.concat(incl).slice(0,8);
+}
+
+function formatCaptainLine(c){
+  const bits=[c.name];
+  if(c.number)bits.push(c.number);
+  if(c.cat)bits.push(c.cat);
+  return bits.join(' — ');
+}
+
+function hl(name,q){
+  const n=esc(name);if(!q)return n;
+  const i=name.toLowerCase().indexOf(q.toLowerCase());
+  if(i<0)return n;
+  return esc(name.slice(0,i))+'<span class="mt">'+esc(name.slice(i,i+q.length))+'</span>'+esc(name.slice(i+q.length));
+}
+
+function updateAc(id){
+  const ta=document.getElementById(id);
+  const ctx=getCtx(ta);
+  const matches=matchCaptains(ctx.query);
+  if(!matches.length){hideAc();return;}
+  acState={id,ctx,matches,active:0};
+  renderAc();
+  positionAc(ta);
+}
+
+function renderAc(){
+  const q=acState.ctx?acState.ctx.query.trim():'';
+  acEl.innerHTML=acState.matches.map((c,i)=>
+    '<div class="cap-ac-item'+(i===acState.active?' active':'')+'" onmousedown="capAcPick(event,'+i+')">'+
+      '<span class="cap-ac-name">'+hl(c.name,q)+'</span>'+
+      '<span class="cap-ac-meta">'+esc(c.number||'')+(c.cat?' · '+esc(c.cat):'')+'</span>'+
+    '</div>'
+  ).join('');
+  acEl.classList.add('show');
+}
+
+function positionAc(ta){
+  if(!ta||!acEl)return;
+  const r=ta.getBoundingClientRect();
+  acEl.style.left=Math.round(r.left)+'px';
+  acEl.style.width=Math.round(r.width)+'px';
+  const h=Math.min(acEl.offsetHeight||0,260);
+  const below=window.innerHeight-r.bottom;
+  if(below<h+10 && r.top>below){acEl.style.top=Math.round(r.top-h-6)+'px';}
+  else{acEl.style.top=Math.round(r.bottom+6)+'px';}
+}
+
+function acKeydown(e,id){
+  if(acState.id!==id||!acState.matches.length)return;
+  if(e.key==='ArrowDown'){e.preventDefault();acState.active=(acState.active+1)%acState.matches.length;renderAc();}
+  else if(e.key==='ArrowUp'){e.preventDefault();acState.active=(acState.active-1+acState.matches.length)%acState.matches.length;renderAc();}
+  else if(e.key==='Enter'){e.preventDefault();pickCaptain(acState.active);}
+  else if(e.key==='Escape'){e.preventDefault();hideAc();}
+  else if(e.key==='Tab'){e.preventDefault();pickCaptain(acState.active);}
+}
+
+function capAcPick(e,i){e.preventDefault();pickCaptain(i);}
+
+function pickCaptain(i){
+  const id=acState.id,ctx=acState.ctx,c=acState.matches[i];
+  if(!id||!ctx||!c)return;
+  const ta=document.getElementById(id);
+  const formatted=formatCaptainLine(c);
+  ta.value=ta.value.slice(0,ctx.nameStart)+formatted+ta.value.slice(ctx.le);
+  const caret=ctx.nameStart+formatted.length;
+  ta.focus();
+  ta.setSelectionRange(caret,caret);
+  hideAc();
+  onInput();
+}
+
+function hideAc(){
+  if(!acEl)return;
+  acEl.classList.remove('show');
+  acEl.innerHTML='';
+  acState={id:null,ctx:null,matches:[],active:0};
+}
+
 function switchTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -469,6 +613,7 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'
 document.addEventListener('DOMContentLoaded',async()=>{
   loadLocal();
   renderCaptainTable();
+  initCaptainAutocomplete();
   onInput(true);
   await loadFromCloud(false);
 });
