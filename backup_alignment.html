@@ -41,27 +41,34 @@ textarea::placeholder{color:var(--text3)}
 .tx-parking:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(6,182,212,.12)}
 .tx-note:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(234,179,8,.12)}
 .tx-note{min-height:90px}
-.cap-row{display:grid;grid-template-columns:1fr 110px 150px 34px;gap:8px;margin-bottom:8px;align-items:center}
-@media(max-width:520px){.cap-row{grid-template-columns:1fr 1fr 34px}.cap-name{grid-column:1/-1}}
-.cap-row input,.cap-row select{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--sans);font-size:12.5px;padding:8px 10px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
-.cap-row input:focus,.cap-row select:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(236,72,153,.12)}
-.cap-row input::placeholder{color:var(--text3)}
-.cap-del{background:transparent;border:1px solid rgba(239,68,68,.35);color:#ef4444;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:700;padding:0;height:34px;transition:all .15s}
-.cap-del:hover{background:rgba(239,68,68,.12);border-color:#ef4444}
-.btn-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+/* captain add/edit form */
+.fld{margin-bottom:12px}
+.fld-label{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.fld input,.fld select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 11px;outline:none;transition:border-color .2s,box-shadow .2s}
+.fld input:focus,.fld select:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(236,72,153,.12)}
+.form-actions{display:flex;gap:8px;margin-top:4px}
+/* registry table */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg3)}
+tbody tr{border-bottom:1px solid var(--border)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:9px 12px;font-family:var(--mono);font-size:12px;color:var(--text2);vertical-align:middle}
+td.cap-name-cell{color:var(--pink);font-weight:600}
+.act-btn{background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:5px;padding:4px 9px;font-size:11px;cursor:pointer;margin-right:4px;transition:all .15s;font-family:var(--sans);font-weight:600}
+.act-btn:hover{color:var(--accent);border-color:var(--accent)}
+.act-btn.del:hover{color:#ef4444;border-color:#ef4444}
+.empty-cap{text-align:center;color:var(--text3);font-family:var(--mono);font-size:11px;padding:24px}
 .btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:10px 20px;border:none;border-radius:50px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;letter-spacing:.2px}
+.btn-sm{padding:7px 14px;font-size:12px}
 .btn-primary{background:var(--accent);color:#000}
 .btn-primary:hover{background:#fbbf24;transform:translateY(-1px);box-shadow:0 4px 12px rgba(245,158,11,.3)}
+.btn-pink{background:var(--pink);color:#fff}
+.btn-pink:hover{background:#f472b6;transform:translateY(-1px);box-shadow:0 4px 12px rgba(236,72,153,.3)}
 .btn-success{background:var(--green);color:#000}
 .btn-success:hover{background:#4ade80;transform:translateY(-1px);box-shadow:0 4px 12px rgba(34,197,94,.3)}
 .btn-ghost{background:var(--bg4);border:1px solid var(--border2);color:var(--text2)}
 .btn-ghost:hover{color:var(--accent);border-color:var(--accent);background:rgba(245,158,11,.06)}
-.btn-add{background:rgba(236,72,153,.12);border:1px solid rgba(236,72,153,.35);color:var(--pink);font-family:var(--sans);font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:50px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;margin-top:4px}
-.btn-add:hover{background:rgba(236,72,153,.2);transform:translateY(-1px)}
-.status{font-family:var(--mono);font-size:11px;margin-bottom:16px;min-height:15px;color:var(--text3)}
-.status.ok{color:var(--green)}
-.status.warn{color:var(--yellow)}
-.status.muted{color:var(--text3)}
 .preview-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
 .preview-title{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2)}
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.6s infinite}
@@ -71,9 +78,26 @@ textarea::placeholder{color:var(--text3)}
 .tg-bubble b{color:#6ab7ff;font-weight:700}
 .tg-empty{color:var(--text3);font-family:var(--mono);font-size:12px;text-align:center;padding:60px 20px}
 .preview-footer{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--border);background:var(--bg3)}
+.status{font-family:var(--mono);font-size:11px;min-height:15px;color:var(--text3)}
+.status.ok{color:var(--green)}
+.status.warn{color:var(--yellow)}
+.status.muted{color:var(--text3)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:11px 22px;border-radius:50px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:0;transition:all .3s;z-index:500}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .hint{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.6}
+.tabs-wrap{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:60px;z-index:150}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tabs{display:flex;gap:2px;min-width:max-content}
+.tab-btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:14px 18px;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab-btn:hover{color:var(--text2)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-badge{background:var(--pink);color:#fff;font-size:10px;font-weight:700;border-radius:20px;min-width:18px;height:18px;padding:0 5px;display:inline-flex;align-items:center;justify-content:center}
+.tab-btn:not(.active) .tab-badge{background:var(--bg4);color:var(--text2)}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.cap-layout{display:grid;grid-template-columns:340px 1fr;gap:16px}
+@media(max-width:900px){.cap-layout{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -87,7 +111,13 @@ textarea::placeholder{color:var(--text3)}
   <a href="/" class="back-link">← Hub Report</a>
 </div>
 
+<div class="tabs-wrap"><div class="tabs">
+  <button class="tab-btn active" id="tabbtn-report" onclick="switchTab('report')">📋 Alignment Report</button>
+  <button class="tab-btn" id="tabbtn-captains" onclick="switchTab('captains')">👤 Captain Details <span class="tab-badge" id="cap-badge">0</span></button>
+</div></div>
+
 <div class="main">
+  <div class="tab-panel active" id="tab-report">
   <div class="hint">Fill the sections below. Telegram preview merges everything live. Use the buttons below the preview to Save to Cloud and Copy.</div>
 
   <div class="layout">
@@ -132,16 +162,6 @@ textarea::placeholder{color:var(--text3)}
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><span class="dot captains"></span> Backup Captains</div>
-          <span class="char-count" id="cc-captains">0 captains</span>
-        </div>
-        <div class="card-body">
-          <div id="captainsList"></div>
-          <button class="btn-add" onclick="addCaptainRow()">＋ Add Captain</button>
-        </div>
-      </div>
 
       <div class="card">
         <div class="card-header">
@@ -173,6 +193,46 @@ textarea::placeholder{color:var(--text3)}
       </div>
     </div>
   </div>
+  </div>
+
+  <div class="tab-panel" id="tab-captains">
+    <div class="cap-layout">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="dot captains"></span> Add / Edit Captain</div></div>
+          <div class="card-body">
+            <div class="fld"><div class="fld-label">Captain Name *</div><input type="text" id="cap-name" placeholder="e.g. Ramesh Kumar" onkeydown="if(event.key==='Enter')saveCaptain()"></div>
+            <div class="fld"><div class="fld-label">Number *</div><input type="text" id="cap-number" placeholder="e.g. 98765 43210" onkeydown="if(event.key==='Enter')saveCaptain()"></div>
+            <div class="fld"><div class="fld-label">Category</div><select id="cap-cat"><option>Backup Captain</option><option>Badli Captain</option></select></div>
+            <input type="hidden" id="cap-edit-index" value="-1">
+            <div class="form-actions">
+              <button class="btn btn-pink btn-sm" onclick="saveCaptain()">💾 Save Captain</button>
+              <button class="btn btn-ghost btn-sm" onclick="cancelCaptainEdit()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="dot captains"></span> Captain Registry</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="char-count" id="cap-count">0 captains</span>
+              <button class="act-btn del" onclick="clearCaptains()">Clear All</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Name</th><th>Number</th><th>Category</th><th>Actions</th></tr></thead>
+                <tbody id="capTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -185,66 +245,96 @@ const SECTIONS=[
   {id:'parking',label:'AVAILABLE IN PARKING'},
   {id:'note',label:'NOTE'}
 ];
-const CATS=['Backup Captain','Badli Captain'];
 const SEP='─'.repeat(19);
 const STORE='backupAlignmentData';
 const API='/api/backup';
-let loading=false;   // true while we programmatically fill the form
-let dirty=false;     // unsaved changes vs cloud
+let loading=false;
+let dirty=false;
+let captains=[];   // registry: [{name, number, cat}]
 
-/* ── CAPTAIN ROWS ── */
-function addCaptainRow(name='',number='',cat='Backup Captain'){
-  const row=document.createElement('div');
-  row.className='cap-row';
-  const opts=CATS.map(c=>`<option value="${c}"${c===cat?' selected':''}>${c}</option>`).join('');
-  row.innerHTML=
-    `<input class="cap-name" placeholder="Captain name" value="${esc(name)}" oninput="onInput()">`+
-    `<input class="cap-number" placeholder="Number" value="${esc(number)}" oninput="onInput()">`+
-    `<select class="cap-cat" onchange="onInput()">${opts}</select>`+
-    `<button class="cap-del" title="Remove" onclick="removeCaptainRow(this)">✕</button>`;
-  document.getElementById('captainsList').appendChild(row);
-  onInput();
+/* ── HELPERS ── */
+function val(id){return document.getElementById(id).value;}
+function setVal(id,v){document.getElementById(id).value=v;}
+function markDirty(){dirty=true;setStatus('● Unsaved changes — click Save to Cloud','warn');}
+
+/* ── CAPTAIN REGISTRY ── */
+function saveCaptain(){
+  const name=val('cap-name').trim();
+  const number=val('cap-number').trim();
+  const cat=val('cap-cat');
+  if(!name){showToast('Enter captain name');return;}
+  if(!number){showToast('Enter number');return;}
+  const idx=parseInt(document.getElementById('cap-edit-index').value);
+  const entry={name,number,cat};
+  if(idx>=0){captains[idx]=entry;}
+  else{
+    const ex=captains.findIndex(c=>c.name.trim().toLowerCase()===name.toLowerCase());
+    if(ex>=0)captains[ex]=entry; else captains.push(entry);
+  }
+  cancelCaptainEdit();
+  afterCaptainChange();
+  showToast('✓ Captain saved');
 }
-function removeCaptainRow(btn){btn.closest('.cap-row').remove();onInput();}
-function getCaptains(){
-  const out=[];
-  document.querySelectorAll('#captainsList .cap-row').forEach(r=>{
-    out.push({
-      name:r.querySelector('.cap-name').value.trim(),
-      number:r.querySelector('.cap-number').value.trim(),
-      cat:r.querySelector('.cap-cat').value
-    });
-  });
-  return out;
+function editCaptain(i){
+  const c=captains[i];if(!c)return;
+  setVal('cap-name',c.name);setVal('cap-number',c.number);setVal('cap-cat',c.cat||'Backup Captain');
+  document.getElementById('cap-edit-index').value=i;
+  document.getElementById('cap-name').focus();
+}
+function deleteCaptain(i){captains.splice(i,1);afterCaptainChange();}
+function cancelCaptainEdit(){
+  setVal('cap-name','');setVal('cap-number','');setVal('cap-cat','Backup Captain');
+  document.getElementById('cap-edit-index').value='-1';
+}
+function clearCaptains(){
+  if(!captains.length){showToast('No captains');return;}
+  if(!confirm('Remove all captains from the registry?'))return;
+  captains=[];afterCaptainChange();
+}
+function renderCaptainTable(){
+  const tb=document.getElementById('capTable');
+  document.getElementById('cap-count').textContent=captains.length+' captains';
+  var _b=document.getElementById('cap-badge');if(_b)_b.textContent=captains.length;
+  if(!captains.length){tb.innerHTML='<tr><td colspan="5"><div class="empty-cap">No captains added yet</div></td></tr>';return;}
+  tb.innerHTML=captains.map((c,i)=>
+    `<tr><td>${i+1}</td>`+
+    `<td class="cap-name-cell">${esc(c.name)}</td>`+
+    `<td>${esc(c.number)}</td>`+
+    `<td>${esc(c.cat)}</td>`+
+    `<td><button class="act-btn" onclick="editCaptain(${i})">Edit</button><button class="act-btn del" onclick="deleteCaptain(${i})">✕</button></td></tr>`
+  ).join('');
+}
+function afterCaptainChange(){
+  renderCaptainTable();
+  renderPreview();
+  saveLocal();
+  if(!loading)markDirty();
 }
 
 /* ── DATA GET/SET ── */
 function getData(){
-  const d={captains:getCaptains()};
+  const d={captains:captains};
   SECTIONS.forEach(s=>d[s.id]=document.getElementById(s.id).value);
   return d;
 }
 function setData(d){
   loading=true;
   SECTIONS.forEach(s=>{document.getElementById(s.id).value=d[s.id]||'';});
-  document.getElementById('captainsList').innerHTML='';
-  if(Array.isArray(d.captains)&&d.captains.length){
-    d.captains.forEach(c=>addCaptainRow(c.name||'',c.number||'',c.cat||'Backup Captain'));
-  }
-  if(!document.querySelector('#captainsList .cap-row'))addCaptainRow();
+  captains=Array.isArray(d.captains)?d.captains.filter(c=>c&&c.name):[];
+  renderCaptainTable();
   loading=false;
   onInput(true);
 }
 
 /* ── BUILD MERGED TEXT ── */
 function addTextareaBlock(parts,id,label){
-  const val=(document.getElementById(id).value||'').trim();
-  if(!val)return false;
-  parts.push('**'+label+'**');parts.push(SEP);parts.push(val);parts.push('');
+  const v=(document.getElementById(id).value||'').trim();
+  if(!v)return false;
+  parts.push('**'+label+'**');parts.push(SEP);parts.push(v);parts.push('');
   return true;
 }
 function addCaptainsBlock(parts){
-  const caps=getCaptains().filter(c=>c.name);
+  const caps=captains.filter(c=>c.name);
   if(!caps.length)return false;
   parts.push('**BACKUP CAPTAINS**');parts.push(SEP);
   caps.forEach(c=>{
@@ -277,16 +367,16 @@ function renderPreview(){
   el.innerHTML='<div class="tg-bubble">'+html+'</div>';
 }
 
+/* textarea input handler */
 function onInput(fromLoad){
   SECTIONS.forEach(s=>{
     const v=document.getElementById(s.id).value;
     const lines=v.trim()?v.trim().split(/\n/).filter(l=>l.trim()).length:0;
     document.getElementById('cc-'+s.id).textContent=lines+' lines';
   });
-  document.getElementById('cc-captains').textContent=getCaptains().filter(c=>c.name).length+' captains';
   renderPreview();
   saveLocal();
-  if(!loading && !fromLoad){dirty=true;setStatus('● Unsaved changes — click Save to Cloud','warn');}
+  if(!loading && !fromLoad)markDirty();
 }
 
 /* ── CLOUD SYNC ── */
@@ -301,8 +391,7 @@ async function loadFromCloud(manual){
     const d=await r.json();
     const hasData=d&&(d.captains||SECTIONS.some(s=>d[s.id]));
     if(hasData){
-      setData(d);
-      dirty=false;
+      setData(d);dirty=false;
       setStatus('☁ Loaded from cloud'+(d.savedAt?(' · '+fmtTime(d.savedAt)):''),'ok');
       if(manual)showToast('✓ Loaded latest');
     }else{
@@ -350,35 +439,35 @@ function fallbackCopy(text){
   document.body.removeChild(ta);
 }
 function clearAll(){
-  if(!confirm('Clear all data on this screen? (Cloud stays until you Save)'))return;
+  if(!confirm('Clear all sections + captain registry on this screen? (Cloud stays until you Save)'))return;
   loading=true;
   SECTIONS.forEach(s=>document.getElementById(s.id).value='');
-  document.getElementById('captainsList').innerHTML='';
-  addCaptainRow();
+  captains=[];renderCaptainTable();cancelCaptainEdit();
   loading=false;
   onInput();
   showToast('Cleared');
 }
 
 /* ── LOCAL DRAFT ── */
-function saveLocal(){
-  try{localStorage.setItem(STORE,JSON.stringify(getData()));}catch(e){}
-}
+function saveLocal(){try{localStorage.setItem(STORE,JSON.stringify(getData()));}catch(e){}}
 function loadLocal(){
-  try{
-    const raw=localStorage.getItem(STORE);if(!raw)return;
-    setData(JSON.parse(raw));
-  }catch(e){}
+  try{const raw=localStorage.getItem(STORE);if(raw)setData(JSON.parse(raw));}catch(e){}
 }
 
+function switchTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('tabbtn-'+name).classList.add('active');
+}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 document.addEventListener('DOMContentLoaded',async()=>{
   loadLocal();
-  if(!document.querySelector('#captainsList .cap-row')){loading=true;addCaptainRow();loading=false;}
+  renderCaptainTable();
   onInput(true);
-  await loadFromCloud(false);  // shared cloud data wins on open
+  await loadFromCloud(false);
 });
 </script>
 </body>
