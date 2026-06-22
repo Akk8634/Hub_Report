@@ -133,6 +133,7 @@ td.cap-name-cell{color:var(--pink);font-weight:600}
 <div class="tabs-wrap"><div class="tabs">
   <button class="tab-btn active" id="tabbtn-report" onclick="switchTab('report')">📋 Alignment Report</button>
   <button class="tab-btn" id="tabbtn-captains" onclick="switchTab('captains')">👤 Captain Details <span class="tab-badge" id="cap-badge">0</span></button>
+  <button class="tab-btn" id="tabbtn-routes" onclick="switchTab('routes')">🚌 Routes <span class="tab-badge" id="route-badge">0</span></button>
 </div></div>
 
 <div class="main">
@@ -260,6 +261,51 @@ td.cap-name-cell{color:var(--pink);font-weight:600}
       </div>
     </div>
   </div>
+
+  <div class="tab-panel" id="tab-routes">
+    <div class="cap-layout">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="dot central"></span> Add / Edit Route</div></div>
+          <div class="card-body">
+            <div class="fld"><div class="fld-label">Route Name *</div><input type="text" id="route-name" placeholder="e.g. THANE SOBO" onkeydown="if(event.key==='Enter')saveRoute()"></div>
+            <input type="hidden" id="route-edit-index" value="-1">
+            <div class="form-actions">
+              <button class="btn btn-primary btn-sm" onclick="saveRoute()">💾 Save Route</button>
+              <button class="btn btn-ghost btn-sm" onclick="cancelRouteEdit()">Cancel</button>
+            </div>
+            <div class="fld-label" style="margin-top:16px">Bulk add — one route per line</div>
+            <textarea id="bulkRoutes" class="bulk-ta" placeholder="THANE SOBO&#10;BKC ANDHERI W&#10;POWAI THANE"></textarea>
+            <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="bulkAddRoutes()">➕ Add All</button>
+            <div class="hint" style="margin-top:14px;margin-bottom:0">These routes power the suggestions in Central / Harbour / Western / Parking. Add or remove them here — no code change needed.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header" style="flex-wrap:wrap;gap:8px">
+            <div class="card-title"><span class="dot central"></span> Route Registry</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input id="routeSearch" class="reg-search" type="text" placeholder="Search route" oninput="renderRouteTable()">
+              <span class="char-count" id="route-count">0 routes</span>
+              <button class="act-btn" onclick="exportRoutesCSV()">⬇ CSV</button>
+              <label class="act-btn" style="cursor:pointer">⬆ CSV<input type="file" accept=".csv,text/csv,.txt" onchange="importRoutesCSV(this)" style="display:none"></label>
+              <button class="act-btn" onclick="resetRoutes()">↺ Defaults</button>
+              <button class="act-btn del" onclick="clearRoutes()">Clear All</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Route Name</th><th>Actions</th></tr></thead>
+                <tbody id="routeTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -278,17 +324,33 @@ const API='/api/backup';
 let loading=false;
 let dirty=false;
 let captains=[];   // registry: [{name, number, cat}]
-const ROUTES=['THANE SOBO','CHEMBUR BKC','CHEMBUR SOBO','MULUND SOBO','BKC ANDHERI W','BKC GHATKOPAR','BKC KANDIVALI','BKC METRO LOOP','BKC MIRA BHAYANDER','BKC MULUND','BKC NAVI MUMBAI','BKC PALM BEACH','BKC PANVEL','BKC THANE','BKC VASHI','ANDHERI MULUND','ANDHERI NAVI MUMBAI','ANDHERI THANE','ANDHERI VASHI','GG MULUND STH','GG VASHI','GG THANE NTH','GG THANE STH','LP MULUND','LP NAVI MUMBAI','LP PALM BEACH','LP PANVEL','LP THANE','MAROL THANE','NAVI MUMBAI THANE','POWAI CHEMBUR','POWAI KALYAN','POWAI MIRA BHAYANDER','POWAI NAVI MUMBAI','POWAI THANE','POWAI VIKHROLI','SAKI NAKA MIRA BHAYANDER','SANTACRUZ THANE','SOBO NAVI MUMBAI','SOBO NAVI MUMBAI ATAL SETU','SOBO PALM BEACH','SOBO PANVEL','SOBO VASHI','VIKHROLI POWAI','WORLI CHEMBUR','WORLI NAVI MUMBAI','WORLI VASHI'];
+const DEFAULT_ROUTES=['THANE SOBO','CHEMBUR BKC','CHEMBUR SOBO','MULUND SOBO','BKC ANDHERI W','BKC GHATKOPAR','BKC KANDIVALI','BKC METRO LOOP','BKC MIRA BHAYANDER','BKC MULUND','BKC NAVI MUMBAI','BKC PALM BEACH','BKC PANVEL','BKC THANE','BKC VASHI','ANDHERI MULUND','ANDHERI NAVI MUMBAI','ANDHERI THANE','ANDHERI VASHI','GG MULUND STH','GG VASHI','GG THANE NTH','GG THANE STH','LP MULUND','LP NAVI MUMBAI','LP PALM BEACH','LP PANVEL','LP THANE','MAROL THANE','NAVI MUMBAI THANE','POWAI CHEMBUR','POWAI KALYAN','POWAI MIRA BHAYANDER','POWAI NAVI MUMBAI','POWAI THANE','POWAI VIKHROLI','SAKI NAKA MIRA BHAYANDER','SANTACRUZ THANE','SOBO NAVI MUMBAI','SOBO NAVI MUMBAI ATAL SETU','SOBO PALM BEACH','SOBO PANVEL','SOBO VASHI','VIKHROLI POWAI','WORLI CHEMBUR','WORLI NAVI MUMBAI','WORLI VASHI'];
+let routes=DEFAULT_ROUTES.slice();   // editable via the Routes tab
 function matchRoutes(query){
   const q=(query||'').trim().toLowerCase();if(q.length<2)return[];
   const qd=q.replace(/[\s\-]/g,'');
   const starts=[],incl=[];
-  ROUTES.forEach(r=>{
-    const n=r.toLowerCase(),nc=n.replace(/[\s\-]/g,'');
+  routes.forEach(r=>{
+    const n=String(r).toLowerCase(),nc=n.replace(/[\s\-]/g,'');
     if(n.startsWith(q)||nc.startsWith(qd))starts.push(r);
     else if(n.includes(q)||nc.includes(qd))incl.push(r);
   });
   return starts.concat(incl).slice(0,6);
+}
+/* How strongly does `cand` match any route/captain NAME?  3=prefix, 2=contains,
+   0=none. Used only to choose which trailing word-suffix to suggest on, so a
+   weak number/fuzzy hit on a longer suffix can't shadow a clean route match on a
+   shorter one. Pure scoring helper — does not change what each matcher returns. */
+function matchQuality(cand){
+  const q=(cand||'').trim().toLowerCase();if(!q)return 0;
+  const qd=q.replace(/[\s\-]/g,'');
+  let best=0;
+  routes.forEach(r=>{const n=String(r).toLowerCase(),nc=n.replace(/[\s\-]/g,'');
+    if(n.startsWith(q)||(qd&&nc.startsWith(qd)))best=Math.max(best,3);
+    else if(n.includes(q)||(qd&&nc.includes(qd)))best=Math.max(best,2);});
+  captains.forEach(c=>{if(!c||!c.name)return;const n=c.name.toLowerCase();
+    if(n.startsWith(q))best=Math.max(best,3);else if(n.includes(q))best=Math.max(best,2);});
+  return best;
 }
 function matchAll(query){
   const caps=matchCaptains(query).map(c=>({type:'captain',name:c.name,number:c.number,cat:c.cat}));
@@ -435,9 +497,114 @@ function afterCaptainChange(){
   if(!loading)markDirty();
 }
 
+/* ── ROUTE REGISTRY ── */
+function normRoute(s){return String(s||'').replace(/\s+/g,' ').trim();}
+function afterRouteChange(){
+  renderRouteTable();
+  saveLocal();
+  if(!loading)markDirty();
+}
+function saveRoute(){
+  const name=normRoute(val('route-name'));
+  if(!name){showToast('Enter route name');return;}
+  const idx=parseInt(document.getElementById('route-edit-index').value);
+  const dup=routes.findIndex(r=>normRoute(r).toLowerCase()===name.toLowerCase());
+  if(idx>=0){
+    if(dup>=0 && dup!==idx){showToast('Route already exists');return;}
+    routes[idx]=name;
+  }else{
+    if(dup>=0){showToast('Route already exists');cancelRouteEdit();return;}
+    routes.push(name);
+  }
+  cancelRouteEdit();
+  afterRouteChange();
+  showToast('✓ Route saved');
+}
+function editRoute(i){
+  const r=routes[i];if(r==null)return;
+  setVal('route-name',r);
+  document.getElementById('route-edit-index').value=i;
+  document.getElementById('route-name').focus();
+}
+function deleteRoute(i){routes.splice(i,1);afterRouteChange();}
+function cancelRouteEdit(){
+  setVal('route-name','');
+  document.getElementById('route-edit-index').value='-1';
+}
+function bulkAddRoutes(){
+  const t=val('bulkRoutes').trim();
+  if(!t){showToast('Paste some routes first');return;}
+  let added=0;
+  t.split(/\n/).forEach(line=>{
+    const name=normRoute(line);if(!name)return;
+    const ex=routes.findIndex(r=>normRoute(r).toLowerCase()===name.toLowerCase());
+    if(ex<0){routes.push(name);added++;}
+  });
+  setVal('bulkRoutes','');
+  afterRouteChange();
+  showToast('✓ Added '+added+' route'+(added===1?'':'s'));
+}
+function exportRoutesCSV(){
+  if(!routes.length){showToast('No routes to export');return;}
+  const rows=[['Route']].concat(routes.map(r=>[r]));
+  const csv=rows.map(r=>r.map(x=>'"'+String(x||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='routes.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  showToast('✓ Exported '+routes.length+' routes');
+}
+function importRoutesCSV(input){
+  const f=input.files&&input.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const lines=String(rd.result).split(/\r?\n/).filter(l=>l.trim());
+    let added=0;
+    lines.forEach((l,idx)=>{
+      const cols=parseCsvLine(l);if(!cols.length)return;
+      if(idx===0 && /route|name/i.test(cols.join(',')))return;
+      const name=normRoute(cols[0]);if(!name)return;
+      const ex=routes.findIndex(r=>normRoute(r).toLowerCase()===name.toLowerCase());
+      if(ex<0){routes.push(name);added++;}
+    });
+    afterRouteChange();
+    showToast('✓ Imported '+added+' routes');
+  };
+  rd.readAsText(f);input.value='';
+}
+function resetRoutes(){
+  if(!confirm('Reset the route list back to the built-in defaults?'))return;
+  routes=DEFAULT_ROUTES.slice();
+  afterRouteChange();
+  showToast('✓ Routes reset to defaults');
+}
+function clearRoutes(){
+  if(!routes.length){showToast('No routes');return;}
+  if(!confirm('Remove all routes from the registry?'))return;
+  routes=[];afterRouteChange();
+}
+function renderRouteTable(){
+  const tb=document.getElementById('routeTable');if(!tb)return;
+  const cEl=document.getElementById('route-count');if(cEl)cEl.textContent=routes.length+' route'+(routes.length===1?'':'s');
+  const b=document.getElementById('route-badge');if(b)b.textContent=routes.length;
+  const qEl=document.getElementById('routeSearch');
+  const q=qEl?qEl.value.trim().toLowerCase():'';
+  const qd=q.replace(/[\s\-]/g,'');
+  let rows=routes.map((r,i)=>({r,i}));
+  if(q)rows=rows.filter(({r})=>{const n=String(r).toLowerCase();return n.includes(q)||(qd&&n.replace(/[\s\-]/g,'').includes(qd));});
+  if(!routes.length){tb.innerHTML='<tr><td colspan="3"><div class="empty-cap">No routes added yet</div></td></tr>';return;}
+  if(!rows.length){tb.innerHTML='<tr><td colspan="3"><div class="empty-cap">No match</div></td></tr>';return;}
+  tb.innerHTML=rows.map((o,n)=>{
+    const r=o.r,i=o.i;
+    return `<tr><td>${n+1}</td>`+
+    `<td class="cap-name-cell" style="color:var(--accent)">${esc(r)}</td>`+
+    `<td><button class="act-btn" onclick="editRoute(${i})">Edit</button><button class="act-btn del" onclick="deleteRoute(${i})">\u2715</button></td></tr>`;
+  }).join('');
+}
+
 /* ── DATA GET/SET ── */
 function getData(){
-  const d={captains:captains};
+  const d={captains:captains,routes:routes};
   SECTIONS.forEach(s=>d[s.id]=document.getElementById(s.id).value);
   return d;
 }
@@ -445,7 +612,9 @@ function setData(d){
   loading=true;
   SECTIONS.forEach(s=>{document.getElementById(s.id).value=d[s.id]||'';});
   captains=Array.isArray(d.captains)?d.captains.filter(c=>c&&c.name).map(c=>({name:c.name,number:fmtNumber(c.number),cat:c.cat||'Backup Captain'})):[];
+  routes=Array.isArray(d.routes)?d.routes.map(normRoute).filter(Boolean):DEFAULT_ROUTES.slice();
   renderCaptainTable();
+  renderRouteTable();
   loading=false;
   onInput(true);
 }
@@ -481,15 +650,16 @@ function buildSummary(){
 }
 function buildText(){
   const secs=[];
+  const COUNTED={central:1,harbour:1,western:1}; // show ( N ) next to these headers only
   [['central','CENTRAL'],['harbour','HARBOUR'],['western','WESTERN'],['parking','AVAILABLE IN PARKING'],['note','NOTE']].forEach(a=>{
     const v=(document.getElementById(a[0]).value||'').trim();
-    if(v)secs.push('**'+a[1]+'**\n'+v);
+    if(!v)return;
+    let label=a[1];
+    if(COUNTED[a[0]]){label+=' ( '+countCaptainLines(v).total+' )';}
+    secs.push('**'+label+'**\n'+v);
   });
   if(!secs.length)return '';
-  const head=['**BACKUP ALIGNMENT**'];
-  const sm=buildSummary();
-  if(sm)head.push(sm.line);
-  return [head.join('\n')].concat(secs).join('\n\n');
+  return ['**BACKUP ALIGNMENT**'].concat(secs).join('\n\n');
 }
 function renderFlags(){
   const el=document.getElementById('reportFlags');if(!el)return;
@@ -536,7 +706,7 @@ async function loadFromCloud(manual){
     const r=await fetch(API,{method:'GET',cache:'no-store'});
     if(!r.ok)throw new Error('http');
     const d=await r.json();
-    const hasData=d&&(d.captains||SECTIONS.some(s=>d[s.id]));
+    const hasData=d&&(d.captains||d.routes||SECTIONS.some(s=>d[s.id]));
     if(hasData){
       setData(d);dirty=false;
       setStatus('☁ Loaded from cloud'+(d.savedAt?(' · '+fmtTime(d.savedAt)):''),'ok');
@@ -684,14 +854,22 @@ function getCtx(ta){
   });
   if(!words.length)return {pos,ls,le,query:'',nameStart:pos,matches:[],rawQuery,rawStart};
 
-  // 4) longest trailing word-suffix that matches wins (so "Virat Kohli" beats "Kohli")
+  // 4) scan trailing word-suffixes (longest "Virat Kohli" → shortest "Kohli")
+  //    and keep the one whose BEST match is strongest. A weak number/fuzzy hit on
+  //    a longer suffix no longer shadows a clean route/name match on a shorter one.
+  let bestPick=null;
   for(let n=Math.min(4,words.length);n>=1;n--){
     const startInBase=words[words.length-n].start;
     const cand=base.slice(startInBase);
     const matches=matchAll(cand);
-    if(matches.length){
-      return {pos,ls,le,query:cand,nameStart:baseStart+startInBase+ls,matches,rawQuery,rawStart};
+    if(!matches.length)continue;
+    const qual=matchQuality(cand)||1; // 1 = matched only via number/fuzzy
+    if(!bestPick||qual>bestPick.qual){
+      bestPick={query:cand,nameStart:baseStart+startInBase+ls,matches,qual};
     }
+  }
+  if(bestPick){
+    return {pos,ls,le,query:bestPick.query,nameStart:bestPick.nameStart,matches:bestPick.matches,rawQuery,rawStart};
   }
   return {pos,ls,le,query:'',nameStart:pos,matches:[],rawQuery,rawStart};
 }
@@ -848,6 +1026,7 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'
 document.addEventListener('DOMContentLoaded',async()=>{
   loadLocal();
   renderCaptainTable();
+  renderRouteTable();
   initCaptainAutocomplete();
   onInput(true);
   await loadFromCloud(false);
