@@ -496,7 +496,12 @@ function initCaptainAutocomplete(){
   document.addEventListener('keydown',e=>{if(e.key==='Escape')hideAc();});
 }
 
-/* current line context up to the caret, ignoring leading list markers */
+/* Find what the user is typing at the caret. The captain name can be ANYWHERE
+   in the line (route / bus no can come before it). We split the current line into
+   fields by hard separators (, ; / | • — tab), take the field that holds the caret,
+   strip a leading marker/number, then try the trailing word-suffixes (last 4..1
+   words) as the query so multi-word names work too. Only the matched part is
+   replaced on selection — the rest of the line stays. */
 function getCtx(ta){
   const pos=ta.selectionStart;
   const text=ta.value;
@@ -505,10 +510,42 @@ function getCtx(ta){
   const nl=rest.indexOf('\n');
   const le=nl===-1?text.length:pos+nl;
   const lineUpTo=text.slice(ls,pos);
-  const m=lineUpTo.match(/^([\s\d.)\]\-•*:]*)(.*)$/);
-  const prefix=m?m[1]:'';
-  const query=m?m[2]:lineUpTo;
-  return {pos,ls,le,prefix,query,nameStart:ls+prefix.length};
+
+  // 1) current field = text after the last hard separator in the line-up-to-caret
+  let fieldStart=0;
+  for(let i=0;i<lineUpTo.length;i++){
+    if(/[,;/|•·\\\t—]/.test(lineUpTo[i]))fieldStart=i+1;
+  }
+  let field=lineUpTo.slice(fieldStart);
+
+  // 2) strip leading marker / number / spaces (e.g. "1. ", "5 ", "- ")
+  const lead=field.match(/^[\s\d.)\]\-*:]+/);
+  const leadLen=lead?lead[0].length:0;
+  const base=field.slice(leadLen);
+  const baseStart=fieldStart+leadLen; // index within lineUpTo where the name part may begin
+
+  if(!base.trim())return {pos,ls,le,query:'',nameStart:pos,matches:[]};
+
+  // 3) tokenise the base on spaces, keeping start offsets
+  const words=[];
+  let c=0;
+  base.split(/(\s+)/).forEach(seg=>{
+    if(seg==='')return;
+    if(/^\s+$/.test(seg)){c+=seg.length;}
+    else{words.push({start:c});c+=seg.length;}
+  });
+  if(!words.length)return {pos,ls,le,query:'',nameStart:pos,matches:[]};
+
+  // 4) longest trailing word-suffix that matches wins (so "Virat Kohli" beats "Kohli")
+  for(let n=Math.min(4,words.length);n>=1;n--){
+    const startInBase=words[words.length-n].start;
+    const cand=base.slice(startInBase);
+    const matches=matchCaptains(cand);
+    if(matches.length){
+      return {pos,ls,le,query:cand,nameStart:baseStart+startInBase+ls,matches};
+    }
+  }
+  return {pos,ls,le,query:'',nameStart:pos,matches:[]};
 }
 
 function matchCaptains(query){
@@ -541,7 +578,7 @@ function hl(name,q){
 function updateAc(id){
   const ta=document.getElementById(id);
   const ctx=getCtx(ta);
-  const matches=matchCaptains(ctx.query);
+  const matches=ctx.matches||[];
   if(!matches.length){hideAc();return;}
   acState={id,ctx,matches,active:0};
   renderAc();
@@ -586,7 +623,8 @@ function pickCaptain(i){
   if(!id||!ctx||!c)return;
   const ta=document.getElementById(id);
   const formatted=formatCaptainLine(c);
-  ta.value=ta.value.slice(0,ctx.nameStart)+formatted+ta.value.slice(ctx.le);
+  // replace only the typed name part (nameStart → caret); keep route/bus no before it
+  ta.value=ta.value.slice(0,ctx.nameStart)+formatted+ta.value.slice(ctx.pos);
   const caret=ctx.nameStart+formatted.length;
   ta.focus();
   ta.setSelectionRange(caret,caret);
