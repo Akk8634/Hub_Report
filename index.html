@@ -597,7 +597,41 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('currentDate').textContent =
     new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
   setHub('central');
+  attachInputCleaner();
 });
+
+/* ---- Auto-clean pasted/typed data: strip bullets & symbols, keep text + numbers ---- */
+function cleanText(str){
+  return String(str).split('\n').map(line =>
+    line
+      // remove leading list markers / bullets / dashes + following space
+      .replace(/^[\s\u2022\u25CF\u25AA\u25E6\u2023\u2043\u2219\u00B7\u2027\u2666\u25A0\u2014\u2013\-\*►▶➤➔→>]+\s*/,'')
+      // remove emoji & pictographic symbols anywhere in the line
+      .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\uFE0F\u200D]/gu,'')
+      // remove stray bullet symbols if they appear mid-line (NOT normal dashes/slashes)
+      .replace(/[\u2022\u25CF\u25AA\u25E6\u2023\u2043\u2219\u2027\u2666\u25A0►▶➤➔→]/g,'')
+      // collapse extra spaces
+      .replace(/[ \t]{2,}/g,' ')
+      .trim()
+  ).join('\n');
+}
+
+function attachInputCleaner(){
+  // One delegated handler covers every textarea, including route cards rendered later
+  document.addEventListener('input', function(e){
+    const t = e.target;
+    if(!t || t.tagName !== 'TEXTAREA') return;
+    const before = t.value;
+    const cleaned = cleanText(before);
+    if(cleaned !== before){
+      const pos = t.selectionStart || 0;
+      const removed = before.length - cleaned.length;
+      t.value = cleaned;
+      const np = Math.max(0, pos - removed);
+      try { t.setSelectionRange(np, np); } catch(_){}
+    }
+  });
+}
 
 function setHub(hub) {
   currentHub = hub;
@@ -661,9 +695,10 @@ function makeCard(r, isSecondary) {
 }
 
 function formatText(line) {
-  line = line.replace(/\bc(\d+)/gi, 'C$1');
-  line = line.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
-  return line.trim();
+  line = line.replace(/\bc(\d+)/gi, 'C$1');   // bus numbers: c362 -> C362
+  line = line.trim();
+  // keep text exactly as entered (B2B, BKC, SOBO stay intact); only first char capital
+  return line ? line.charAt(0).toUpperCase() + line.slice(1) : line;
 }
 
 function parseBackup(raw) {
