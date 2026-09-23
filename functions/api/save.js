@@ -1,4 +1,6 @@
-// POST /api/save — append one report entry into Cloudflare KV (binding: BACKUP_KV)
+// POST /api/save — save one report entry into Cloudflare KV (binding: BACKUP_KV)
+// If the entry has a reportKey (date|mode|hub), any earlier entry with the same key
+// is replaced, so generating the same report again does not create duplicates.
 const HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -13,10 +15,16 @@ export async function onRequestPost(context) {
     const newEntry = await request.json();
     const raw = await env.BACKUP_KV.get('reports');
     const existing = raw ? JSON.parse(raw) : [];
-    const updated = Array.isArray(existing) ? existing : [];
+    let updated = Array.isArray(existing) ? existing : [];
+    let replaced = false;
+    if (newEntry.reportKey) {
+      const before = updated.length;
+      updated = updated.filter(e => e.reportKey !== newEntry.reportKey);
+      replaced = updated.length !== before;
+    }
     updated.push(newEntry);
     await env.BACKUP_KV.put('reports', JSON.stringify(updated));
-    return new Response(JSON.stringify({ success: true, saved: 1 }), { status: 200, headers: HEADERS });
+    return new Response(JSON.stringify({ success: true, saved: 1, replaced }), { status: 200, headers: HEADERS });
   } catch (err) {
     return new Response(JSON.stringify({ error: 'Save failed', message: err.message }), { status: 500, headers: HEADERS });
   }

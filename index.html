@@ -393,6 +393,63 @@ body.evening-mode .hub-btn.active {
   gap: 10px;
 }
 
+.manage-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.manage-card summary {
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  list-style: none;
+}
+.manage-card summary::-webkit-details-marker { display: none; }
+.manage-card[open] summary { border-bottom: 1px solid var(--border); background: var(--card2); }
+.manage-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.manage-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.manage-row > div { flex: 1; min-width: 140px; }
+.manage-body select, .manage-body input {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  padding: 9px 12px;
+  outline: none;
+}
+.manage-body select:focus, .manage-body input:focus { border-color: var(--active); }
+.btn-add { background: var(--green); color: #fff; align-self: flex-start; }
+.btn-add:disabled { opacity: 0.5; cursor: wait; }
+.route-list { display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow-y: auto; }
+.route-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--card2);
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+.route-item small { color: var(--muted); }
+.route-del {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--red);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+}
+.route-del:hover { background: rgba(239,68,68,0.1); }
+
 @media (max-width: 900px) {
   .app { grid-template-columns: 1fr; }
   .right-panel { position: static; }
@@ -462,8 +519,44 @@ body.evening-mode { --active: #818cf8; }
       <button class="btn btn-clear" onclick="clearAll()">🗑 Clear</button>
       <a href="https://hub-report.pages.dev/analytics" style="padding:11px 22px; background:#38bdf8; color:#000; border-radius:50px; font-family:Outfit,sans-serif; font-size:0.88rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">📊 Analytics</a>
       <a href="https://hub-report.pages.dev/partial_fleet_builder" style="padding:11px 22px; background:#a855f7; color:#fff; border-radius:50px; font-family:Outfit,sans-serif; font-size:0.88rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">🚌 Partial Fleet</a>
-      <a href="https://hub-report.pages.dev/backup_alignment" style="padding:11px 22px; background:#22c55e; color:#000; border-radius:50px; font-family:Outfit,sans-serif; font-size:0.88rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">🔄 Backup Alignment</a>    
+      <a href="https://hub-report.pages.dev/backup_alignment" style="padding:11px 22px; background:#22c55e; color:#000; border-radius:50px; font-family:Outfit,sans-serif; font-size:0.88rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">🔄 Backup Alignment</a>
     </div>
+
+    <details class="manage-card" id="manageRoutes">
+      <summary>⚙️ Manage Routes</summary>
+      <div class="manage-body">
+        <div class="manage-row">
+          <div>
+            <div class="field-label">Hub</div>
+            <select id="newRouteHub" onchange="onManageHubChange()">
+              <option value="central">🏙 Central</option>
+              <option value="harbour">⚓ Harbour</option>
+              <option value="western">🌇 Western</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">Type</div>
+            <select id="newRouteType">
+              <option value="main">Main</option>
+              <option value="secondary">Secondary</option>
+            </select>
+          </div>
+        </div>
+        <div class="manage-row">
+          <div>
+            <div class="field-label">Morning name</div>
+            <input id="newRouteMorning" placeholder="e.g. Thane - Powai" oninput="onMorningInput()">
+          </div>
+          <div>
+            <div class="field-label">Evening name</div>
+            <input id="newRouteEvening" placeholder="e.g. Powai - Thane" oninput="eveningEdited = true">
+          </div>
+        </div>
+        <button class="btn btn-add" id="btnAddRoute" onclick="addRoute()">➕ Add Route</button>
+        <div class="field-label" style="margin-top:4px;">Current routes</div>
+        <div class="route-list" id="routeList"></div>
+      </div>
+    </details>
   </div>
 
   <div class="right-panel">
@@ -501,7 +594,9 @@ body.evening-mode { --active: #818cf8; }
 const NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
 const ISSUE_KEYWORDS = ['issue','tyre','driver','mechanical','ac','pending','rental','na','n/a','breakdown','flat'];
 
-const HUBS = {
+// Default route list. Once routes are added/removed from "Manage Routes",
+// the saved list from /api/routes is used instead of this one.
+let HUBS = {
   central: {
     label: 'Central Hub',
     main: [
@@ -601,7 +696,142 @@ document.addEventListener('DOMContentLoaded', () => {
     new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
   setHub('central');
   attachInputCleaner();
+  onManageHubChange();
+  loadRoutes();
 });
+
+/* ---- Date in the browser's local timezone (IST), YYYY-MM-DD ---- */
+function localDate(d = new Date()) {
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+/* ---- Route list: load / save from /api/routes ---- */
+async function fetchRoutes() {
+  const res = await fetch('/api/routes');
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const json = await res.json();
+  return json.hubs;
+}
+
+async function loadRoutes() {
+  try {
+    const hubs = await fetchRoutes();
+    if (hubs) {
+      HUBS = hubs;
+      renderRoutes();
+      renderRouteList();
+    }
+  } catch (e) {
+    console.error('Route load error:', e);
+    showToast('Could not load saved routes — showing default list', true);
+  }
+}
+
+async function saveRoutes(hubs) {
+  const res = await fetch('/api/routes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hubs })
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || !json.success) throw new Error(json.error || 'HTTP ' + res.status);
+}
+
+// Load the latest list from the server, apply the change, save it back.
+// Starting from the server copy avoids wiping a route someone else just added.
+async function updateRoutes(change) {
+  const latest = (await fetchRoutes()) || HUBS;
+  const hubs = JSON.parse(JSON.stringify(latest));
+  change(hubs);
+  await saveRoutes(hubs);
+  HUBS = hubs;
+  renderRoutes();
+  renderRouteList();
+}
+
+/* ---- Manage Routes section ---- */
+let eveningEdited = false;
+
+// "Thane - Powai" -> "Powai - Thane"; "T-LP" -> "LP - T"
+function reverseRouteName(name) {
+  const parts = name.includes(' - ') ? name.split(' - ') : name.split('-');
+  if (parts.length !== 2) return '';
+  const [a, b] = parts.map(s => s.trim());
+  return a && b ? `${b} - ${a}` : '';
+}
+
+function onMorningInput() {
+  if (eveningEdited) return;
+  document.getElementById('newRouteEvening').value =
+    reverseRouteName(document.getElementById('newRouteMorning').value.trim());
+}
+
+function onManageHubChange() {
+  const hub = document.getElementById('newRouteHub').value;
+  const type = document.getElementById('newRouteType');
+  // Only Central hub shows secondary routes in the report
+  type.querySelector('option[value="secondary"]').disabled = hub !== 'central';
+  if (hub !== 'central') type.value = 'main';
+  renderRouteList();
+}
+
+function renderRouteList() {
+  const hubKey = document.getElementById('newRouteHub').value;
+  const hub = HUBS[hubKey];
+  const item = (r, type) => `
+    <div class="route-item">
+      <span>${escapeHtml(r.morning)} <small>/ ${escapeHtml(r.evening)}${type === 'secondary' ? ' · secondary' : ''}</small></span>
+      <button class="route-del" onclick="deleteRoute('${hubKey}','${type}','${escapeHtml(r.id)}')">✕</button>
+    </div>`;
+  const html = hub.main.map(r => item(r, 'main')).join('') + hub.secondary.map(r => item(r, 'secondary')).join('');
+  document.getElementById('routeList').innerHTML = html || '<small style="color:var(--muted)">No routes</small>';
+}
+
+async function addRoute() {
+  const hubKey = document.getElementById('newRouteHub').value;
+  const type = document.getElementById('newRouteType').value;
+  const morning = document.getElementById('newRouteMorning').value.trim();
+  const evening = document.getElementById('newRouteEvening').value.trim();
+  if (!morning || !evening) { showToast('Enter both morning and evening names', true); return; }
+
+  const exists = [...HUBS[hubKey].main, ...HUBS[hubKey].secondary]
+    .some(r => r.morning.toLowerCase() === morning.toLowerCase());
+  if (exists) { showToast('This route already exists in ' + HUBS[hubKey].label, true); return; }
+
+  const prefix = { central: 'C', harbour: 'H', western: 'W' }[hubKey];
+  const id = `${prefix}-${morning.replace(/[^a-zA-Z0-9]+/g, '-')}-${Date.now().toString(36)}`;
+  const btn = document.getElementById('btnAddRoute');
+  btn.disabled = true;
+  try {
+    await updateRoutes(hubs => { hubs[hubKey][type].push({ id, morning, evening }); });
+    document.getElementById('newRouteMorning').value = '';
+    document.getElementById('newRouteEvening').value = '';
+    eveningEdited = false;
+    showToast(`Added "${morning}" to ${HUBS[hubKey].label} ✓`);
+  } catch (e) {
+    console.error('Add route error:', e);
+    showToast('Could not add route: ' + e.message, true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deleteRoute(hubKey, type, id) {
+  const r = HUBS[hubKey][type].find(x => x.id === id);
+  if (!r || !confirm(`Remove "${r.morning}" from ${HUBS[hubKey].label}?`)) return;
+  try {
+    await updateRoutes(hubs => { hubs[hubKey][type] = hubs[hubKey][type].filter(x => x.id !== id); });
+    showToast(`Removed "${r.morning}" ✓`);
+  } catch (e) {
+    console.error('Delete route error:', e);
+    showToast('Could not remove route: ' + e.message, true);
+  }
+}
 
 /* ---- Auto-clean pasted/typed data: strip bullets & symbols, keep text + numbers ---- */
 function cleanText(str){
@@ -690,7 +920,7 @@ function makeCard(r, isSecondary) {
   return `
     <div class="card">
       <div class="card-header">
-        <span class="route-label">${isSecondary ? '▪️ ' : ''}<b>${label}</b></span>
+        <span class="route-label">${isSecondary ? '▪️ ' : ''}<b>${escapeHtml(label)}</b></span>
         ${isSecondary ? '<span class="secondary-tag">secondary</span>' : ''}
       </div>
       <textarea id="${rid(r)}" placeholder="Enter bus issues..."></textarea>
@@ -726,7 +956,7 @@ function getSortedOtherHub(hub) {
 
 function generate() {
   const hub = HUBS[currentHub];
-  const date = new Date().toISOString().slice(0, 10);
+  const date = localDate();
   const records = [];
   const hubLabel = hub.label;
 
@@ -788,8 +1018,8 @@ function generate() {
 
   document.getElementById('telegramPreview').innerText = out;
   document.getElementById('previewDot').className = 'preview-dot live';
-  if (records.length) autoSave(records).catch(()=>{});
   showToast('Report generated ✓');
+  if (records.length) autoSave(records, `${date}|${mode}|${currentHub}`);
 }
 
 function getSortedCentral(hub) {
@@ -836,26 +1066,46 @@ function toggleCustomDays() {
     document.getElementById('reportType').value === 'custom' ? 'block' : 'none';
 }
 
-async function autoSave(records) {
+// reportKey = date|mode|hub — saving the same report again replaces the earlier copy
+async function autoSave(records, reportKey) {
   try {
     const res = await fetch('/api/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ routes: records, mode, timestamp: new Date().toISOString() })
+      body: JSON.stringify({ routes: records, mode, hub: currentHub, reportKey, timestamp: new Date().toISOString() })
     });
-    const text = await res.text();
-    try { JSON.parse(text); } catch { }
-    showToast('Saved successfully ✓');
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.success) throw new Error(json.message || json.error || 'HTTP ' + res.status);
+    showToast(json.replaced ? 'Saved — updated earlier report ✓' : 'Saved successfully ✓');
   } catch(e) {
     console.error('Save error:', e);
     showToast('Save failed: ' + e.message, true);
   }
 }
 
+// Saved entries come in a few shapes; flatten them to one row per bus issue
+// (same handling as normalizeData in analytics.html)
+function normalizeReports(data) {
+  const out = [];
+  data.forEach(entry => {
+    if (entry.date && entry.route) {
+      out.push(entry);
+    } else if (entry.timestamp && Array.isArray(entry.routes)) {
+      entry.routes.forEach(r => out.push({ ...r, date: r.date || entry.timestamp.slice(0,10), mode: r.mode || entry.mode, hub: r.hub || entry.hub }));
+    } else if (entry.timestamp && entry.routes && typeof entry.routes === 'object') {
+      Object.keys(entry.routes).forEach(route => {
+        if (entry.routes[route]) out.push({ date: entry.timestamp.slice(0,10), mode: entry.mode, hub: entry.hub, route, bus: '', issue: entry.routes[route] });
+      });
+    }
+  });
+  return out;
+}
+
 async function fetchData() {
   const res = await fetch('/api/data');
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   const data = await res.json();
-  return data.reports || [];
+  return normalizeReports(data.reports || []).filter(r => typeof r.date === 'string');
 }
 
 function downloadCSV(records, name) {
@@ -874,16 +1124,19 @@ async function exportReport() {
   try { data = await fetchData(); } catch(e) { showToast('Failed to fetch data', true); return; }
   const now = new Date();
   let filtered, filename;
+  // Dates are YYYY-MM-DD strings, so plain string comparison works
+  const today = localDate(now);
   if (type === 'month') {
-    filtered = data.filter(r => { const d = new Date(r.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
-    filename = `monthly_${now.toISOString().slice(0,7)}.csv`;
+    filtered = data.filter(r => r.date.startsWith(today.slice(0, 7)));
+    filename = `monthly_${today.slice(0,7)}.csv`;
   } else if (type === 'year') {
-    filtered = data.filter(r => new Date(r.date).getFullYear() === now.getFullYear());
-    filename = `yearly_${now.getFullYear()}.csv`;
+    filtered = data.filter(r => r.date.startsWith(today.slice(0, 4)));
+    filename = `yearly_${today.slice(0,4)}.csv`;
   } else {
     const days = type === 'custom' ? parseInt(document.getElementById('customDays').value) || 1 : parseInt(type);
-    const start = new Date(); start.setDate(now.getDate() - days);
-    filtered = data.filter(r => new Date(r.date) >= start);
+    const start = new Date(now); start.setDate(now.getDate() - days);
+    const startStr = localDate(start);
+    filtered = data.filter(r => r.date >= startStr);
     filename = `report_${days}days.csv`;
   }
   if (!filtered.length) { showToast('No data for selected range', true); return; }
