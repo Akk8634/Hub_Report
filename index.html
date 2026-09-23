@@ -450,6 +450,52 @@ body.evening-mode .hub-btn.active {
 }
 .route-del:hover { background: rgba(239,68,68,0.1); }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  background: var(--card);
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  max-width: 420px;
+  width: 100%;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+.modal h3 { color: var(--red); font-size: 1.05rem; margin-bottom: 10px; }
+.modal p { font-size: 0.88rem; line-height: 1.5; color: var(--text); margin-bottom: 8px; }
+.modal .modal-route {
+  background: var(--card2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+.modal .modal-route small { display: block; color: var(--muted); margin-top: 2px; }
+.modal .modal-note { color: var(--muted); font-size: 0.8rem; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { opacity: 0.85; }
+.toast-undo {
+  margin-left: 12px;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 @media (max-width: 900px) {
   .app { grid-template-columns: 1fr; }
   .right-panel { position: static; }
@@ -589,6 +635,19 @@ body.evening-mode { --active: #818cf8; }
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="modal-backdrop" id="removeModal" onclick="if (event.target === this) closeRemoveModal(false)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="removeModalTitle">
+    <h3 id="removeModalTitle">⚠️ Remove this route?</h3>
+    <p>This route will be removed for <b>everyone</b> using Hub Report Builder.</p>
+    <div class="modal-route" id="removeModalRoute"></div>
+    <p class="modal-note">Reports already saved for this route are not deleted.</p>
+    <div class="modal-actions">
+      <button class="btn btn-clear" id="removeCancel" onclick="closeRemoveModal(false)">Cancel</button>
+      <button class="btn btn-danger" onclick="closeRemoveModal(true)">🗑 Yes, remove</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
@@ -821,15 +880,64 @@ async function addRoute() {
   }
 }
 
+/* ---- Remove confirmation: warning popup, then Undo for a few seconds ---- */
+let removeModalResolve = null;
+
+function askRemoveConfirm(r, hubLabel, type) {
+  document.getElementById('removeModalRoute').innerHTML =
+    `<b>${escapeHtml(r.morning)}</b><small>Evening: ${escapeHtml(r.evening)} · ${escapeHtml(hubLabel)} · ${type === 'secondary' ? 'Secondary' : 'Main'}</small>`;
+  document.getElementById('removeModal').classList.add('show');
+  document.getElementById('removeCancel').focus();   // Enter key = Cancel, not Remove
+  return new Promise(resolve => { removeModalResolve = resolve; });
+}
+
+function closeRemoveModal(confirmed) {
+  document.getElementById('removeModal').classList.remove('show');
+  if (removeModalResolve) { removeModalResolve(confirmed); removeModalResolve = null; }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && removeModalResolve) closeRemoveModal(false);
+});
+
+function showUndoToast(msg, onUndo, ms = 10000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  const btn = document.createElement('button');
+  btn.className = 'toast-undo';
+  btn.textContent = '↶ Undo';
+  btn.onclick = () => { t.className = 'toast'; clearTimeout(t._t); onUndo(); };
+  t.appendChild(btn);
+  t.className = 'toast show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.className = 'toast'; }, ms);
+}
+
 async function deleteRoute(hubKey, type, id) {
   const r = HUBS[hubKey][type].find(x => x.id === id);
-  if (!r || !confirm(`Remove "${r.morning}" from ${HUBS[hubKey].label}?`)) return;
+  if (!r) return;
+  const index = HUBS[hubKey][type].indexOf(r);
+  if (!(await askRemoveConfirm(r, HUBS[hubKey].label, type))) return;
   try {
     await updateRoutes(hubs => { hubs[hubKey][type] = hubs[hubKey][type].filter(x => x.id !== id); });
-    showToast(`Removed "${r.morning}" ✓`);
+    showUndoToast(`Removed "${r.morning}"`, () => undoRemove(hubKey, type, r, index));
   } catch (e) {
     console.error('Delete route error:', e);
     showToast('Could not remove route: ' + e.message, true);
+  }
+}
+
+async function undoRemove(hubKey, type, r, index) {
+  try {
+    await updateRoutes(hubs => {
+      const list = hubs[hubKey][type];
+      if (list.some(x => x.id === r.id)) return;   // already back
+      list.splice(Math.min(index, list.length), 0, r);
+    });
+    showToast(`Restored "${r.morning}" ✓`);
+  } catch (e) {
+    console.error('Undo remove error:', e);
+    showToast('Could not restore route: ' + e.message, true);
   }
 }
 
